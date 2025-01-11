@@ -18,8 +18,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("PerFuinder API Docs")
-                .description("PerFuinder API 문서")
+                .title("YouRun API Docs")
+                .description("유런 API 문서")
                 .version("1.0.0");
     }
 }
