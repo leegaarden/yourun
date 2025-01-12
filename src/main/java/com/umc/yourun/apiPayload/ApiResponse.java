@@ -1,6 +1,5 @@
 package com.umc.yourun.apiPayload;
 
-
 import com.umc.yourun.config.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
