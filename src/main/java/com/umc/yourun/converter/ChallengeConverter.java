@@ -6,46 +6,45 @@ import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
 
 @Component
 public class ChallengeConverter {
 
-    // Request DTO -> Entity
+    // Request DTO-> Entity
     public static Challenge toChallenge(ChallengeRequest.CrewChallengeCreateReq request) {
         return Challenge.builder()
                 .kind(ChallengeKind.CREW)
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
-                .crewName(request.getCrewName())
+                .startDate(request.startDate())
+                .endDate(request.endDate())
+                .crewName(request.crewName())
                 .build();
     }
 
     public static Challenge toChallenge(ChallengeRequest.SoloChallengeCreateReq request) {
         return Challenge.builder()
                 .kind(ChallengeKind.SOLO)
-                .distance(request.getDistance())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
+                .distance(request.distance())
+                .startDate(request.startDate())
+                .endDate(request.endDate())
                 .build();
     }
 
     // Entity -> Response DTO
     public static ChallengeResponse.CrewChallengeResult toCrewChallengeResult(Challenge challenge) {
-        return ChallengeResponse.CrewChallengeResult.builder()
-                .id(challenge.getId())
-                .startDate(challenge.getStartDate())
-                .endDate(challenge.getEndDate())
-                .crewName(challenge.getCrew().getName())
-                .build();
+        return new ChallengeResponse.CrewChallengeResult(
+                challenge.getId(),
+                challenge.getStartDate(),
+                challenge.getEndDate(),
+                challenge.getCrew().getName()
+        );
     }
 
     public static ChallengeResponse.SoloChallengeResult toSoloChallengeResult(Challenge challenge) {
-        return ChallengeResponse.SoloChallengeResult.builder()
-                .id(challenge.getId())
-                .distance(challenge.getDistance())
-                .startDate(challenge.getStartDate())
-                .endDate(challenge.getEndDate())
-                .build();
+        return new ChallengeResponse.SoloChallengeResult(
+                challenge.getId(),
+                challenge.getDistance(),
+                challenge.getStartDate(),
+                challenge.getEndDate()
+        );
     }
 }
