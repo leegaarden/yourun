@@ -9,13 +9,13 @@ public class ChallengeRequest {
 
     @Schema(title = "CHALLENGE_REQ_01 : 크루 챌린지 생성 요청 DTO")
     public record CrewChallengeCreateReq(
-            @Schema(description = "크루 이름", example = "열정 러너")
+            @Schema(description = "크루 이름", example = "동작구 사슴")
             String crewName,
 
             @Schema(description = "챌린지 시작일", example = "2025-01-15")
             LocalDate startDate,
 
-            @Schema(description = "챌린지 종료일", example = "2025-01-22")
+            @Schema(description = "챌린지 종료일", example = "2025-01-17")
             LocalDate endDate
     ) {}
 
@@ -24,7 +24,7 @@ public class ChallengeRequest {
             @Schema(description = "챌린지 시작일", example = "2025-01-15")
             LocalDate startDate,
 
-            @Schema(description = "챌린지 종료일", example = "2025-01-22")
+            @Schema(description = "챌린지 종료일", example = "2025-01-17")
             LocalDate endDate,
 
             @Schema(description = "챌린지 거리", example = "KM1",
