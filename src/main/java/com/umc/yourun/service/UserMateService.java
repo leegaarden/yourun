@@ -7,6 +7,7 @@ import com.umc.yourun.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,8 +29,12 @@ public class UserMateService {
         if(userMateRepository.findById(mateId).isEmpty()){
             return false;
         }
-        UserMate temp = new UserMate(userId, tempUser.get());
+        UserMate temp = new UserMate(null, userId, tempUser.get());
         userMateRepository.save(temp);
         return true;
     }
+
+//    public List<UserMate> getMateList(Long userId){
+//        return userMateRepository.findAllByMateid(userId);
+//    }
 }
