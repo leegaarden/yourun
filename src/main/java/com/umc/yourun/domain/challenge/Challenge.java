@@ -1,6 +1,7 @@
 package com.umc.yourun.domain.challenge;
 
 import com.umc.yourun.domain.BaseEntity;
+import com.umc.yourun.domain.Crew;
 import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengeKind;
 import jakarta.persistence.*;
@@ -22,9 +23,6 @@ public class Challenge extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 30, nullable = false)
-    private String name;
-
     @Enumerated(EnumType.STRING)
     private ChallengeKind kind;
 
@@ -37,6 +35,11 @@ public class Challenge extends BaseEntity {
     @Column(nullable = false)
     private LocalDate endDate;
 
+    // Challenge가 생성될 때 자동으로 생성되는 Crew와의 일대일 관계
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "crew_id")
+    private Crew crew;
+
     @OneToMany(mappedBy = "challenge")
     private List<SoloChallenge> soloChallenges = new ArrayList<>();
 
@@ -44,12 +47,16 @@ public class Challenge extends BaseEntity {
     private List<CrewChallenge> crewChallenges = new ArrayList<>();
 
     @Builder
-    public Challenge(String name, ChallengeKind kind, ChallengeDistance distance,
-                     LocalDate startDate, LocalDate endDate) {
-        this.name = name;
+    public Challenge(ChallengeKind kind, ChallengeDistance distance,
+                     LocalDate startDate, LocalDate endDate, String crewName) {
         this.kind = kind;
         this.distance = distance;
         this.startDate = startDate;
         this.endDate = endDate;
+        // 챌린지 생성될 때 크루 자동 생성
+        this.crew = Crew.builder()
+                .name(crewName)
+                .admin("SYSTEM")
+                .build();
     }
 }
