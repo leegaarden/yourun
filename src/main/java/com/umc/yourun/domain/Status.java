@@ -1,2 +1,5 @@
-package com.umc.yourun.domain;public enum Status {
+package com.umc.yourun.domain;
+
+public enum Status {
+    ACTIVE, INACTIVE
 }
