@@ -36,7 +36,7 @@ public class UserMateController {
 //    public ApiResponse getMates(@PathVariable Long userId){
 //        List<UserMate> userMateList = userMateService.getMateList(userId);
 //        if(userMateList.isEmpty()) {
-//            return ApiResponse.error(INVALID_INPUT_VALUE);
+//            return ApiResponse.error(RESOURCE_NOT_FOUND);
 //        }else{
 //            return ApiResponse.success("친구 목록 조회에 성공했습니다.", userMateList);
 //        }
