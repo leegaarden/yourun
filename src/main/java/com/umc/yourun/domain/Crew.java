@@ -27,34 +27,28 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Crew extends BaseEntity{
+public class Crew extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(nullable = false,unique = true,length=50)//TODO: 유니크 여부 물어보기
+	@Column(unique = true, length = 50)//TODO: 유니크 여부 물어보기
 	private String name;
 	@Column
 	private String cheerMessage;
 	@Column
 	private Long adminId;
 	@Column
-	private Integer winningCount=0;
+	private Integer winningCount = 0;
 
-	@OneToMany(mappedBy = "crew",cascade = CascadeType.ALL)
-	private List<UserCrew> userCrews=new ArrayList<>();
-  
-  @OneToMany(mappedBy = "crew")
-  private List<CrewChallenge> crewChallenges = new ArrayList<>();
+	@OneToMany(mappedBy = "crew", cascade = CascadeType.ALL)
+	private List<UserCrew> userCrews = new ArrayList<>();
 
-	public void addUserCrew(UserCrew userCrew){
+	@OneToMany(mappedBy = "crew")
+	private List<CrewChallenge> crewChallenges = new ArrayList<>();
+
+	public void addUserCrew(UserCrew userCrew) {
 		userCrews.add(userCrew);
 		userCrew.setCrew(this);
 	}
-  
-  @Builder
-  public Crew(String name, String admin) {
-      this.name = name;
-      this.admin = admin;
-      this.winningCount = 0;
-  }
+
 }
