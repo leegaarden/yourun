@@ -56,7 +56,7 @@ public class Challenge extends BaseEntity {
         // 챌린지 생성될 때 크루 자동 생성
         this.crew = Crew.builder()
                 .name(crewName)
-                .admin("SYSTEM")
+                .adminId(1L)//TODO: 추후 변경 필요
                 .build();
     }
 }
