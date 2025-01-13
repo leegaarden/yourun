@@ -8,15 +8,15 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
       jdbc:
         time_zone: Asia/Seoul
   application:
     name: yourun
 springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
   api-docs:
     path: /api-docs
-  default-consumes-media-type: application/json
-  default-produces-media-type: application/json
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  packages-to-scan: com.umc.yourun

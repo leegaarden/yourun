@@ -21,18 +21,17 @@ public class UserMateService {
         this.userRepository = userRepository;
     }
 
-    public Boolean addmate(Long userId,Long mateId){
-        Optional<User> tempUser = userRepository.findById(userId);
-        if(tempUser.isEmpty()){
-            return false;
-        }
-        if(userMateRepository.findById(mateId).isEmpty()){
-            return false;
-        }
-        UserMate temp = new UserMate(null, userId, tempUser.get());
-        userMateRepository.save(temp);
-        return true;
-    }
+//    public Boolean addmate(Long userId,Long mateId){
+//        Optional<User> tempUser = userRepository.findById(userId);
+//        if(tempUser.isEmpty()){
+//            return false;
+//        }
+//        if(userMateRepository.findById(mateId).isEmpty()){
+//            return false;
+//        }
+//        userMateRepository.save(UserMate.builder().id(null).user(tempUser.get()).mateid(userId).build());
+//        return true;
+//    }
 
 //    public List<UserMate> getMateList(Long userId){
 //        return userMateRepository.findAllByMateid(userId);
