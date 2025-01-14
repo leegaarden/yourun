@@ -46,6 +46,6 @@ public class CrewChallenge extends BaseEntity {
         this.user = user;
         this.startDate = startDate; // TODO: 내일 날짜 고정으로 수정
         this.endDate = endDate;
-        this.challengeStatus = ChallengeStatus.WAIT; // 처음에는 대기 상태로 생성
+        this.challengeStatus = ChallengeStatus.PENDING; // 처음에는 대기 상태로 생성
     }
 }
