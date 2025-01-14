@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.umc.yourun.domain.mapping.UserCrew;
-import com.umc.yourun.domain.challenge.CrewChallenge;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +15,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,8 +40,8 @@ public class Crew extends BaseEntity {
 	@OneToMany(mappedBy = "crew", cascade = CascadeType.ALL)
 	private List<UserCrew> userCrews = new ArrayList<>();
 
-	@OneToMany(mappedBy = "crew")
-	private List<CrewChallenge> crewChallenges = new ArrayList<>();
+	@OneToOne(mappedBy = "crew")
+	private CrewChallenge crewChallenge;
 
 	public void addUserCrew(UserCrew userCrew) {
 		userCrews.add(userCrew);
