@@ -51,6 +51,7 @@ public class CrewChallenge extends BaseEntity {
         validateCrewName(crewName);
         this.crew = Crew.builder()
                 .name(crewName)
+                .winningCount(0)
                 .build();
         this.startDate = LocalDate.now().plusDays(1);
         this.endDate = endDate;
