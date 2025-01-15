@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 public class ChallengeResponse {
 
-    @Schema(title = "CHALLENGE_RES_01 : 대기 중인 크루 챌린지 응답 DTO")
-    public record CrewChallengePendingRes(
+    @Schema(title = "CHALLENGE_RES_01 : 상태 별 크루 챌린지 응답 DTO")
+    public record CrewChallengeStatusRes(
             @Schema(description = "챌린지 ID", example = "1")
             Long challengeId,
 
@@ -18,7 +18,7 @@ public class ChallengeResponse {
             @Schema(description = "시작일", example = "2025-01-15")
             LocalDate startDate,
 
-            @Schema(description = "종료일", example = "2025-01-20")
+            @Schema(description = "마감일", example = "2025-01-20")
             LocalDate endDate,
 
             @Schema(description = "챌린지 기간", example = "FOUR")

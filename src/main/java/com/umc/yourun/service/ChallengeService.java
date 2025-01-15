@@ -8,6 +8,7 @@ import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
+import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.repository.CrewChallengeRepository;
 import com.umc.yourun.repository.SoloChallengeRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,8 +52,21 @@ public class ChallengeService {
     }
 
     // PENDING 상태인 크루 챌린지 조회
-    public List<CrewChallenge> retrieveCrewChallenge () {
-        return crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+    @Transactional(readOnly = true)
+    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges() {
+        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+        return pendingChallenges.stream()
+                .map(ChallengeConverter::toStatusResponse)
+                .collect(Collectors.toList());
+    }
+
+    // IN_PROGRESS 상태인 크루 챌린지 조회
+    @Transactional(readOnly = true)
+    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges() {
+        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
+        return pendingChallenges.stream()
+                .map(ChallengeConverter::toStatusResponse)
+                .collect(Collectors.toList());
     }
 
     // 크루 이름 검사
@@ -68,6 +83,7 @@ public class ChallengeService {
         }
     }
 
+    // 기간 검사
     private ChallengePeriod validateDates(LocalDate endDate) {
         LocalDate startDate = LocalDate.now().plusDays(1);
 

@@ -16,4 +16,5 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
 
     // 기간 내 챌린지 조회 (매칭 관련)
     List<CrewChallenge> findByStartDateBetween(LocalDate startDate, LocalDate endDate);
+
 }

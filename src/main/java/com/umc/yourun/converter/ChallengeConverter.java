@@ -4,6 +4,7 @@ import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
+import com.umc.yourun.dto.challenge.ChallengeResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,4 +27,15 @@ public class ChallengeConverter {
                 .challengePeriod(challengePeriod)
                 .build();
     }
+
+    public static ChallengeResponse.CrewChallengeStatusRes toStatusResponse(CrewChallenge challenge) {
+        return new ChallengeResponse.CrewChallengeStatusRes(
+                challenge.getId(),
+                challenge.getCrewName(),
+                challenge.getStartDate(),
+                challenge.getEndDate(),
+                challenge.getChallengePeriod()
+        );
+    }
+
 }
