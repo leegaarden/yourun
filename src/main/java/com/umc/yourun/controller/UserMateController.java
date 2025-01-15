@@ -14,7 +14,7 @@ import static com.umc.yourun.config.exception.ErrorCode.INVALID_INPUT_VALUE;
 @Controller
 @RequestMapping("/users")
 public class UserMateController {
-    UserMateService userMateService;
+    private static UserMateService userMateService;
 
     @Autowired
     public UserMateController(UserMateService userMateService) {
