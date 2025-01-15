@@ -47,10 +47,11 @@ public class CrewChallenge extends BaseEntity {
 
     @Builder
     public CrewChallenge(String crewName, LocalDate endDate) {
+        // 크루명 검사 먼저 한 뒤에 생성
+        validateCrewName(crewName);
         this.crew = Crew.builder()
                 .name(crewName)
                 .build();
-        validateCrew(this.crew);
         this.startDate = LocalDate.now().plusDays(1);
         this.endDate = endDate;
         validateDates();
@@ -58,14 +59,14 @@ public class CrewChallenge extends BaseEntity {
     }
 
     // 크루명 조건 검사
-    private void validateCrew(Crew crew) {
-        if (crew.getName() == null || crew.getName().trim().isEmpty()) {
+    private void validateCrewName(String crewName) {
+        if (crewName == null || crewName.trim().isEmpty()) { // 비어있는지 검사
             throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_NULL);
         }
-        if (crew.getName().matches(".*[!@#$%^&*(),.?\":{}|<>].*")) {
+        if (crewName.matches(".*[!@#$%^&*(),.?\":{}|<>].*")) { // 특수 문자 검사
             throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT1);
         }
-        if (crew.getName().length() < 3 || crew.getName().length() > 5) {
+        if (crewName.length() < 3 || crewName.length() > 5) { // 글자 수 검사
             throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT2);
         }
     }
