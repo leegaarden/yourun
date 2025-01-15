@@ -29,7 +29,7 @@ public class CrewChallenge extends BaseEntity {
     private Crew crew;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(nullable = false)
