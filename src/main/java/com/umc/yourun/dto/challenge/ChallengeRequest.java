@@ -22,8 +22,8 @@ public record ChallengeRequest() {
             @Schema(description = "챌린지 종료일", example = "2025-01-17")
             LocalDate endDate,
 
-            @Schema(description = "챌린지 거리", example = "KM1",
-            title = "KM1 = 1KM, KM3 = 3KM, KM5 = 5KM")
+            @Schema(description = "챌린지 거리", example = "ONE_KM",
+            title = "ONE_KM = 1, THREE_KM = 3, FIVE_KM = 5")
             ChallengeDistance challengeDistance
     ) {}
 }

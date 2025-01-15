@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 @Entity
 @Getter
@@ -50,10 +51,11 @@ public class SoloChallenge extends BaseEntity {
     @Builder
     public SoloChallenge(LocalDate endDate, ChallengeDistance challengeDistance) {
 
+        validateDistance(challengeDistance);
         this.startDate = LocalDate.now().plusDays(1); // 시작일은 내일로 고정
         this.endDate = endDate;
-        validateDates();
         this.challengeDistance = challengeDistance;
+        validateDates();
         this.challengeStatus = ChallengeStatus.PENDING; // 처음 생성시 대기로 고정
     }
 
@@ -80,6 +82,12 @@ public class SoloChallenge extends BaseEntity {
 
     }
 
+    // 거리 검사
+    private void validateDistance(ChallengeDistance challengeDistance) {
+        if (challengeDistance == null) {
+            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_DISTANCE_NULL);
+        }
+    }
     // 상태 변경
     public void updateStatus(ChallengeStatus status) {
         this.challengeStatus = status;
@@ -101,10 +109,4 @@ public class SoloChallenge extends BaseEntity {
         return LocalDate.now().isAfter(endDate);
     }
 
-    // Builder의 파라미터로 받은 challengeDistance가 null이 아닌지 확인
-    private void validateDistance(ChallengeDistance challengeDistance) {
-        if (challengeDistance == null) {
-            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_DISTANCE);
-        }
-    }
 }
