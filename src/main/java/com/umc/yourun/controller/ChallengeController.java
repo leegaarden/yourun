@@ -35,4 +35,17 @@ public class ChallengeController {
         Long challengeId = challengeService.createCrewChallenge(request);
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
     }
+
+    @PostMapping("/solo")
+    @Operation(summary = "CHALLENGE_API_02 : 개인 챌린지 생성", description = "새로운 개인 챌린지를 생성합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 생성 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ApiResponse<Long> createSoloChallenge(
+            @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
+        Long challengeId = challengeService.createSoloChallenge(request);
+        return ApiResponse.success("개인 챌린지가 생성되었습니다.", challengeId);
+    }
 }
