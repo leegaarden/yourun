@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 
-public record ChallengeRequest() {
+public class ChallengeRequest {
 
     @Schema(title = "CHALLENGE_REQ_01 : 크루 챌린지 생성 요청")
     public record CreateCrewChallengeReq(
