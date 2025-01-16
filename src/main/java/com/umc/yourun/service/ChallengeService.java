@@ -37,6 +37,11 @@ public class ChallengeService {
     // 크루 챌린지 생성
     @Transactional
     public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         // 크루명 검사
         validateCrewName(request.crewName());
 
@@ -45,10 +50,6 @@ public class ChallengeService {
 
         CrewChallenge crewChallenge = ChallengeConverter.toCrewChallenge(request, period);
         CrewChallenge savedCrewChallenge = crewChallengeRepository.save(crewChallenge);
-
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
         UserCrewChallenge userCrewChallenge = UserCrewChallenge.builder()
                 .user(user)
@@ -62,16 +63,17 @@ public class ChallengeService {
     // 솔로 챌린지 생성
     @Transactional
     public Long createSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
 
         // 솔로 챌린지 생성 및 저장
         SoloChallenge soloChallenge = ChallengeConverter.toSoloChallenge(request, period);
         SoloChallenge savedChallenge = soloChallengeRepository.save(soloChallenge);
-
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
         // UserSoloChallenge 생성 및 저장
         UserSoloChallenge userSoloChallenge = UserSoloChallenge.builder()
@@ -85,7 +87,12 @@ public class ChallengeService {
 
     // PENDING 상태인 크루 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges() {
+    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
         return pendingChallenges.stream()
                 .map(ChallengeConverter::toStatusCrewChallengeRes)
@@ -94,7 +101,12 @@ public class ChallengeService {
 
     // IN_PROGRESS 상태인 크루 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges() {
+    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<CrewChallenge> inProgressChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
         return inProgressChallenges.stream()
                 .map(ChallengeConverter::toStatusCrewChallengeRes)
@@ -103,7 +115,12 @@ public class ChallengeService {
 
     // PENDING 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges() {
+    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
         return pendingChallenges.stream()
                 .map(ChallengeConverter::toStatusSoloChallengeRes)
@@ -112,7 +129,12 @@ public class ChallengeService {
 
     // IN_PROGRESS 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges() {
+    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<SoloChallenge> inProgressChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
         return inProgressChallenges.stream()
                 .map(ChallengeConverter::toStatusSoloChallengeRes)

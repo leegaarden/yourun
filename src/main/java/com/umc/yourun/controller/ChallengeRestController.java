@@ -59,8 +59,10 @@ public class ChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/crew/pending")
-    public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getPendingCrewChallenges() {
-        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges();
+    public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getPendingCrewChallenges(
+            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    ) {
+        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges(userId);
         return ApiResponse.success("대기 중인 크루 챌린지 목록입니다.", result);
     }
 
@@ -71,8 +73,10 @@ public class ChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/crew/in-progress")
-    public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getInProgressCrewChallenges() {
-        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges();
+    public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getInProgressCrewChallenges(
+            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    ) {
+        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges(userId);
         return ApiResponse.success("진행 중인 크루 챌린지 목록입니다.", result);
     }
 
@@ -83,8 +87,10 @@ public class ChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/solo/pending")
-    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getPendingSoloChallenges() {
-        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getPendingSoloChallenges();
+    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getPendingSoloChallenges(
+            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    ) {
+        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getPendingSoloChallenges(userId);
         return ApiResponse.success("대기 중인 솔로 챌린지 목록입니다.", result);
     }
 
@@ -95,8 +101,10 @@ public class ChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/solo/in-progress")
-    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getInProgressSoloChallenges() {
-        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getInProgressSoloChallenges();
+    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getInProgressSoloChallenges(
+            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    ) {
+        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getInProgressSoloChallenges(userId);
         return ApiResponse.success("진행 중인 솔로 챌린지 목록입니다.", result);
     }
 
