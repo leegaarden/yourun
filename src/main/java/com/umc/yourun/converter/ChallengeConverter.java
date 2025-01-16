@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class ChallengeConverter {
 
 
-    // request DTO -> Entity
+    //  DTO -> Entity
     public static CrewChallenge toCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, ChallengePeriod challengePeriod) {
         return CrewChallenge.builder()
                 .crewName(request.crewName())
@@ -28,12 +28,23 @@ public class ChallengeConverter {
                 .build();
     }
 
-    public static ChallengeResponse.CrewChallengeStatusRes toStatusResponse(CrewChallenge challenge) {
+    // Entity -> DTO
+    public static ChallengeResponse.CrewChallengeStatusRes toStatusCrewChallengeRes (CrewChallenge challenge) {
         return new ChallengeResponse.CrewChallengeStatusRes(
                 challenge.getId(),
                 challenge.getCrewName(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),
+                challenge.getChallengePeriod()
+        );
+    }
+
+    public static ChallengeResponse.SoloChallengeStatusRes toStatusSoloChallengeRes (SoloChallenge challenge) {
+        return new ChallengeResponse.SoloChallengeStatusRes(
+                challenge.getId(),
+                challenge.getStartDate(),
+                challenge.getEndDate(),
+                challenge.getChallengeDistance(),
                 challenge.getChallengePeriod()
         );
     }

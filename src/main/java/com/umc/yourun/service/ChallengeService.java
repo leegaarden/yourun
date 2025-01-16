@@ -56,7 +56,7 @@ public class ChallengeService {
     public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges() {
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
         return pendingChallenges.stream()
-                .map(ChallengeConverter::toStatusResponse)
+                .map(ChallengeConverter::toStatusCrewChallengeRes)
                 .collect(Collectors.toList());
     }
 
@@ -65,9 +65,19 @@ public class ChallengeService {
     public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges() {
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
         return pendingChallenges.stream()
-                .map(ChallengeConverter::toStatusResponse)
+                .map(ChallengeConverter::toStatusCrewChallengeRes)
                 .collect(Collectors.toList());
     }
+
+    // PENDING 상태인 솔로 챌린지 조회
+    @Transactional(readOnly = true)
+    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges() {
+        List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+        return pendingChallenges.stream()
+                .map(ChallengeConverter::toStatusSoloChallengeRes)
+                .collect(Collectors.toList());
+    }
+
 
     // 크루 이름 검사
     // TODO: 한번에 검사하는 로직으로

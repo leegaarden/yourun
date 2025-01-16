@@ -24,4 +24,23 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 기간", example = "FOUR")
             ChallengePeriod challengePeriod
     ) {}
+
+    @Schema(title = "CHALLENGE_RES_02 : 상태 별 솔로 챌린지 응답 DTO")
+    public record SoloChallengeStatusRes(
+            @Schema(description = "챌린지 ID", example = "1")
+            Long challengeId,
+
+            @Schema(description = "시작일", example = "2025-01-15")
+            LocalDate startDate,
+
+            @Schema(description = "마감일", example = "2025-01-20")
+            LocalDate endDate,
+
+            @Schema(description = "챌린지 거리", example = "ONE_KM",
+                    title = "ONE_KM = 1, THREE_KM = 3, FIVE_KM = 5")
+            ChallengeDistance challengeDistance,
+
+            @Schema(description = "챌린지 기간", example = "FOUR")
+            ChallengePeriod challengePeriod
+    ) {}
 }
