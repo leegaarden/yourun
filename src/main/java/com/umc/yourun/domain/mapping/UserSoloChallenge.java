@@ -25,8 +25,10 @@ public class UserSoloChallenge extends BaseEntity {
     @JoinColumn(name = "solo_challenge_id", nullable = false)
     private SoloChallenge soloChallenge;
 
+    @Builder
     public UserSoloChallenge(User user, SoloChallenge soloChallenge) {
         this.user = user;
         this.soloChallenge = soloChallenge;
     }
+
 }

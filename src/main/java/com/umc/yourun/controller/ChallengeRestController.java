@@ -45,8 +45,9 @@ public class ChallengeRestController {
     })
     @PostMapping("/solo")
     public ApiResponse<Long> createSoloChallenge(
+            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
-        Long challengeId = challengeService.createSoloChallenge(request);
+        Long challengeId = challengeService.createSoloChallenge(request, userId);
         return ApiResponse.success("개인 챌린지가 생성되었습니다.", challengeId);
     }
 
@@ -96,5 +97,19 @@ public class ChallengeRestController {
     public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getInProgressSoloChallenges() {
         List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getInProgressSoloChallenges();
         return ApiResponse.success("진행 중인 솔로 챌린지 목록입니다.", result);
+    }
+
+    @Operation(summary = "CHALLENGE_API_07 : 개인 챌린지 참여", description = "대기 중인 개인 챌린지에 참여합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/solo/{challengeId}/join")
+    public ApiResponse<ChallengeResponse.ChallengeMateRes> joinSoloChallenge(
+            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @PathVariable Long challengeId) {
+        ChallengeResponse.ChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, userId);
+        return ApiResponse.success("개인 챌린지 참여가 완료되었습니다.", response);
     }
 }

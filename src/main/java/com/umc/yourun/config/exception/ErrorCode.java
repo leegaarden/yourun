@@ -20,7 +20,15 @@ public enum ErrorCode {
     INVALID_CREW_NAME_FORMAT1(400, "C005","크루명은 특수문자를 포함할 수 없습니다."),
     INVALID_CREW_NAME_FORMAT2(400, "C006", "크루명은 공백 포함 3-5자 범위입니다."),
     INVALID_CHALLENGE_DISTANCE_NULL(400, "C007", "거리는 필수 입력값입니다."),
-    INVALID_CHALLENGE_DISTANCE(400, "C008", "유효하지 않은 거리입니다. ONE_KM, THREE_KM, FIVE_KM 중 하나여야 합니다.");
+    INVALID_CHALLENGE_DISTANCE(400, "C008", "유효하지 않은 거리입니다. ONE_KM, THREE_KM, FIVE_KM 중 하나여야 합니다."),
+    CHALLENGE_NOT_FOUND(404, "C009", "존재하지 않는 챌린지입니다."),
+    INVALID_CHALLENGE_STATUS(400, "C010", "참여할 수 없는 상태의 챌린지입니다."),
+    CHALLENGE_EXPIRED(400, "C011", "만료된 챌린지입니다."),
+    CANNOT_JOIN_OWN_CHALLENGE(400, "C012", "본인이 만든 챌린지에는 참여할 수 없습니다."),
+    ALREADY_IN_CHALLENGE(400, "C013", "종류별 하나의 챌린지에만 참여할 수 있습니다."),
+
+    // User 관련 에러
+    USER_NOT_FOUND(500, "U001", "존재하지 않는 사용자입니다.");
 
     private final int status;
     private final String code;

@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,5 +50,15 @@ public class CrewChallenge extends BaseEntity {
         this.endDate = endDate;
         this.challengeStatus = ChallengeStatus.PENDING;
         this.challengePeriod = challengePeriod;
+    }
+
+    // 상태 변경
+    public void updateStatus(ChallengeStatus status) {
+        this.challengeStatus = status;
+    }
+
+    // 생성 후 24시간 이내인지 확인
+    public boolean isMatchable() {
+        return this.getCreatedAt().plusDays(1).isAfter(LocalDateTime.now());
     }
 }
