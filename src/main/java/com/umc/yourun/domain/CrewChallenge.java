@@ -2,7 +2,7 @@ package com.umc.yourun.domain;
 
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
-import com.umc.yourun.domain.mapping.UserCrew;
+import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,7 +39,7 @@ public class CrewChallenge extends BaseEntity {
     private int winningCount;    // 기존 crew의 winning_count 속성
 
     @OneToMany(mappedBy = "crewChallenge")
-    private List<UserCrew> userCrews = new ArrayList<>();
+    private List<UserCrewChallenge> userCrews = new ArrayList<>();
 
 
     @Builder

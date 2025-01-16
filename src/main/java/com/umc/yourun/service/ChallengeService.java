@@ -9,13 +9,11 @@ import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
+import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
-import com.umc.yourun.repository.CrewChallengeRepository;
-import com.umc.yourun.repository.SoloChallengeRepository;
-import com.umc.yourun.repository.UserRepository;
-import com.umc.yourun.repository.UserSoloChallengeRepository;
+import com.umc.yourun.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,19 +31,32 @@ public class ChallengeService {
     private final CrewChallengeRepository crewChallengeRepository;
     private final SoloChallengeRepository soloChallengeRepository;
     private final UserSoloChallengeRepository userSoloChallengeRepository;
+    private final UserCrewChallengeRepository userCrewChallengeRepository;
     private final UserRepository userRepository;
 
     // 크루 챌린지 생성
     @Transactional
-    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request) {
+    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, Long userId) {
         // 크루명 검사
         validateCrewName(request.crewName());
 
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
-        validateDates(request.endDate());
+
         CrewChallenge crewChallenge = ChallengeConverter.toCrewChallenge(request, period);
-        return crewChallengeRepository.save(crewChallenge).getId();
+        CrewChallenge savedCrewChallenge = crewChallengeRepository.save(crewChallenge);
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        UserCrewChallenge userCrewChallenge = UserCrewChallenge.builder()
+                .user(user)
+                .crewChallenge(savedCrewChallenge)
+                .build();
+        userCrewChallengeRepository.save(userCrewChallenge);
+
+        return savedCrewChallenge.getId();
     }
 
     // 솔로 챌린지 생성

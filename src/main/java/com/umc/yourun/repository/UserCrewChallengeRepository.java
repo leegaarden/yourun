@@ -3,9 +3,9 @@ package com.umc.yourun.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.umc.yourun.domain.mapping.UserCrew;
+import com.umc.yourun.domain.mapping.UserCrewChallenge;
 
 @Repository
-public interface UserCrewRepository extends JpaRepository<UserCrew, Long> {
+public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChallenge, Long> {
 
 }

@@ -32,8 +32,9 @@ public class ChallengeRestController {
     })
     @PostMapping("/crew")
     public ApiResponse<Long> createCrewChallenge(
+            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
-        Long challengeId = challengeService.createCrewChallenge(request);
+        Long challengeId = challengeService.createCrewChallenge(request, userId);
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
     }
 
