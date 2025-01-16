@@ -85,4 +85,16 @@ public class ChallengeRestController {
         List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getPendingSoloChallenges();
         return ApiResponse.success("대기 중인 솔로 챌린지 목록입니다.", result);
     }
+
+    @Operation(summary = "CHALLENGE_API_06 : 진행 중인 솔로 챌린지 조회", description = "IN_PROGRESS 상태인 솔로 챌린지 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/solo/in-progress")
+    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getInProgressSoloChallenges() {
+        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getInProgressSoloChallenges();
+        return ApiResponse.success("진행 중인 솔로 챌린지 목록입니다.", result);
+    }
 }

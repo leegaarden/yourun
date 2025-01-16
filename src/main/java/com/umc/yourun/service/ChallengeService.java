@@ -63,8 +63,8 @@ public class ChallengeService {
     // IN_PROGRESS 상태인 크루 챌린지 조회
     @Transactional(readOnly = true)
     public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges() {
-        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
-        return pendingChallenges.stream()
+        List<CrewChallenge> inProgressChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
+        return inProgressChallenges.stream()
                 .map(ChallengeConverter::toStatusCrewChallengeRes)
                 .collect(Collectors.toList());
     }
@@ -74,6 +74,15 @@ public class ChallengeService {
     public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges() {
         List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
         return pendingChallenges.stream()
+                .map(ChallengeConverter::toStatusSoloChallengeRes)
+                .collect(Collectors.toList());
+    }
+
+    // IN_PROGRESS 상태인 솔로 챌린지 조회
+    @Transactional(readOnly = true)
+    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges() {
+        List<SoloChallenge> inProgressChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
+        return inProgressChallenges.stream()
                 .map(ChallengeConverter::toStatusSoloChallengeRes)
                 .collect(Collectors.toList());
     }
