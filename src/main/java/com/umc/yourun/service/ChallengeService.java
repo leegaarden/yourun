@@ -42,6 +42,16 @@ public class ChallengeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
+        // 챌린지 별 하나만 되도록 검사
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
+                userId, ChallengeStatus.IN_PROGRESS)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
+                userId, ChallengeStatus.PENDING)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+
         // 크루명 검사
         validateCrewName(request.crewName());
 
@@ -67,6 +77,16 @@ public class ChallengeService {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 챌린지 별 하나만 되도록 검사
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
+                userId, ChallengeStatus.IN_PROGRESS)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
+                userId, ChallengeStatus.PENDING)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
 
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
