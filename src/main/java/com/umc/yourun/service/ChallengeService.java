@@ -1,16 +1,19 @@
 package com.umc.yourun.service;
 
 import com.umc.yourun.config.exception.ErrorCode;
+import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.converter.ChallengeConverter;
 import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
+import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
+import com.umc.yourun.domain.mapping.UserCrewChallenge;
+import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
-import com.umc.yourun.repository.CrewChallengeRepository;
-import com.umc.yourun.repository.SoloChallengeRepository;
+import com.umc.yourun.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,33 +30,89 @@ public class ChallengeService {
 
     private final CrewChallengeRepository crewChallengeRepository;
     private final SoloChallengeRepository soloChallengeRepository;
+    private final UserSoloChallengeRepository userSoloChallengeRepository;
+    private final UserCrewChallengeRepository userCrewChallengeRepository;
+    private final UserRepository userRepository;
 
     // 크루 챌린지 생성
     @Transactional
-    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request) {
+    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 챌린지 별 하나만 되도록 검사
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
+                userId, ChallengeStatus.IN_PROGRESS)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
+                userId, ChallengeStatus.PENDING)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+
         // 크루명 검사
         validateCrewName(request.crewName());
 
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
-        validateDates(request.endDate());
+
         CrewChallenge crewChallenge = ChallengeConverter.toCrewChallenge(request, period);
-        return crewChallengeRepository.save(crewChallenge).getId();
+        CrewChallenge savedCrewChallenge = crewChallengeRepository.save(crewChallenge);
+
+        UserCrewChallenge userCrewChallenge = UserCrewChallenge.builder()
+                .user(user)
+                .crewChallenge(savedCrewChallenge)
+                .build();
+        userCrewChallengeRepository.save(userCrewChallenge);
+
+        return savedCrewChallenge.getId();
     }
 
-    // 개인 챌린지 생성
+    // 솔로 챌린지 생성
     @Transactional
-    public Long createSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request) {
+    public Long createSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 챌린지 별 하나만 되도록 검사
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
+                userId, ChallengeStatus.IN_PROGRESS)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
+                userId, ChallengeStatus.PENDING)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
-        validateDates(request.endDate());
+
+        // 솔로 챌린지 생성 및 저장
         SoloChallenge soloChallenge = ChallengeConverter.toSoloChallenge(request, period);
-        return soloChallengeRepository.save(soloChallenge).getId();
+        SoloChallenge savedChallenge = soloChallengeRepository.save(soloChallenge);
+
+        // UserSoloChallenge 생성 및 저장
+        UserSoloChallenge userSoloChallenge = UserSoloChallenge.builder()
+                .user(user)
+                .soloChallenge(savedChallenge)
+                .build();
+        userSoloChallengeRepository.save(userSoloChallenge);
+
+        return savedChallenge.getId();
     }
 
     // PENDING 상태인 크루 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges() {
+    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
         return pendingChallenges.stream()
                 .map(ChallengeConverter::toStatusCrewChallengeRes)
@@ -62,7 +121,12 @@ public class ChallengeService {
 
     // IN_PROGRESS 상태인 크루 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges() {
+    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<CrewChallenge> inProgressChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
         return inProgressChallenges.stream()
                 .map(ChallengeConverter::toStatusCrewChallengeRes)
@@ -71,7 +135,12 @@ public class ChallengeService {
 
     // PENDING 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges() {
+    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
         return pendingChallenges.stream()
                 .map(ChallengeConverter::toStatusSoloChallengeRes)
@@ -80,11 +149,65 @@ public class ChallengeService {
 
     // IN_PROGRESS 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges() {
+    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         List<SoloChallenge> inProgressChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
         return inProgressChallenges.stream()
                 .map(ChallengeConverter::toStatusSoloChallengeRes)
                 .collect(Collectors.toList());
+    }
+
+    // 솔로 챌린지에 참여하기
+    @Transactional
+    public ChallengeResponse.ChallengeMateRes joinSoloChallenge(Long challengeId, Long userId) {
+        // 1. 챌린지 조회
+        SoloChallenge soloChallenge = soloChallengeRepository.findById(challengeId)
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        // 2. 챌린지 상태 확인
+        if (soloChallenge.getChallengeStatus() != ChallengeStatus.PENDING) {
+            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_STATUS);
+        }
+
+        // 3. 24시간 이내 챌린지인지 확인
+        if (!soloChallenge.isMatchable()) {
+            throw new ChallengeException(ErrorCode.CHALLENGE_EXPIRED);
+        }
+
+        // 4. 이미 진행 중인 챌린지가 있는지 확인
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
+                userId, ChallengeStatus.IN_PROGRESS)) {
+            throw new ChallengeException(ErrorCode.ALREADY_IN_CHALLENGE);
+        }
+
+        // 5. 챌린지 생성자 확인
+        UserSoloChallenge creatorChallenge = userSoloChallengeRepository.findBySoloChallengeId(challengeId)
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        // 6. 본인 챌린지 참여 방지
+        if (creatorChallenge.getUser().getId().equals(userId)) {
+            throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
+        }
+
+        // 7. UserSoloChallenge 생성 및 저장
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        UserSoloChallenge userSoloChallenge = UserSoloChallenge.builder()
+                .user(User.builder().id(userId).build())
+                .soloChallenge(soloChallenge)
+                .build();
+        userSoloChallengeRepository.save(userSoloChallenge);
+
+        // 8. 챌린지 상태 업데이트
+        soloChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
+
+        return new ChallengeResponse.ChallengeMateRes(challengeId, creatorChallenge.getUser().getId());
     }
 
 

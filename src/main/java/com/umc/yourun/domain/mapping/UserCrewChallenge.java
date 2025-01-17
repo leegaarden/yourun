@@ -22,7 +22,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserCrew extends BaseEntity {
+public class UserCrewChallenge extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -34,4 +34,10 @@ public class UserCrew extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "crew_challenge_id")
 	private CrewChallenge crewChallenge;
+
+	@Builder
+	public UserCrewChallenge (User user, CrewChallenge crewChallenge) {
+		this.user = user;
+		this.crewChallenge = crewChallenge;
+	}
 }

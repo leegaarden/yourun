@@ -43,4 +43,13 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 기간", example = "FOUR")
             ChallengePeriod challengePeriod
     ) {}
+
+    @Schema(title = "CHALLENGE_RES_03 : 솔로 챌린지 참여 응답 DTO")
+    public record ChallengeMateRes(
+            @Schema(description = "챌린지 ID", example = "1")
+            Long challengeId,
+
+            @Schema(description = "챌린지 생성자 ID", example = "null")
+            Long userId
+    ) {}
 }

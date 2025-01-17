@@ -57,4 +57,14 @@ public class SoloChallenge extends BaseEntity {
         this.challengeStatus = ChallengeStatus.PENDING;
         this.challengePeriod = challengePeriod;
     }
+
+    // 상태 변경
+    public void updateStatus(ChallengeStatus status) {
+        this.challengeStatus = status;
+    }
+
+    // 생성 후 24시간 이내인지 확인
+    public boolean isMatchable() {
+        return this.getCreatedAt().plusDays(1).isAfter(LocalDateTime.now());
+    }
 }
