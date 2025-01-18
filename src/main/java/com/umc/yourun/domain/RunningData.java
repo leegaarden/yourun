@@ -20,10 +20,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class RunningData {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,13 +45,18 @@ public class RunningData {
 	@Column
 	private Integer totalTime;
 
-	@Column
-	private Integer calories;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
 	//TODO: builder 정의 필요
+	@Builder
+	public RunningData(LocalDateTime startTime, LocalDateTime endTime, Integer totalDistance, Integer totalTime, User user) {
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.totalDistance = totalDistance;
+		this.totalTime = totalTime;
+		this.user = user;
+	}
 
 }

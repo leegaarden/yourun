@@ -12,9 +12,7 @@ public class RunningDataRequestDTO {
 		LocalDateTime startTime,
 		@Schema(description = "종료 시간", example = "2025-01-17T15:30:00")
 		LocalDateTime endTime,
-		@Schema(description = "거리", example = "5000")
-		Long totalDistance,
-		@Schema(description = "소모 칼로리", example = "500")
-		Long calories
+		@Schema(description = "총 거리", example = "5000")
+		Integer totalDistance
 	) {}
 }
