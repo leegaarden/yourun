@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 public class ChallengeResponse {
 
+    // TODO: 남은 인원 응답에 추가하기
     @Schema(title = "CHALLENGE_RES_01 : 상태 별 크루 챌린지 응답 DTO")
     public record CrewChallengeStatusRes(
             @Schema(description = "챌린지 ID", example = "1")
@@ -25,6 +26,7 @@ public class ChallengeResponse {
             ChallengePeriod challengePeriod
     ) {}
 
+    // TODO: 만든 사용자의 해시태그 응답에 추가
     @Schema(title = "CHALLENGE_RES_02 : 상태 별 솔로 챌린지 응답 DTO")
     public record SoloChallengeStatusRes(
             @Schema(description = "챌린지 ID", example = "1")

@@ -214,14 +214,19 @@ public class ChallengeService {
     // 크루 이름 검사
     // TODO: 한번에 검사하는 로직으로
     private void validateCrewName(String crewName) {
+        // null 체크
         if (crewName == null || crewName.trim().isEmpty()) {
             throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_NULL);
         }
-        if (crewName.matches(".*[!@#$%^&*(),.?\":{}|<>].*") || crewName.matches(".*[a-zA-Z].*")) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT1);
-        }
-        if (crewName.length() < 3 || crewName.length() > 5) {
+
+        // 길이 검사 (2-5자)
+        if (crewName.length() < 2 || crewName.length() > 5) {
             throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT2);
+        }
+
+        // 한글만 허용하고 띄어쓰기 없는지 검사
+        if (!crewName.matches("^[가-힣]{2,5}$")) {
+            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT1);
         }
     }
 
