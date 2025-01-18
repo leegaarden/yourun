@@ -1,15 +1,12 @@
 package com.umc.yourun.dto.runningdata;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import com.umc.yourun.domain.enums.ChallengePeriod;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class RunningDataResponseDTO{
 	@Schema(title = "RUNNING_RES_01 : 러닝 결과 정보 생성 응답 DTO")
-	public record CrewChallengeStatusRes(
+	public record createRunningData(
 
 		@Schema(description = "러닝 결과 ID", example = "1")
 		Long challengeId,
