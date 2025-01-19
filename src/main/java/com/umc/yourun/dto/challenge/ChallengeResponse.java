@@ -4,6 +4,7 @@ import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.List;
 
 public class ChallengeResponse {
 
@@ -48,10 +49,19 @@ public class ChallengeResponse {
 
     @Schema(title = "CHALLENGE_RES_03 : 솔로 챌린지 참여 응답 DTO")
     public record ChallengeMateRes(
-            @Schema(description = "챌린지 ID", example = "1")
+            @Schema(description = "솔로 챌린지 ID", example = "1")
             Long challengeId,
 
             @Schema(description = "챌린지 생성자 ID", example = "null")
             Long userId
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_04 : 크루 챌린지 참여 응답 DTO")
+    public record CrewChallengeMateRes(
+            @Schema(description = "크루 챌린지 ID")
+            Long challengeId,
+
+            @Schema(description = "참여자 ID 목록")
+            List<Long> participantIds
     ) {}
 }
