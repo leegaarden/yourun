@@ -48,7 +48,7 @@ public class ChallengeRestController {
             @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
         Long challengeId = challengeService.createSoloChallenge(request, userId);
-        return ApiResponse.success("개인 챌린지가 생성되었습니다.", challengeId);
+        return ApiResponse.success("솔로 챌린지가 생성되었습니다.", challengeId);
     }
 
     @Operation(summary = "CHALLENGE_API_03 : 대기 중인 크루 챌린지 조회", description = "PENDING 상태인 크루 챌린지 목록을 조회합니다.")
@@ -118,7 +118,7 @@ public class ChallengeRestController {
             @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @PathVariable Long challengeId) {
         ChallengeResponse.ChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, userId);
-        return ApiResponse.success("개인 챌린지 참여가 완료되었습니다.", response);
+        return ApiResponse.success("솔로 챌린지 참여가 완료되었습니다.", response);
     }
 
     @PostMapping("/crew/{challengeId}/join")
