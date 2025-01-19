@@ -26,7 +26,7 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
     List<UserCrewChallenge> findParticipantsByCrewChallengeId(Long challengeId);
 
     // 크루 챌린지 찾기
-    Optional<UserCrewChallenge> findByCrewChallengeId(Long challengeId);
+    Optional<UserCrewChallenge> findAllByCrewChallengeId(Long challengeId);
 
     // 솔로 챌린지 삭제
     void deleteAllByCrewChallengeId(Long challengeId);

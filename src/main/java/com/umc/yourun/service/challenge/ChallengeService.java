@@ -265,16 +265,23 @@ public class ChallengeService {
             throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
         }
 
-        // 6. 챌린지 생성자 확인
-        UserCrewChallenge creatorChallenge = userCrewChallengeRepository.findByCrewChallengeId(challengeId)
-                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        // 6. 이미 진행 중 (혹은 대기) 인 크루 챌린지가 있는지 검사, 셀프 참여 검사
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(
+                userId,
+                Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
 
-        // 7. 본인 챌린지 참여 방지
-        if (creatorChallenge.getUser().getId().equals(userId)) {
-            throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
+            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(userId);
+
+            // 사용자가 생성자였던 경우
+            if (userCrewChallenge.isCreator()) {
+                throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
+            } else {
+                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
+            }
+
         }
 
-        // 8. UserCrewChallenge 생성 및 저장
+        // 7. UserCrewChallenge 생성 및 저장
         UserCrewChallenge userCrewChallenge = UserCrewChallenge.builder()
                 .user(userRepository.getReferenceById(userId))
                 .crewChallenge(crewChallenge)
@@ -282,7 +289,7 @@ public class ChallengeService {
                 .build();
         userCrewChallengeRepository.save(userCrewChallenge);
 
-        // 9. 챌린지 참여자 조회
+        // 8. 챌린지 참여자 조회
         List<Long> participants = userCrewChallengeRepository
                 .findParticipantsByCrewChallengeId(challengeId)
                 .stream()
@@ -311,7 +318,7 @@ public class ChallengeService {
         }
 
         // 크루명 중복 검사
-        if (crewChallengeRepository.existsByNameIgnoreCase(crewName)) {
+        if (crewChallengeRepository.existsByCrewNameIgnoreCase(crewName)) {
             throw new ChallengeException(ErrorCode.DUPLICATE_CREW_NAME);
         }
     }

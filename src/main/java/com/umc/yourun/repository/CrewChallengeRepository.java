@@ -48,5 +48,5 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
     List<CrewChallenge> findMatchableCrew(ChallengePeriod period, Long excludeId);
 
     // 이미 존재하는 크루명인지 확인
-    boolean existsByNameIgnoreCase(String name);
+    boolean existsByCrewNameIgnoreCase(String name);
 }
