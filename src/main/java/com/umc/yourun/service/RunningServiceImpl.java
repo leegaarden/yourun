@@ -6,6 +6,9 @@ import java.time.ZoneOffset;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.umc.yourun.config.exception.ErrorCode;
+import com.umc.yourun.config.exception.GeneralException;
+import com.umc.yourun.config.exception.custom.RunningException;
 import com.umc.yourun.converter.RunningDataConverter;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
@@ -28,7 +31,10 @@ public class RunningServiceImpl implements RunningService{
 	@Transactional
 	public RunningData createRunningData(RunningDataRequestDTO.@Valid CreateRunningDataReq request) {
 		Integer totalTime=calculateTotalTime(request.startTime(),request.endTime());
-		User user=userRepository.findById(1L).orElseThrow();//TODO:추후 토큰 구현
+		if(totalTime<0) {
+			throw new RunningException(ErrorCode.INVALID_END_TIME);
+		}
+		User user=userRepository.findById(1L).orElseThrow(()->new GeneralException(ErrorCode.USER_NOT_FOUND));
 		RunningData runningData= RunningDataConverter.toRunningData(request,totalTime,user);
 		return runningDataRepository.save(runningData);
 	}

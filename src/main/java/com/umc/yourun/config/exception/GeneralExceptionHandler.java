@@ -2,6 +2,8 @@ package com.umc.yourun.config.exception;
 
 import com.umc.yourun.apiPayload.ApiResponse;
 import com.umc.yourun.config.exception.custom.ChallengeException;
+import com.umc.yourun.config.exception.custom.RunningException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,6 +20,15 @@ public class GeneralExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
         return ApiResponse.error(errorCode);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ApiResponse<Object> handleRunningException(RunningException e) {
+        log.error("Running Exception: {}", e.getMessage());
+        ErrorCode errorCode = e.getErrorCode();
+        return ApiResponse.error(errorCode);
+    }
+
+
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<Object> handleException(Exception e) {

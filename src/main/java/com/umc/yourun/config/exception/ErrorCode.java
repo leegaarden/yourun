@@ -2,7 +2,6 @@ package com.umc.yourun.config.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @AllArgsConstructor
@@ -20,7 +19,14 @@ public enum ErrorCode {
     INVALID_CREW_NAME_FORMAT1(400, "C005","크루명은 특수문자를 포함할 수 없습니다."),
     INVALID_CREW_NAME_FORMAT2(400, "C006", "크루명은 공백 포함 3-5자 범위입니다."),
     INVALID_CHALLENGE_DISTANCE_NULL(400, "C007", "거리는 필수 입력값입니다."),
-    INVALID_CHALLENGE_DISTANCE(400, "C008", "유효하지 않은 거리입니다. ONE_KM, THREE_KM, FIVE_KM 중 하나여야 합니다.");
+    INVALID_CHALLENGE_DISTANCE(400, "C008", "유효하지 않은 거리입니다. ONE_KM, THREE_KM, FIVE_KM 중 하나여야 합니다."),
+
+
+    //Running 관련 에러
+    INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
+
+    //User 관련 에러
+    USER_NOT_FOUND(400, "U001", "해당 유저를 찾을 수 없습니다."),;
 
     private final int status;
     private final String code;
