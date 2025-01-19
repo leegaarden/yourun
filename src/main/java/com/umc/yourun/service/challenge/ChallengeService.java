@@ -309,6 +309,11 @@ public class ChallengeService {
         if (!crewName.matches("^[가-힣]{2,5}$")) {
             throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT1);
         }
+
+        // 크루명 중복 검사
+        if (crewChallengeRepository.existsByNameIgnoreCase(crewName)) {
+            throw new ChallengeException(ErrorCode.DUPLICATE_CREW_NAME);
+        }
     }
 
     // 기간 검사
