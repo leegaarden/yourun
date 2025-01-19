@@ -25,7 +25,7 @@ public enum ErrorCode {
     INVALID_CHALLENGE_STATUS(400, "C010", "이미 진행 중인 챌린지에는 참여할 수 없습니다."),
     CHALLENGE_EXPIRED(400, "C011", "만료된 챌린지입니다."),
     CANNOT_JOIN_OWN_CHALLENGE(400, "C012", "본인이 만든 챌린지에는 참여할 수 없습니다."),
-    INVALID_CHALLENGE_CREATE(400, "C013", "종류별 하나의 챌린지에만 생성할 수 있습니다."),
+    INVALID_CHALLENGE_CREATE(400, "C013", "종류별 하나의 챌린지만 생성할 수 있습니다."),
     INVALID_CHALLENGE_JOIN(400, "C014", "종류별 하나의 챌린지에만 참여할 수 있습니다."),
     CREW_CHALLENGE_FULL(400, "C015", "크루 인원이 모두 찼습니다."),
 

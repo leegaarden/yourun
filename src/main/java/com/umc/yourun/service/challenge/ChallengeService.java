@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -46,14 +47,20 @@ public class ChallengeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
-        // 이미 진행 중(혹은 대기) 인 크루 챌린지가 있는지 검사
-        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
-                userId, ChallengeStatus.IN_PROGRESS)) {
-            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CREATE);
-        }
-        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
-                userId, ChallengeStatus.PENDING)) {
-            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CREATE);
+        // 이미 진행 중 (혹은 대기) 인 크루 챌린지가 있는지 검사
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(
+                userId,
+                Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
+
+            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(userId);
+
+            // 사용자가 생성자였던 경우
+            if (userCrewChallenge.isCreator()) {
+                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CREATE);
+            } else {
+                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
+            }
+
         }
 
         // 크루명 검사
@@ -68,6 +75,7 @@ public class ChallengeService {
         UserCrewChallenge userCrewChallenge = UserCrewChallenge.builder()
                 .user(user)
                 .crewChallenge(savedCrewChallenge)
+                .isCreator(true)
                 .build();
         userCrewChallengeRepository.save(userCrewChallenge);
 
@@ -83,13 +91,19 @@ public class ChallengeService {
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
         // 이미 진행 중(혹은 대기) 인 솔로 챌린지가 있는지 검사
-        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
-                userId, ChallengeStatus.IN_PROGRESS)) {
-            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CREATE);
-        }
-        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
-                userId, ChallengeStatus.PENDING)) {
-            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CREATE);
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatusIn(
+                userId,
+                Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
+
+            UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(userId);
+
+            // 사용자가 생성자였던 경우
+            if (userSoloChallenge.isCreator()) {
+                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_CREATE);
+            } else {
+                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
+            }
+
         }
 
         // 날짜 검사 및 기간 반환
@@ -103,6 +117,7 @@ public class ChallengeService {
         UserSoloChallenge userSoloChallenge = UserSoloChallenge.builder()
                 .user(user)
                 .soloChallenge(savedChallenge)
+                .isCreator(true)
                 .build();
         userSoloChallengeRepository.save(userSoloChallenge);
 
@@ -188,8 +203,8 @@ public class ChallengeService {
         }
 
         // 4. 사용자가 이미 진행 중인 솔로 챌린지가 있는지 확인
-        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatus(
-                userId, ChallengeStatus.IN_PROGRESS)) {
+        if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatusIn(
+                userId, List.of(ChallengeStatus.IN_PROGRESS))) {
             throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
         }
 
@@ -206,6 +221,7 @@ public class ChallengeService {
         UserSoloChallenge userSoloChallenge = UserSoloChallenge.builder()
                 .user(User.builder().id(userId).build())
                 .soloChallenge(soloChallenge)
+                .isCreator(false)
                 .build();
         userSoloChallengeRepository.save(userSoloChallenge);
 
@@ -244,8 +260,8 @@ public class ChallengeService {
         }
 
         // 5. 이미 진행 중인 챌린지가 있는지 확인
-        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatus(
-                userId, ChallengeStatus.IN_PROGRESS)) {
+        if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(
+                userId, List.of(ChallengeStatus.IN_PROGRESS))) {
             throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
         }
 
@@ -262,6 +278,7 @@ public class ChallengeService {
         UserCrewChallenge userCrewChallenge = UserCrewChallenge.builder()
                 .user(userRepository.getReferenceById(userId))
                 .crewChallenge(crewChallenge)
+                .isCreator(false)
                 .build();
         userCrewChallengeRepository.save(userCrewChallenge);
 

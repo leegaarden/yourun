@@ -24,4 +24,8 @@ public class UserSoloChallenge extends BaseEntity {
     @JoinColumn(name = "solo_challenge_id", nullable = false)
     private SoloChallenge soloChallenge;
 
+    @Getter
+    @Column(nullable = false)
+    private boolean isCreator;
+
 }

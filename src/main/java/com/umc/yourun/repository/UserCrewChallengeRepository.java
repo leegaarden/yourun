@@ -14,7 +14,10 @@ import java.util.Optional;
 public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChallenge, Long> {
 
     // 상태별 크루 찾기
-    boolean existsByUserIdAndCrewChallenge_ChallengeStatus(Long userId, ChallengeStatus challengeStatus);
+    boolean existsByUserIdAndCrewChallenge_ChallengeStatusIn(
+            Long userId,
+            List<ChallengeStatus> statuses
+    );
 
     // 챌린지 인원 세기
     long countByCrewChallengeId(Long challengeId);
@@ -27,5 +30,8 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
 
     // 솔로 챌린지 삭제
     void deleteAllByCrewChallengeId(Long challengeId);
+
+    // 사용자 아아디로 찾은 userCrewChallenge
+    UserCrewChallenge findByUserId (Long userId);
 
 }
