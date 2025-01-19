@@ -64,21 +64,32 @@ public class ChallengeMatchService {
     private void tryMatchCrewChallenge(CrewChallenge challenge) {
         // 같은 기간의 다른 4명이 모인 크루 찾기
         List<CrewChallenge> potentialMatches = crewChallengeRepository
-                .findMatchableCrew(
+                .findFirstMatchableCrewOrderByCreatedAt(
                         challenge.getChallengePeriod(),
                         challenge.getId()
                 );
 
         // 매칭 가능한 크루가 있으면 랜덤 매칭
+//        if (!potentialMatches.isEmpty()) {
+//            CrewChallenge matchedChallenge = potentialMatches.get(
+//                    new Random().nextInt(potentialMatches.size())
+//            );
+//
+//            // 두 크루 모두 상태 업데이트
+//            challenge.updateStatus(ChallengeStatus.IN_PROGRESS);
+//            matchedChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
+//        }
+
+        // 매칭 가능한 크루가 있으면 가장 먼저 생성된 크루와 매칭
         if (!potentialMatches.isEmpty()) {
-            CrewChallenge matchedChallenge = potentialMatches.get(
-                    new Random().nextInt(potentialMatches.size())
-            );
+            CrewChallenge matchedChallenge = potentialMatches.get(0);
 
             // 두 크루 모두 상태 업데이트
             challenge.updateStatus(ChallengeStatus.IN_PROGRESS);
-            matchedChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
+            challenge.setMatchedCrewChallengeId(matchedChallenge.getId());  // 매칭된 크루 정보 저장
 
+            matchedChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
+            matchedChallenge.setMatchedCrewChallengeId(challenge.getId());  // 매칭된 크루 정보 저장
         }
 
     }

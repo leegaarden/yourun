@@ -38,9 +38,12 @@ public class CrewChallenge extends BaseEntity {
     @Column(nullable = false)
     private int winningCount;    // 기존 crew의 winning_count 속성
 
+    @Setter
+    @Column
+    private Long matchedCrewChallengeId;  // 매칭된 크루 챌린지 ID
+
     @OneToMany(mappedBy = "crewChallenge")
     private List<UserCrewChallenge> userCrews = new ArrayList<>();
-
 
     @Builder
     public CrewChallenge(String crewName, LocalDate endDate, ChallengePeriod challengePeriod) {
