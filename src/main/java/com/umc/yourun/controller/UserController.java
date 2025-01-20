@@ -1,16 +1,22 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
-import com.umc.yourun.config.exception.custom.UserException;
 import com.umc.yourun.dto.user.UserRequestDTO;
-import com.umc.yourun.service.TokenService;
 import com.umc.yourun.service.UserService;
-import lombok.Getter;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Key;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,13 +26,11 @@ import static com.umc.yourun.config.exception.ErrorCode.INVALID_USER_INCONSISTEN
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private static UserService userService;
-    private static TokenService tokenService;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService, TokenService tokenService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.tokenService = tokenService;
     }
 
     @PostMapping("")
@@ -39,13 +43,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<Map<String, String>> login(@RequestBody UserRequestDTO.LoginDto loginDto){
-        Map<String, String> accessToken = new HashMap<>();
-        if(!userService.login(loginDto)){
-            return ApiResponse.error(INVALID_USER_INCONSISTENCY);
-        }
-        accessToken.put("access_token", tokenService.getAccessToken(loginDto.email(), loginDto.password()));
-        return ApiResponse.success("로그인에 성공했습니다.", accessToken);
+    public ApiResponse<Map<String,String>> getAccessToken(@RequestBody UserRequestDTO.LoginDto loginDto){
+        Map<String,String> token = userService.login(loginDto);
+        return ApiResponse.success("로그인에 성공했습니다.", token);
     }
-
 }

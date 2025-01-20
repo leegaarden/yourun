@@ -1,15 +1,15 @@
 package com.umc.yourun.dto.user;
 
-import com.umc.yourun.domain.User;
-
-import java.util.List;
+import com.umc.yourun.domain.enums.Tag;
 
 public class UserRequestDTO {
     public record JoinDto(
         String email,
         String password,
         String passwordcheck,
-        String nickname
+        String nickname,
+        Tag tag1,
+        Tag tag2
     ){}
 
     public record LoginDto(
