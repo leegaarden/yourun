@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.umc.yourun.domain.mapping.UserCrew;
-
 import ch.qos.logback.core.Layout;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

@@ -38,9 +38,12 @@ public class CrewChallenge extends BaseEntity {
     @Column(nullable = false)
     private int winningCount;    // 기존 crew의 winning_count 속성
 
+    @Setter
+    @Column
+    private Long matchedCrewChallengeId;  // 매칭된 크루 챌린지 ID
+
     @OneToMany(mappedBy = "crewChallenge")
     private List<UserCrewChallenge> userCrews = new ArrayList<>();
-
 
     @Builder
     public CrewChallenge(String crewName, LocalDate endDate, ChallengePeriod challengePeriod) {
@@ -58,6 +61,8 @@ public class CrewChallenge extends BaseEntity {
     }
 
     // 생성 후 24시간 이내인지 확인
+    // true 반환: 아직 매칭 가능한 상태 (24시간 이내)
+    // false 반환: 매칭 불가능한 상태 (24시간 초과)
     public boolean isMatchable() {
         return this.getCreatedAt().plusDays(1).isAfter(LocalDateTime.now());
     }

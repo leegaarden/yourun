@@ -2,6 +2,7 @@ package com.umc.yourun.repository;
 
 import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
+import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,4 +17,5 @@ public interface SoloChallengeRepository extends JpaRepository<SoloChallenge, Lo
 
     // 기간 내 챌린지 조회 (매칭 관련)
     List<SoloChallenge> findByStartDateBetween(LocalDate startDate, LocalDate endDate);
+
 }

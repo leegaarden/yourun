@@ -64,6 +64,8 @@ public class SoloChallenge extends BaseEntity {
     }
 
     // 생성 후 24시간 이내인지 확인
+    // true 반환: 아직 매칭 가능한 상태 (24시간 이내)
+    // false 반환: 매칭 불가능한 상태 (24시간 초과)
     public boolean isMatchable() {
         return this.getCreatedAt().plusDays(1).isAfter(LocalDateTime.now());
     }
