@@ -18,12 +18,16 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
             Long userId,
             List<ChallengeStatus> statuses
     );
+    
+    // Optional 버전으로
+    Optional<UserCrewChallenge> findByUserIdAndCrewChallenge_ChallengeStatusIn(
+            Long userId, List<ChallengeStatus> statuses);
 
     // 챌린지 인원 세기
     long countByCrewChallengeId(Long challengeId);
 
     // 특정 챌린지의 참여 중인 챌린지 조회
-    List<UserCrewChallenge> findParticipantsByCrewChallengeId(Long challengeId);
+    List<UserCrewChallenge> findByCrewChallengeIdOrderByCreatedAt(Long challengeId);
 
     // 크루 챌린지 찾기
     Optional<UserCrewChallenge> findAllByCrewChallengeId(Long challengeId);

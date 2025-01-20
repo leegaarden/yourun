@@ -64,4 +64,22 @@ public class ChallengeResponse {
             @Schema(description = "참여자 ID 목록")
             List<Long> participantIds
     ) {}
+
+    @Schema(description = "CHALLENGE_RES_05 : 크루 챌린지 매칭 조회 응답 DTO")
+    public record CrewMatchingRes(
+            @Schema(description = "챌린지 기간(일)", example = "3")
+            int period,
+
+            @Schema(description = "내 크루명", example = "달리기조")
+            String crewName,
+
+            @Schema(description = "내 크루원 ID 목록 (참여 순서대로)")
+            List<Long> crewMemberIds,
+
+            @Schema(description = "매칭된 크루명", example = "러닝조")
+            String matchedCrewName,
+
+            @Schema(description = "매칭된 크루원 ID 목록 (참여 순서대로)")
+            List<Long> matchedCrewMemberIds
+    ) {}
 }

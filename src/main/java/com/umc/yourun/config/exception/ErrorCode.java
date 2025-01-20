@@ -29,6 +29,7 @@ public enum ErrorCode {
     INVALID_CHALLENGE_JOIN(400, "C014", "종류별 하나의 챌린지에만 참여할 수 있습니다."),
     CREW_CHALLENGE_FULL(400, "C015", "크루 인원이 모두 찼습니다."),
     DUPLICATE_CREW_NAME(400, "C016", "이미 사용 중인 크루명입니다."),
+    NO_CREW_CHALLENGE_FOUND(400, "C017", "사용자는 크루에 참여하고 있지 않습니다."),
 
     //Running 관련 에러
     INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),

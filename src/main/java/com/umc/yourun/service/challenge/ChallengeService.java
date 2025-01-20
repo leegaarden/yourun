@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -291,12 +292,61 @@ public class ChallengeService {
 
         // 8. 챌린지 참여자 조회
         List<Long> participants = userCrewChallengeRepository
-                .findParticipantsByCrewChallengeId(challengeId)
+                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
                 .stream()
                 .map(challenge -> challenge.getUser().getId())
                 .collect(Collectors.toList());
 
         return new ChallengeResponse.CrewChallengeMateRes (challengeId, participants);
+    }
+
+    // 크루 챌린지 매칭 화면
+    @Transactional(readOnly = true)
+    public ChallengeResponse.CrewMatchingRes getCrewMatch(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 1. 사용자의 현재 크루 챌린지 참여 정보 조회
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
+                .findByUserIdAndCrewChallenge_ChallengeStatusIn(userId,
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
+                .orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
+
+        CrewChallenge myCrew = userCrewChallenge.getCrewChallenge();
+
+        // 2. 내 크루원 ID 목록 조회 (참여 순서대로)
+        List<Long> crewMemberIds = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(myCrew.getId())
+                .stream()
+                .map(uc -> uc.getUser().getId())
+                .collect(Collectors.toList());
+
+        // 3. 매칭된 크루 정보 조회
+        String matchedCrewName = null;
+        List<Long> matchedCrewMemberIds = new ArrayList<>();
+
+        if (myCrew.getMatchedCrewChallengeId() != null) {
+            CrewChallenge matchedCrew = crewChallengeRepository
+                    .findById(myCrew.getMatchedCrewChallengeId())
+                    .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+            matchedCrewName = matchedCrew.getCrewName();
+            matchedCrewMemberIds = userCrewChallengeRepository
+                    .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
+                    .stream()
+                    .map(uc -> uc.getUser().getId())
+                    .collect(Collectors.toList());
+        }
+
+        return new ChallengeResponse.CrewMatchingRes(
+                myCrew.getChallengePeriod().getDays(),
+                myCrew.getCrewName(),
+                crewMemberIds,
+                matchedCrewName,
+                matchedCrewMemberIds
+        );
     }
 
     // 크루 이름 검사
