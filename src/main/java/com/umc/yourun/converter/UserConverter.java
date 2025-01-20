@@ -1,11 +1,8 @@
 package com.umc.yourun.converter;
 
 import com.umc.yourun.domain.User;
-import com.umc.yourun.domain.enums.UserStatus;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
 
 @Component
 public class UserConverter {

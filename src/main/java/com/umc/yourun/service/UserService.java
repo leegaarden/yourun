@@ -3,7 +3,6 @@ package com.umc.yourun.service;
 import com.umc.yourun.converter.UserConverter;
 import com.umc.yourun.converter.UserTagConverter;
 import com.umc.yourun.domain.User;
-import com.umc.yourun.domain.UserTag;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.repository.UserRepository;
 import com.umc.yourun.repository.UserTagRepository;
@@ -17,14 +16,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import static com.umc.yourun.config.exception.ErrorCode.INVALID_USER_INCONSISTENCY;
-import static com.umc.yourun.config.exception.ErrorCode.INVALID_USER_NOTFOUND;
 import com.umc.yourun.config.exception.custom.UserException;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
