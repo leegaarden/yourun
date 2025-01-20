@@ -2,5 +2,5 @@ package com.umc.yourun.domain.enums;
 
 public enum ChallengeStatus {
 
-    START, DONE, GIVEUP
+    PENDING, IN_PROGRESS, COMPLETED
 }

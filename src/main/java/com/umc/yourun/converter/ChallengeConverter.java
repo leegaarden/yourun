@@ -1,50 +1,52 @@
 package com.umc.yourun.converter;
 
-import com.umc.yourun.domain.challenge.Challenge;
-import com.umc.yourun.domain.enums.ChallengeKind;
+import com.umc.yourun.domain.CrewChallenge;
+import com.umc.yourun.domain.SoloChallenge;
+import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class ChallengeConverter {
 
-    // Request DTO-> Entity
-    public static Challenge toChallenge(ChallengeRequest.CrewChallengeCreateReq request) {
-        return Challenge.builder()
-                .kind(ChallengeKind.CREW)
-                .startDate(request.startDate())
-                .endDate(request.endDate())
+
+    //  DTO -> Entity
+    public static CrewChallenge toCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, ChallengePeriod challengePeriod) {
+        return CrewChallenge.builder()
                 .crewName(request.crewName())
-                .build();
-    }
-
-    public static Challenge toChallenge(ChallengeRequest.SoloChallengeCreateReq request) {
-        return Challenge.builder()
-                .kind(ChallengeKind.SOLO)
-                .distance(request.distance())
-                .startDate(request.startDate())
                 .endDate(request.endDate())
+                .challengePeriod(challengePeriod)
                 .build();
     }
 
-    // Entity -> Response DTO
-    public static ChallengeResponse.CrewChallengeResult toCrewChallengeResult(Challenge challenge) {
-        return new ChallengeResponse.CrewChallengeResult(
+    public static SoloChallenge toSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, ChallengePeriod challengePeriod) {
+        return SoloChallenge.builder()
+                .endDate(request.endDate())
+                .challengeDistance(request.challengeDistance())
+                .challengePeriod(challengePeriod)
+                .build();
+    }
+
+    // Entity -> DTO
+    public static ChallengeResponse.CrewChallengeStatusRes toStatusCrewChallengeRes (CrewChallenge challenge) {
+        return new ChallengeResponse.CrewChallengeStatusRes(
+                challenge.getId(),
+                challenge.getCrewName(),
+                challenge.getStartDate(),
+                challenge.getEndDate(),
+                challenge.getChallengePeriod()
+        );
+    }
+
+    public static ChallengeResponse.SoloChallengeStatusRes toStatusSoloChallengeRes (SoloChallenge challenge) {
+        return new ChallengeResponse.SoloChallengeStatusRes(
                 challenge.getId(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),
-                challenge.getCrew().getName()
+                challenge.getChallengeDistance(),
+                challenge.getChallengePeriod()
         );
     }
 
-    public static ChallengeResponse.SoloChallengeResult toSoloChallengeResult(Challenge challenge) {
-        return new ChallengeResponse.SoloChallengeResult(
-                challenge.getId(),
-                challenge.getDistance(),
-                challenge.getStartDate(),
-                challenge.getEndDate()
-        );
-    }
 }

@@ -34,4 +34,12 @@ public class ApiResponse<T> {
                 .data(null)    // 에러 시에는 data를 null로
                 .build();
     }
+    // 에러 응답 생성 메서드(커스텀 메세지 추가)
+    public static <T> ApiResponse<T> error(String message,ErrorCode errorCode,T data) {
+        return ApiResponse.<T>builder()
+            .status(errorCode.getStatus())
+            .message(message)
+            .data(data)
+            .build();
+    }
 }

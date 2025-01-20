@@ -4,13 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum ChallengeDistance {
-    KM1("1KM"),
-    KM3("3KM"),
-    KM5("5KM");
+    ONE_KM(1),
+    THREE_KM(3),
+    FIVE_KM(5);
 
-    private final String value;
+    private final int distance;
 
-    ChallengeDistance(String value) {
-        this.value = value;
+    ChallengeDistance(int distance) {
+        this.distance = distance;
     }
+
 }
