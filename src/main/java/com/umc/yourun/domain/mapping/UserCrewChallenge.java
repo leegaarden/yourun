@@ -1,15 +1,10 @@
 package com.umc.yourun.domain.mapping;
 
 import com.umc.yourun.domain.BaseEntity;
-import com.umc.yourun.domain.Crew;
+import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.User;
-import com.umc.yourun.domain.enums.CrewRole;
-import com.umc.yourun.domain.enums.UserCrewStatus;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,22 +22,22 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserCrew extends BaseEntity {
+public class UserCrewChallenge extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long userCrewId;
-	@Column
-	@Enumerated(EnumType.STRING)
-	private UserCrewStatus status;
-	@Column
-	@Enumerated(EnumType.STRING)
-	private CrewRole role;//추가된 사항, 논의 필요
+	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "crew_id")
-	private Crew crew;
+	@JoinColumn(name = "crew_challenge_id")
+	private CrewChallenge crewChallenge;
+
+	@Builder
+	public UserCrewChallenge (User user, CrewChallenge crewChallenge) {
+		this.user = user;
+		this.crewChallenge = crewChallenge;
+	}
 }
