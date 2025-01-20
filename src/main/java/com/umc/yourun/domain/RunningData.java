@@ -32,6 +32,9 @@ public class RunningData {
 	private Long id;
 
 	@Column
+	private Integer targetTime;
+
+	@Column
 	private LocalDateTime startTime;
 
 	@Column
@@ -49,11 +52,11 @@ public class RunningData {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	//TODO: builder 정의 필요
 	@Builder
-	public RunningData(LocalDateTime startTime, LocalDateTime endTime, Integer totalDistance, Integer totalTime, User user) {
+	public RunningData(Integer targetTime,LocalDateTime startTime, LocalDateTime endTime, Integer totalDistance, Integer totalTime, User user) {
 		this.startTime = startTime;
 		this.endTime = endTime;
+		this.targetTime = targetTime;
 		this.totalDistance = totalDistance;
 		this.totalTime = totalTime;
 		this.user = user;

@@ -2,7 +2,6 @@ package com.umc.yourun.config.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @AllArgsConstructor
@@ -26,6 +25,11 @@ public enum ErrorCode {
     CHALLENGE_EXPIRED(400, "C011", "만료된 챌린지입니다."),
     CANNOT_JOIN_OWN_CHALLENGE(400, "C012", "본인이 만든 챌린지에는 참여할 수 없습니다."),
     ALREADY_IN_CHALLENGE(400, "C013", "종류별 하나의 챌린지에만 참여할 수 있습니다."),
+  
+  
+
+    //Running 관련 에러
+    INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
 
     // User 관련 에러
     USER_NOT_FOUND(500, "U001", "존재하지 않는 사용자입니다.");
