@@ -121,13 +121,13 @@ public class ChallengeRestController {
         return ApiResponse.success("솔로 챌린지 참여가 완료되었습니다.", response);
     }
 
-    @PostMapping("/crew/{challengeId}/join")
     @Operation(summary = "CHALLENGE_API_08 : 크루 챌린지 참여", description = "대기 중인 크루 챌린지에 참여합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @PostMapping("/crew/{challengeId}/join")
     public ApiResponse<ChallengeResponse.CrewChallengeMateRes> joinCrewChallenge(
             @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @PathVariable Long challengeId) {
