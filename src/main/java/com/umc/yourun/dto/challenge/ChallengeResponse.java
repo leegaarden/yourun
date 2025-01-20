@@ -101,13 +101,13 @@ public class ChallengeResponse {
             ChallengeStatus status,
 
             @Schema(description = "목표 거리", example = "1")
-            int distance,
+            int challengeDistance,
 
             @Schema(description = "챌린지 기간(일)", example = "3")
-            int period,
+            int challengePeriod,
 
             @Schema(description = "챌린지 메이트 ID", example = "1")
-            Long mateId
+            Long challengeMateId
     ) {}
 
     // 유저의 크루 챌린지 응답
@@ -119,10 +119,10 @@ public class ChallengeResponse {
             String crewName,
 
             @Schema(description = "챌린지 상태", example = "PENDING/IN_PROGRESS")
-            ChallengeStatus status,
+            ChallengeStatus challengeStatus,
 
             @Schema(description = "챌린지 기간(일)", example = "3")
-            int period,
+            int challengePeriod,
 
             @Schema(description = "크루원 ID 목록")
             List<Long> crewMemberIds
