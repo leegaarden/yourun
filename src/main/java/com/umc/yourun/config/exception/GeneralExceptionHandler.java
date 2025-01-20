@@ -54,7 +54,7 @@ public class GeneralExceptionHandler {
         return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE);
     }
 
-    //DTO형식에서 에러난 경우
+    //DTO 형식에서 에러난 경우
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
     public ApiResponse<List<Map<String,String>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("Invalid DTO Value: {}", e.getMessage());

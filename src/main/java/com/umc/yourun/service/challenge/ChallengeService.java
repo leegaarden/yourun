@@ -349,6 +349,72 @@ public class ChallengeService {
         );
     }
 
+    // 홈 화면에서 유저의 홈 화면 조회
+    @Transactional(readOnly = true)
+    public ChallengeResponse.HomeChallengeRes getUserChallenges(Long userId) {
+        // 솔로 챌린지 조회
+        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
+                .findByUserIdAndSoloChallenge_ChallengeStatusIn(
+                        userId,
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
+                .orElse(null);
+
+        // 크루 챌린지 조회 (4명이 모인 크루만)
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
+                .findByUserIdAndCrewChallenge_ChallengeStatusIn(
+                        userId,
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
+                .orElse(null);
+
+        // 응답 DTO 생성
+        ChallengeResponse.UserSoloChallengeInfo soloInfo = null;
+        if (userSoloChallenge != null) {
+            SoloChallenge challenge = userSoloChallenge.getSoloChallenge();
+
+            // 챌린지 메이트 조회
+            Long mateId = null;
+            if (challenge.getChallengeStatus() == ChallengeStatus.IN_PROGRESS) {
+                mateId = userSoloChallengeRepository
+                        .findBySoloChallengeIdAndUserIdNot(challenge.getId(), userId)
+                        .map(mate -> mate.getUser().getId())
+                        .orElse(null);
+            }
+
+            soloInfo = new ChallengeResponse.UserSoloChallengeInfo(
+                    challenge.getId(),
+                    challenge.getChallengeStatus(),
+                    challenge.getChallengeDistance(),
+                    challenge.getChallengePeriod().getDays(),
+                    mateId
+            );
+        }
+
+        ChallengeResponse.UserCrewChallengeInfo crewInfo = null;
+        if (userCrewChallenge != null) {
+            CrewChallenge challenge = userCrewChallenge.getCrewChallenge();
+
+            // 크루원 수 확인
+            long memberCount = userCrewChallengeRepository.countByCrewChallengeId(challenge.getId());
+            if (memberCount == 4) {  // 4명이 모인 크루만 응답
+                List<Long> crewMemberIds = userCrewChallengeRepository
+                        .findByCrewChallengeIdOrderByCreatedAt(challenge.getId())
+                        .stream()
+                        .map(member -> member.getUser().getId())
+                        .collect(Collectors.toList());
+
+                crewInfo = new ChallengeResponse.UserCrewChallengeInfo(
+                        challenge.getId(),
+                        challenge.getCrewName(),
+                        challenge.getChallengeStatus(),
+                        challenge.getChallengePeriod().getDays(),
+                        crewMemberIds
+                );
+            }
+        }
+
+        return new ChallengeResponse.HomeChallengeRes(soloInfo, crewInfo);
+    }
+
     // 크루 이름 검사
     // TODO: 한번에 검사하는 로직으로
     private void validateCrewName(String crewName) {

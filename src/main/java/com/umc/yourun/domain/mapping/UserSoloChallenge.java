@@ -20,6 +20,7 @@ public class UserSoloChallenge extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solo_challenge_id", nullable = false)
     private SoloChallenge soloChallenge;

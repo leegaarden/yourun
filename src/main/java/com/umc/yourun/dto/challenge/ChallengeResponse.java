@@ -2,6 +2,7 @@ package com.umc.yourun.dto.challenge;
 
 import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengePeriod;
+import com.umc.yourun.domain.enums.ChallengeStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -81,5 +82,50 @@ public class ChallengeResponse {
 
             @Schema(description = "매칭된 크루원 ID 목록 (참여 순서대로)")
             List<Long> matchedCrewMemberIds
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_06 : 홈 화면 챌린지 조회 응답")
+    public record HomeChallengeRes(
+            @Schema(description = "솔로 챌린지 정보")
+            UserSoloChallengeInfo soloChallenge,
+
+            @Schema(description = "크루 챌린지 정보")
+            UserCrewChallengeInfo crewChallenge
+    ) {}
+
+    // 유저의 솔로 챌린지 응답
+    public record UserSoloChallengeInfo(
+            @Schema(description = "챌린지 ID")
+            Long challengeId,
+
+            @Schema(description = "챌린지 상태", example = "PENDING/IN_PROGRESS")
+            ChallengeStatus status,
+
+            @Schema(description = "목표 거리", example = "ONE_KM")
+            ChallengeDistance distance,
+
+            @Schema(description = "챌린지 기간(일)", example = "3")
+            int period,
+
+            @Schema(description = "챌린지 메이트 ID", example = "1")
+            Long mateId
+    ) {}
+
+    // 유저의 크루 챌린지 응답
+    public record UserCrewChallengeInfo(
+            @Schema(description = "챌린지 ID")
+            Long challengeId,
+
+            @Schema(description = "크루명")
+            String crewName,
+
+            @Schema(description = "챌린지 상태", example = "PENDING/IN_PROGRESS")
+            ChallengeStatus status,
+
+            @Schema(description = "챌린지 기간(일)", example = "3")
+            int period,
+
+            @Schema(description = "크루원 ID 목록")
+            List<Long> crewMemberIds
     ) {}
 }

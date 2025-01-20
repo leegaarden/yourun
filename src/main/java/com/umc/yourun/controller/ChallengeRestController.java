@@ -149,4 +149,17 @@ public class ChallengeRestController {
         ChallengeResponse.CrewMatchingRes response = challengeService.getCrewMatch(userId);
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
+
+    @Operation(summary = "CHALLENGE_API_10 : 홈 화면 챌린지 조회", description = "사용자가 참여중인 모든 챌린지를 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/home")
+    public ApiResponse<ChallengeResponse.HomeChallengeRes> getUserChallenges(
+            @RequestHeader("USER-ID") Long userId) {
+        ChallengeResponse.HomeChallengeRes response = challengeService.getUserChallenges(userId);
+        return ApiResponse.success("홈 화면 : 사용자와 관련된 챌린지 정보입니다.", response);
+    }
 }
