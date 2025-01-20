@@ -1,10 +1,18 @@
 package com.umc.yourun.config.exception;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.umc.yourun.apiPayload.ApiResponse;
 import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.config.exception.custom.RunningException;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,5 +52,18 @@ public class GeneralExceptionHandler {
             return ApiResponse.error(ErrorCode.INVALID_CHALLENGE_DISTANCE);
         }
         return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE);
+    }
+
+    //DTO형식에서 에러난 경우
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    public ApiResponse<List<Map<String,String>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("Invalid DTO Value: {}", e.getMessage());
+        List<Map<String, String>> fieldErrors = e.getBindingResult().getFieldErrors().stream()
+            .map(fieldError -> Map.of(
+                "field", fieldError.getField(),
+                "message", Objects.requireNonNull(fieldError.getDefaultMessage())
+            ))
+            .toList();
+        return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE,fieldErrors);
     }
 }
