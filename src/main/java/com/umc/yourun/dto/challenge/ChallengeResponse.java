@@ -24,8 +24,8 @@ public class ChallengeResponse {
             @Schema(description = "마감일", example = "2025-01-20")
             LocalDate endDate,
 
-            @Schema(description = "챌린지 기간", example = "FOUR")
-            ChallengePeriod challengePeriod
+            @Schema(description = "챌린지 기간", example = "4")
+            int challengePeriod
     ) {}
 
     // TODO: 만든 사용자의 해시태그 응답에 추가
@@ -40,12 +40,11 @@ public class ChallengeResponse {
             @Schema(description = "마감일", example = "2025-01-20")
             LocalDate endDate,
 
-            @Schema(description = "챌린지 거리", example = "ONE_KM",
-                    title = "ONE_KM = 1, THREE_KM = 3, FIVE_KM = 5")
-            ChallengeDistance challengeDistance,
+            @Schema(description = "챌린지 거리", example = "1")
+            int challengeDistance,
 
-            @Schema(description = "챌린지 기간", example = "FOUR")
-            ChallengePeriod challengePeriod
+            @Schema(description = "챌린지 기간", example = "4")
+            int challengePeriod
     ) {}
 
     @Schema(title = "CHALLENGE_RES_03 : 솔로 챌린지 참여 응답 DTO")
@@ -101,8 +100,8 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 상태", example = "PENDING/IN_PROGRESS")
             ChallengeStatus status,
 
-            @Schema(description = "목표 거리", example = "ONE_KM")
-            ChallengeDistance distance,
+            @Schema(description = "목표 거리", example = "1")
+            int distance,
 
             @Schema(description = "챌린지 기간(일)", example = "3")
             int period,

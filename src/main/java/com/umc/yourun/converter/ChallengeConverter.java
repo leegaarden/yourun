@@ -35,7 +35,7 @@ public class ChallengeConverter {
                 challenge.getCrewName(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),
-                challenge.getChallengePeriod()
+                challenge.getChallengePeriod().getDays()
         );
     }
 
@@ -44,8 +44,8 @@ public class ChallengeConverter {
                 challenge.getId(),
                 challenge.getStartDate(),
                 challenge.getEndDate(),
-                challenge.getChallengeDistance(),
-                challenge.getChallengePeriod()
+                challenge.getChallengeDistance().getDistance(),
+                challenge.getChallengePeriod().getDays()
         );
     }
 

@@ -383,7 +383,7 @@ public class ChallengeService {
             soloInfo = new ChallengeResponse.UserSoloChallengeInfo(
                     challenge.getId(),
                     challenge.getChallengeStatus(),
-                    challenge.getChallengeDistance(),
+                    challenge.getChallengeDistance().getDistance(),
                     challenge.getChallengePeriod().getDays(),
                     mateId
             );
