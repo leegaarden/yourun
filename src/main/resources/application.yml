@@ -20,3 +20,14 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
   packages-to-scan: com.umc.yourun
+  security:
+    oauth2:
+      client:
+        registration:
+          custom-client:
+#            client-id: your-client-id
+#            client-secret: your-client-secret
+            authorization-grant-type: password
+            scope: read write
+            token-uri: http://${SERVER_HOST}:8080/oauth/token
+            client-authentication-method: post
