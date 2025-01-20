@@ -25,7 +25,7 @@ public class RunningRestController {
 	private final RunningService runningService;
 
 	@PostMapping
-	public ApiResponse<RunningDataResponseDTO.createRunningData> createRunningData(@RequestBody @Valid RunningDataRequestDTO.CreateRunningDataReq request){
+	public ApiResponse<RunningDataResponseDTO.createRunningData> createRunningData(@RequestBody @Valid RunningDataRequestDTO.CreateRunningDataReq request) {
 		RunningData runningData = runningService.createRunningData(request);
 		return ApiResponse.success("러닝 결과 정보 생성 성공", RunningDataConverter.toCreateRunningDataRes(runningData));
 	}

@@ -26,7 +26,9 @@ public enum ErrorCode {
     INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
 
     //User 관련 에러
-    USER_NOT_FOUND(400, "U001", "해당 유저를 찾을 수 없습니다."),;
+    USER_NOT_FOUND(400, "U001", "해당 유저를 찾을 수 없습니다."),
+
+    ;
 
     private final int status;
     private final String code;

@@ -34,7 +34,7 @@ public class RunningServiceImpl implements RunningService{
 		if(totalTime<0) {
 			throw new RunningException(ErrorCode.INVALID_END_TIME);
 		}
-		User user=userRepository.findById(1L).orElseThrow(()->new GeneralException(ErrorCode.USER_NOT_FOUND));
+		User user=userRepository.findById(request.userId()).orElseThrow(()->new GeneralException(ErrorCode.USER_NOT_FOUND));
 		RunningData runningData= RunningDataConverter.toRunningData(request,totalTime,user);
 		return runningDataRepository.save(runningData);
 	}
