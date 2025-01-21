@@ -171,12 +171,13 @@ public class ChallengeResponse {
             @Schema(description = "매칭된 크루명")
             String crewName,
 
-            @Schema(description = "매칭된 크루의 크루원들 ID 목록", example = "[\n" +
-                    "      1,\n" +
-                    "      2,\n" +
-                    "      3,\n" +
-                    "      4\n" +
-                    "    ]")
+            @Schema(description = "매칭된 크루의 크루원들 ID 목록", example = """
+                    [
+                          1,
+                          2,
+                          3,
+                          4
+                        ]""")
             List<Long> matchedCrewMemberIds,
 
             @Schema(description = "전체 거리 대비 우리 크루 달성 비율(%)", example = "55.5")
