@@ -52,16 +52,21 @@ public class ChallengeResponse {
             @Schema(description = "솔로 챌린지 ID", example = "1")
             Long challengeId,
 
-            @Schema(description = "챌린지 생성자 ID", example = "null")
+            @Schema(description = "챌린지 생성자 ID", example = "2")
             Long userId
     ) {}
 
     @Schema(description = "CHALLENGE_RES_04 : 크루 챌린지 참여 응답 DTO")
     public record CrewChallengeMateRes(
-            @Schema(description = "크루 챌린지 ID")
+            @Schema(description = "크루 챌린지 ID", example = "1")
             Long challengeId,
 
-            @Schema(description = "참여자 ID 목록")
+            @Schema(description = "참여자 ID 목록", example = "[\n" +
+                    "      1,\n" +
+                    "      2,\n" +
+                    "      3,\n" +
+                    "      4\n" +
+                    "    ]")
             List<Long> participantIds
     ) {}
 
@@ -70,16 +75,26 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 기간(일)", example = "3")
             int period,
 
-            @Schema(description = "내 크루명", example = "달리기조")
+            @Schema(description = "내 크루명", example = "거진홍길동")
             String crewName,
 
-            @Schema(description = "내 크루원 ID 목록 (참여 순서대로)")
+            @Schema(description = "내 크루원 ID 목록 (참여 순서대로)", example = "[\n" +
+                    "      1,\n" +
+                    "      2,\n" +
+                    "      3,\n" +
+                    "      4\n" +
+                    "    ]")
             List<Long> crewMemberIds,
 
-            @Schema(description = "매칭된 크루명", example = "러닝조")
+            @Schema(description = "매칭된 크루명", example = "거진이봉주")
             String matchedCrewName,
 
-            @Schema(description = "매칭된 크루원 ID 목록 (참여 순서대로)")
+            @Schema(description = "매칭된 크루원 ID 목록 (참여 순서대로)", example = "[\n" +
+                    "      5,\n" +
+                    "      6,\n" +
+                    "      7,\n" +
+                    "      8\n" +
+                    "    ]")
             List<Long> matchedCrewMemberIds
     ) {}
 
@@ -112,10 +127,10 @@ public class ChallengeResponse {
 
     // 유저의 크루 챌린지 응답
     public record UserCrewChallengeInfo(
-            @Schema(description = "챌린지 ID")
+            @Schema(description = "챌린지 ID", example = "1")
             Long challengeId,
 
-            @Schema(description = "크루명")
+            @Schema(description = "크루명", example = "거진홍길동")
             String crewName,
 
             @Schema(description = "챌린지 상태", example = "PENDING/IN_PROGRESS")
@@ -124,7 +139,12 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 기간(일)", example = "3")
             int challengePeriod,
 
-            @Schema(description = "크루원 ID 목록")
+            @Schema(description = "크루원 ID 목록", example = "[\n" +
+                    "      1,\n" +
+                    "      2,\n" +
+                    "      3,\n" +
+                    "      4\n" +
+                    "    ]")
             List<Long> crewMemberIds
     ) {}
 }

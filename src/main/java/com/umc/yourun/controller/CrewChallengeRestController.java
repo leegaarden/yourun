@@ -4,7 +4,7 @@ import com.umc.yourun.apiPayload.ApiResponse;
 import com.umc.yourun.config.exception.ErrorResponse;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
-import com.umc.yourun.service.challenge.ChallengeService;
+import com.umc.yourun.service.ChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -64,7 +64,7 @@ public class CrewChallengeRestController {
     public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getInProgressCrewChallenges(
             @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
     ) {
-        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges(userId);
+        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getInProgressCrewChallenges(userId);
         return ApiResponse.success("진행 중인 크루 챌린지 목록입니다.", result);
     }
 
