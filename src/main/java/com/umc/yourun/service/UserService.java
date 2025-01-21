@@ -3,6 +3,7 @@ package com.umc.yourun.service;
 import com.umc.yourun.converter.UserConverter;
 import com.umc.yourun.converter.UserTagConverter;
 import com.umc.yourun.domain.User;
+import com.umc.yourun.domain.enums.UserStatus;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.repository.UserRepository;
 import com.umc.yourun.repository.UserTagRepository;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.umc.yourun.config.exception.custom.UserException;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,13 +85,13 @@ public class UserService {
         long now = System.currentTimeMillis();
 
         token.put("access_token", Jwts.builder()
-                .setHeader(headers)
-                .setClaims(claims)
-                .setSubject("AccessToken") // 토큰 용도
-                .setIssuedAt(new Date(now)) // 발행 시간
-                .setExpiration(new Date(now + 1000 * 60 * 15)) // 만료 시간
-                .signWith(SECRET_KEY) // 서명
-                .compact());
+                                    .setHeader(headers)
+                                    .setClaims(claims)
+                                    .setSubject("AccessToken") // 토큰 용도
+                                    .setIssuedAt(new Date(now)) // 발행 시간
+                                    .setExpiration(new Date(now + 1000 * 60 * 15)) // 만료 시간
+                                    .signWith(SECRET_KEY) // 서명
+                                    .compact());
         return token;
     }
 
@@ -106,5 +108,12 @@ public class UserService {
             throw new RuntimeException("Invalid JWT token", e);
         }
         return userRepository.findByEmail((String) claims.get("email"));
+    }
+
+    public Boolean deleteUser(String accessToken){
+        User user = getUserByToken(accessToken).get();
+        user.setStatus(UserStatus.valueOf("INACTIVE"));
+        user.setInactive_date(LocalDateTime.now());
+        return true;
     }
 }

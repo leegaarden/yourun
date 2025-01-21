@@ -1,6 +1,8 @@
 package com.umc.yourun.config;
 
 import com.umc.yourun.domain.User;
+import com.umc.yourun.service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,9 +60,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
+    public AuthorizationServerSettings authorizationServerSettings(@Value("${springdoc.security.oauth2.client.registration.custom-client.token-uri}") String tokenUri){
         return AuthorizationServerSettings.builder()
-                .issuer("http://localhost:8080") // 인증 서버의 기본 주소
+                .issuer(tokenUri) // 인증 서버의 기본 주소
                 .tokenEndpoint("/oauth/token")
                 .build();
     }
@@ -68,16 +70,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
-                org.springframework.security.core.userdetails.User
-                .withUsername("seokun921@naver.com")
-                .password(passwordEncoder().encode("chltjr123@"))
-                .build()
-        );
     }
 
     @Bean
