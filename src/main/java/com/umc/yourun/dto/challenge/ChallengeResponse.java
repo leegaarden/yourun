@@ -127,7 +127,10 @@ public class ChallengeResponse {
             Long challengeMateId,
 
             @Schema(description = "솔로 챌린지 진행 일차", example = "3")
-            int soloDayCount
+            int soloDayCount,
+
+            @Schema(description = "솔로 챌린지 시작일", example = "2025-01-22")
+            LocalDate soloStartDate
     ) {}
 
     @Schema(description = "CHALLENGE_RES_06 - 2 : 유저의 크루 챌린지 응답 DTO")
@@ -154,7 +157,10 @@ public class ChallengeResponse {
             List<Long> crewMemberIds,
 
             @Schema(description = "크루 챌린지 진행 일차", example = "2")
-            int crewDayCount
+            int crewDayCount,
+
+            @Schema(description = "크루 챌린지 시작일", example = "2025-01-22")
+            LocalDate crewStartDate
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 : 팀원별 거리 포함 크루 챌린지 진행도 DTO")

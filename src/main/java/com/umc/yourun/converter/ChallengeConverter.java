@@ -90,7 +90,8 @@ public class ChallengeConverter {
                 challenge.getChallengeDistance().getDistance(),
                 challenge.getChallengePeriod().getDays(),
                 mateId,
-                soloCountDay
+                soloCountDay,
+                challenge.getStartDate()
         );
     }
 
@@ -105,7 +106,8 @@ public class ChallengeConverter {
                 challenge.getChallengeStatus(),
                 challenge.getChallengePeriod().getDays(),
                 crewMemberIds,
-                crewCountDay
+                crewCountDay,
+                challenge.getStartDate()
         );
     }
 
