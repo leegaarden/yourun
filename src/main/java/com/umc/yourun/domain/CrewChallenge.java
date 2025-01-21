@@ -36,7 +36,7 @@ public class CrewChallenge extends BaseEntity {
     private String crewName;    // 기존 crew의 name 속성
 
     @Column(nullable = false)
-    private int winningCount;    // 기존 crew의 winning_count 속성
+    private String slogan;    // 구호
 
     @Setter
     @Column
@@ -44,16 +44,6 @@ public class CrewChallenge extends BaseEntity {
 
     @OneToMany(mappedBy = "crewChallenge")
     private List<UserCrewChallenge> userCrews = new ArrayList<>();
-
-    @Builder
-    public CrewChallenge(String crewName, LocalDate endDate, ChallengePeriod challengePeriod) {
-        this.crewName = crewName;
-        this.winningCount = 0;   // 처음 생성시 0으로 초기화
-        this.startDate = LocalDate.now().plusDays(1);
-        this.endDate = endDate;
-        this.challengeStatus = ChallengeStatus.PENDING;
-        this.challengePeriod = challengePeriod;
-    }
 
     // 상태 변경
     public void updateStatus(ChallengeStatus status) {
