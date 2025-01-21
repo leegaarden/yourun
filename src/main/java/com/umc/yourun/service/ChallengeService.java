@@ -342,6 +342,11 @@ public class ChallengeService {
     // 홈 화면에서 유저의 챌린지 관련 화면 조회
     @Transactional(readOnly = true)
     public ChallengeResponse.HomeChallengeRes getUserChallenges(Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
         // 솔로 챌린지 조회
         UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
                 .findByUserIdAndSoloChallenge_ChallengeStatusIn(
@@ -359,6 +364,7 @@ public class ChallengeService {
         ChallengeResponse.UserSoloChallengeInfo soloInfo = null;
         if (userSoloChallenge != null) {
             SoloChallenge challenge = userSoloChallenge.getSoloChallenge();
+            int soloCountDay = calculateCountDay(challenge.getStartDate());
 
             // 챌린지 메이트 조회
             Long mateId = null;
@@ -369,12 +375,13 @@ public class ChallengeService {
                         .orElse(null);
             }
 
-            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, userId, mateId);
+            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, userId, mateId, soloCountDay);
         }
 
         ChallengeResponse.UserCrewChallengeInfo crewInfo = null;
         if (userCrewChallenge != null) {
             CrewChallenge challenge = userCrewChallenge.getCrewChallenge();
+            int crewCountDay = calculateCountDay(challenge.getStartDate());
 
             // 크루원 수 확인
             long memberCount = userCrewChallengeRepository.countByCrewChallengeId(challenge.getId());
@@ -385,7 +392,7 @@ public class ChallengeService {
                         .map(member -> member.getUser().getId())
                         .collect(Collectors.toList());
 
-                crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, crewMemberIds);
+                crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, crewMemberIds, crewCountDay);
             }
         }
 
@@ -434,5 +441,11 @@ public class ChallengeService {
 
         return ChallengePeriod.from(period);  // 기간 반환
     }
+
+    // 챌린지 며칠째 진행 중인지
+    private int calculateCountDay(LocalDate startDate) {
+        return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
+    }
+
 
 }

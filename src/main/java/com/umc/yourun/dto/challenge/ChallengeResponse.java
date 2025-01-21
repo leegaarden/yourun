@@ -122,7 +122,10 @@ public class ChallengeResponse {
             int challengePeriod,
 
             @Schema(description = "챌린지 메이트 ID", example = "1")
-            Long challengeMateId
+            Long challengeMateId,
+
+            @Schema(description = "솔로 챌린지 진행 일차", example = "3")
+            int soloDayCount
     ) {}
 
     // 유저의 크루 챌린지 응답
@@ -145,6 +148,9 @@ public class ChallengeResponse {
                     "      3,\n" +
                     "      4\n" +
                     "    ]")
-            List<Long> crewMemberIds
+            List<Long> crewMemberIds,
+
+            @Schema(description = "크루 챌린지 진행 일차", example = "2")
+            int crewDayCount
     ) {}
 }
