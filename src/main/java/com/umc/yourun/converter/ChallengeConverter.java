@@ -4,18 +4,19 @@ import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
+import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
+import lombok.Builder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
 public class ChallengeConverter {
-
-
     //  1. DTO -> Entity
 
     // 1-1. 크루 챌린지 생성
@@ -23,6 +24,7 @@ public class ChallengeConverter {
         return CrewChallenge.builder()
                 .crewName(request.crewName())
                 .endDate(request.endDate())
+                .slogan(request.slogan())
                 .challengePeriod(challengePeriod)
                 .build();
     }
@@ -81,15 +83,16 @@ public class ChallengeConverter {
     // 2-3. 사용자 관련된 솔로 챌린지 정보 응답
     public static ChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
             SoloChallenge challenge,
-            Long userId,
             Long mateId,
-            int soloCountDay) {
+            int soloCountDay,
+            String mateNickName) {
         return new ChallengeResponse.UserSoloChallengeInfo(
                 challenge.getId(),
                 challenge.getChallengeStatus(),
                 challenge.getChallengeDistance().getDistance(),
                 challenge.getChallengePeriod().getDays(),
                 mateId,
+                mateNickName,
                 soloCountDay,
                 challenge.getStartDate()
         );

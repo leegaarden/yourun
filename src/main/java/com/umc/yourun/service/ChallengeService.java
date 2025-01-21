@@ -62,9 +62,6 @@ public class ChallengeService {
 
         }
 
-        // 크루명 검사
-        validateCrewName(request.crewName());
-
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
 
@@ -369,14 +366,17 @@ public class ChallengeService {
 
             // 챌린지 메이트 조회
             Long mateId = null;
+            String mateNickname = "";
             if (challenge.getChallengeStatus() == ChallengeStatus.IN_PROGRESS) {
                 mateId = userSoloChallengeRepository
                         .findBySoloChallengeIdAndUserIdNot(challenge.getId(), userId)
                         .map(mate -> mate.getUser().getId())
                         .orElse(null);
+                mateNickname = userRepository.findNicknameById(userId)
+                        .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
             }
 
-            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, userId, mateId, soloCountDay);
+            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, mateId, soloCountDay, mateNickname);
         }
 
         ChallengeResponse.UserCrewChallengeInfo crewInfo = null;
@@ -455,30 +455,6 @@ public class ChallengeService {
         return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrewMembers,
                 matchedCrewName, matchedCrewMemberIds, progressRatio);
 
-    }
-
-    // 크루 이름 검사
-    // TODO: 한번에 검사하는 로직으로
-    private void validateCrewName(String crewName) {
-        // null 체크
-        if (crewName == null || crewName.trim().isEmpty()) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_NULL);
-        }
-
-        // 길이 검사 (2-5자)
-        if (crewName.length() < 2 || crewName.length() > 5) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT2);
-        }
-
-        // 한글만 허용하고 띄어쓰기 없는지 검사
-        if (!crewName.matches("^[가-힣]{2,5}$")) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT1);
-        }
-
-        // 크루명 중복 검사
-        if (crewChallengeRepository.existsByCrewNameIgnoreCase(crewName)) {
-            throw new ChallengeException(ErrorCode.DUPLICATE_CREW_NAME);
-        }
     }
 
     // 기간 검사

@@ -126,6 +126,9 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 메이트 ID", example = "1")
             Long challengeMateId,
 
+            @Schema(description = "챌린지 메이트 닉네임", example = "청정원")
+            String challengeMateNickName,
+
             @Schema(description = "솔로 챌린지 진행 일차", example = "3")
             int soloDayCount,
 
