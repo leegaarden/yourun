@@ -30,13 +30,18 @@ public class GeneralExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ApiResponse<Object> handleRunningException(RunningException e) {
-        log.error("Running Exception: {}", e.getMessage());
-        ErrorCode errorCode = e.getErrorCode();
-        return ApiResponse.error(errorCode);
+    public ApiResponse<Object> handleRuntimeException(RuntimeException e) {
+        log.error("Runtime Exception: {}", e.getMessage());
+
+        // GeneralException인 경우
+        if (e instanceof GeneralException) {
+            GeneralException generalException = (GeneralException) e;
+            return ApiResponse.error(generalException.getErrorCode());
+        }
+
+        // 그 외의 RuntimeException인 경우
+        return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
-
-
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<Object> handleException(Exception e) {

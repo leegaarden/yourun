@@ -18,12 +18,12 @@ public class UserCrewChallenge extends BaseEntity {
 
 	@Getter
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@Getter
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "crew_challenge_id")
+	@JoinColumn(name = "crew_challenge_id", nullable = false)
 	private CrewChallenge crewChallenge;
 
 	@Getter
