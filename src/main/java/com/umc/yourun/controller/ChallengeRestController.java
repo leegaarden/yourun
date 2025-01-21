@@ -1,9 +1,13 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
+import com.umc.yourun.config.exception.ErrorCode;
 import com.umc.yourun.config.exception.ErrorResponse;
+import com.umc.yourun.config.exception.GeneralException;
+import com.umc.yourun.domain.User;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
+import com.umc.yourun.service.UserService;
 import com.umc.yourun.service.challenge.ChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ import java.util.List;
 public class ChallengeRestController {
 
     private final ChallengeService challengeService;
+    private final UserService userService;
 
     @Operation(summary = "CHALLENGE_API_01 : 크루 챌린지 생성", description = "새로운 크루 챌린지를 생성합니다.")
     @ApiResponses(value = {
@@ -31,9 +37,11 @@ public class ChallengeRestController {
     })
     @PostMapping("/crew")
     public ApiResponse<Long> createCrewChallenge(
+            // @RequestHeader("Authorization") String token,
             @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
-        Long challengeId = challengeService.createCrewChallenge(request, userId);
+
+        Long challengeId = challengeService.createCrewChallenge(request, userId );
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
     }
 
@@ -45,6 +53,7 @@ public class ChallengeRestController {
     })
     @PostMapping("/solo")
     public ApiResponse<Long> createSoloChallenge(
+            // @RequestHeader("Authorization") String token,
             @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
         Long challengeId = challengeService.createSoloChallenge(request, userId);
@@ -59,6 +68,7 @@ public class ChallengeRestController {
     })
     @GetMapping("/crew/pending")
     public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getPendingCrewChallenges(
+            // @RequestHeader("Authorization") String token
             @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
     ) {
         List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges(userId);
