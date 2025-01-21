@@ -302,9 +302,14 @@ public class ChallengeService {
                         List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS));
                 // .orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
 
-        CrewChallenge myCrew = userCrewChallenge.getCrewChallenge();
+        if (userCrewChallenge == null) {
+            throw new GeneralException(ErrorCode.NO_CREW_CHALLENGE_FOUND);
+        }
 
         // 2. 내 크루원 ID 목록 조회 (참여 순서대로)
+
+        CrewChallenge myCrew = userCrewChallenge.getCrewChallenge();
+
         List<Long> crewMemberIds = userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(myCrew.getId())
                 .stream()
@@ -336,7 +341,7 @@ public class ChallengeService {
         );
     }
 
-    // 홈 화면에서 유저의 홈 화면 조회
+    // 홈 화면에서 유저의 챌린지 관련 화면 조회
     @Transactional(readOnly = true)
     public ChallengeResponse.HomeChallengeRes getUserChallenges(Long userId) {
         // 솔로 챌린지 조회
