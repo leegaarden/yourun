@@ -109,19 +109,4 @@ public class ChallengeConverter {
         );
     }
 
-    // 2-5. 크루 챌린지 매칭 응답
-    public static ChallengeResponse.CrewMatchingRes toCrewMatchingRes(
-            CrewChallenge myCrew,
-            List<Long> crewMemberIds,
-            String matchedCrewName,
-            List<Long> matchedCrewMemberIds) {
-        return new ChallengeResponse.CrewMatchingRes(
-                myCrew.getChallengePeriod().getDays(),
-                myCrew.getCrewName(),
-                crewMemberIds,
-                matchedCrewName,
-                matchedCrewMemberIds
-        );
-    }
-
 }

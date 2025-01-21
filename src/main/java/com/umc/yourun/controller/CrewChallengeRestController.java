@@ -96,4 +96,19 @@ public class CrewChallengeRestController {
         ChallengeResponse.CrewMatchingRes response = challengeService.getCrewMatch(userId);
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
+
+    @Operation(summary = "CREW_CHALLENGE_API_06 : 크루 챌린지 상세 진행도 조회", description = "홈 - 크루 챌린지 클릭시 조회됩니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/match/detail-progress")
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewMatchDetailProgress(
+            @RequestHeader("USER-ID") Long userId) {
+        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(userId);
+        return ApiResponse.success("크루 챌린지 상세 진행도 정보입니다.", response);
+    }
 }

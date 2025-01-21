@@ -14,12 +14,12 @@ import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.repository.*;
-import com.umc.yourun.service.ChallengeMatchService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +36,7 @@ public class ChallengeService {
     private final UserSoloChallengeRepository userSoloChallengeRepository;
     private final UserCrewChallengeRepository userCrewChallengeRepository;
     private final UserRepository userRepository;
-    private final ChallengeMatchService challengeMatchService;
+    private final RunningDataRepository runningDataRepository;
 
     // 크루 챌린지 생성
     @Transactional
@@ -331,12 +331,13 @@ public class ChallengeService {
                     .collect(Collectors.toList());
         }
 
-        return ChallengeConverter.toCrewMatchingRes(
-                myCrew,
+        return new ChallengeResponse.CrewMatchingRes(
+                myCrew.getChallengePeriod().getDays(),
+                myCrew.getCrewName(),
                 crewMemberIds,
                 matchedCrewName,
-                matchedCrewMemberIds
-        );
+                matchedCrewMemberIds);
+
     }
 
     // 홈 화면에서 유저의 챌린지 관련 화면 조회
@@ -399,6 +400,63 @@ public class ChallengeService {
         return new ChallengeResponse.HomeChallengeRes(soloInfo, crewInfo);
     }
 
+    // 크루원들의 거리 정보 조회가 가능한 크루 챌린지 진행도 (홈 화면 - 크루 챌린지 클릭)
+    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long userId) {
+
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 1. 유저가 참여 중인 크루 챌린지
+        Long challengeId = userCrewChallengeRepository.findByUserId(userId).getCrewChallenge().getId();
+        CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        int challengePeriod = challenge.getChallengePeriod().getDays();
+        String crewName = challenge.getCrewName();
+
+        // 2. 유저가 속한 크루의 크루원들 정보
+        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
+                .stream()
+                .map(member -> new ChallengeResponse.CrewMemberInfo(
+                        member.getUser().getId(),
+                        calculateTotalDistance(challengeId, member.getUser().getId())
+                ))
+                .toList();
+
+        // 3. 매칭된 크루 정보 조회
+        CrewChallenge matchedCrew = crewChallengeRepository.findById(challenge.getMatchedCrewChallengeId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        String matchedCrewName = matchedCrew.getCrewName();
+        List<Long> matchedCrewMemberIds = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
+                .stream()
+                .map(uc -> uc.getUser().getId())
+                .toList();
+
+        // 4. 크루들의 총 달성 거리 계산
+        int myCrewTotalDistance = myCrewMembers.stream()
+                .mapToInt(ChallengeResponse.CrewMemberInfo::runningDistance)
+                .sum();
+
+        int matchedCrewTotalDistance = matchedCrewMemberIds.stream()
+                .mapToInt(memberId -> calculateTotalDistance(challenge.getMatchedCrewChallengeId(), memberId))
+                .sum();
+
+        // 5. 진행률 계산 (우리 크루의 달성 비율)
+        double progressRatio = 0.0;
+        int totalDistance = myCrewTotalDistance + matchedCrewTotalDistance;
+        if (totalDistance > 0) {
+            progressRatio = (double) myCrewTotalDistance / totalDistance * 100;
+        }
+
+        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrewMembers,
+                matchedCrewName, matchedCrewMemberIds, progressRatio);
+
+    }
+
     // 크루 이름 검사
     // TODO: 한번에 검사하는 로직으로
     private void validateCrewName(String crewName) {
@@ -445,6 +503,25 @@ public class ChallengeService {
     // 챌린지 며칠째 진행 중인지
     private int calculateCountDay(LocalDate startDate) {
         return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
+    }
+
+    // 크루원들이 달린 거리 계산
+    private int calculateTotalDistance(Long challengeId, Long userId) {
+        // 1. 챌린지 기간 조회
+        CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        // 2. 시작일의 시작(00:00:00)과 현재 시간 설정
+        LocalDateTime periodStart = challenge.getStartDate().atStartOfDay();
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // 3. 챌린지가 아직 시작되지 않았다면 0 반환
+        if (currentTime.isBefore(periodStart)) {
+            return 0;
+        }
+
+        // 4. 해당 기간 동안의 총 러닝 거리 조회
+        return runningDataRepository.sumDistanceByUserIdAndPeriod(userId, periodStart, currentTime);
     }
 
 
