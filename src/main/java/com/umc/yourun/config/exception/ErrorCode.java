@@ -37,6 +37,10 @@ public enum ErrorCode {
     //Running 관련 에러
     INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
 
+    //Ranking 관련 에러
+    INVALID_RANKING_SCORE(400, "RK001", "Ranking Score는 0 이상이어야 합니다"),
+    INVALID_RANKING_TYPE(400, "RK001", "Ranking Type이 올바르지 않습니다."),
+
     // User 관련 에러
     USER_NOT_FOUND(500, "U001", "존재하지 않는 사용자입니다.");
 
