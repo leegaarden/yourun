@@ -12,7 +12,7 @@ import java.util.List;
 import static com.umc.yourun.config.exception.ErrorCode.INVALID_INPUT_VALUE;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("api/v1/users")
 public class UserMateController {
     private static UserMateService userMateService;
 

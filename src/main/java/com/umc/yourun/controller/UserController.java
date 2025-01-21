@@ -1,22 +1,26 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
+import com.umc.yourun.config.exception.ErrorResponse;
+import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.umc.yourun.service.ChallengeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import static com.umc.yourun.config.exception.ErrorCode.INVALID_INPUT_VALUE;
 
 @RestController
-@RequestMapping("/users")
+@RequiredArgsConstructor
+@RequestMapping("api/v1/users")
 public class UserController {
     private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private final ChallengeService challengeService;
 
     @PostMapping("")
     public ApiResponse<Boolean> join(@RequestBody UserRequestDTO.JoinDto user){
@@ -31,5 +35,19 @@ public class UserController {
     public ApiResponse<Map<String,String>> getAccessToken(@RequestBody UserRequestDTO.LoginDto loginDto){
         Map<String,String> token = userService.login(loginDto);
         return ApiResponse.success("로그인에 성공했습니다.", token);
+    }
+
+    // 홈 화면에서 챌린지 조회 부분
+    @Operation(summary = "CHALLENGE_API_1 : 홈 화면 챌린지 조회", description = "사용자가 참여중인 모든 챌린지를 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/home/challenges")
+    public ApiResponse<ChallengeResponse.HomeChallengeRes> getUserChallenges(
+            @RequestHeader("USER-ID") Long userId) {
+        ChallengeResponse.HomeChallengeRes response = challengeService.getUserChallenges(userId);
+        return ApiResponse.success("홈 화면 : 사용자와 관련된 챌린지 정보입니다.", response);
     }
 }

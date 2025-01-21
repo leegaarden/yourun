@@ -82,41 +82,30 @@ public class ChallengeConverter {
     public static ChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
             SoloChallenge challenge,
             Long userId,
-            Long mateId) {
+            Long mateId,
+            int soloCountDay) {
         return new ChallengeResponse.UserSoloChallengeInfo(
                 challenge.getId(),
                 challenge.getChallengeStatus(),
                 challenge.getChallengeDistance().getDistance(),
                 challenge.getChallengePeriod().getDays(),
-                mateId
+                mateId,
+                soloCountDay
         );
     }
 
     // 2-4. 사용자 관련 크루 챌린지 정보 응답
     public static ChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
             CrewChallenge challenge,
-            List<Long> crewMemberIds) {
+            List<Long> crewMemberIds,
+            int crewCountDay) {
         return new ChallengeResponse.UserCrewChallengeInfo(
                 challenge.getId(),
                 challenge.getCrewName(),
                 challenge.getChallengeStatus(),
                 challenge.getChallengePeriod().getDays(),
-                crewMemberIds
-        );
-    }
-
-    // 2-5. 크루 챌린지 매칭 응답
-    public static ChallengeResponse.CrewMatchingRes toCrewMatchingRes(
-            CrewChallenge myCrew,
-            List<Long> crewMemberIds,
-            String matchedCrewName,
-            List<Long> matchedCrewMemberIds) {
-        return new ChallengeResponse.CrewMatchingRes(
-                myCrew.getChallengePeriod().getDays(),
-                myCrew.getCrewName(),
                 crewMemberIds,
-                matchedCrewName,
-                matchedCrewMemberIds
+                crewCountDay
         );
     }
 
