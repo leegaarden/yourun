@@ -7,6 +7,7 @@ import com.umc.yourun.converter.ChallengeConverter;
 import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
+import com.umc.yourun.domain.UserTag;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
@@ -24,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,59 +114,93 @@ public class ChallengeService {
         return savedChallenge.getId();
     }
 
-    // PENDING 상태인 크루 챌린지 조회
+    // PENDING 상태인 크루 챌린지 조회 : 크루원이 4명 미만으로 아직 결성되지 않은
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges(Long userId) {
-
+    public List<ChallengeResponse.CrewChallengeRes> getPendingCrewChallenges(Long userId) {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
+        // PENDING 상태인 크루 챌린지 조회
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+
         return pendingChallenges.stream()
-                .map(ChallengeConverter::toStatusCrewChallengeRes)
-                .collect(Collectors.toList());
-    }
+                .map(challenge -> {
+                    // 현재 참여 인원 조회
+                    List<Long> participants = userCrewChallengeRepository
+                            .findByCrewChallengeIdOrderByCreatedAt(challenge.getId())
+                            .stream()
+                            .map(uc -> uc.getUser().getId())
+                            .collect(Collectors.toList());
 
-    // IN_PROGRESS 상태인 크루 챌린지 조회
-    @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges(Long userId) {
+                    // 4명 미만인 크루만 필터링
+                    if (participants.size() >= 4) {
+                        return null;
+                    }
 
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+                    // 남은 자리 계산
+                    int remaining = 4 - participants.size();
 
-        List<CrewChallenge> inProgressChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
-        return inProgressChallenges.stream()
-                .map(ChallengeConverter::toStatusCrewChallengeRes)
+                    // 기간에 따른 보상 계산
+                    int reward = switch (challenge.getChallengePeriod().getDays()) {
+                        case 3 -> 1;
+                        case 4 -> 2;
+                        case 5 -> 3;
+                        default -> 0;
+                    };
+
+                    return new ChallengeResponse.CrewChallengeRes(
+                            challenge.getId(),
+                            challenge.getCrewName(),
+                            challenge.getStartDate(),
+                            challenge.getEndDate(),
+                            challenge.getChallengePeriod().getDays(),
+                            remaining,
+                            reward,
+                            participants
+                    );
+                })
+                .filter(Objects::nonNull)  // 4명 이상인 크루 제외
                 .collect(Collectors.toList());
     }
 
     // PENDING 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges(Long userId) {
-
+    public List<ChallengeResponse.SoloChallengeRes> getPendingSoloChallenges(Long userId) {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
         List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+
         return pendingChallenges.stream()
-                .map(ChallengeConverter::toStatusSoloChallengeRes)
-                .collect(Collectors.toList());
-    }
+                .map(challenge -> {
+                    // 챌린지 생성자 조회
+                    UserSoloChallenge creator = userSoloChallengeRepository
+                            .findBySoloChallengeIdAndIsCreator(challenge.getId(), true)
+                            .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-    // IN_PROGRESS 상태인 솔로 챌린지 조회
-    @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges(Long userId) {
+                    // 생성자의 닉네임과 해시태그 조회
+                    User creatorUser = creator.getUser();
+                    String nickname = userRepository.findNicknameById(creatorUser.getId())
+                            .orElse("Unknown");
 
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+                    // 해시태그 값 조회 (최대 2개)
+                    List<String> hashtags = creatorUser.getUserTags().stream()
+                            .map(userTag -> userTag.getTag().name())  // UserTag 엔티티에서 Tag enum의 이름을 가져옴
+                            .limit(2)  // 최대 2개로 제한
+                            .collect(Collectors.toList());
 
-        List<SoloChallenge> inProgressChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
-        return inProgressChallenges.stream()
-                .map(ChallengeConverter::toStatusSoloChallengeRes)
+                    return new ChallengeResponse.SoloChallengeRes(
+                            challenge.getId(),
+                            challenge.getStartDate(),
+                            challenge.getEndDate(),
+                            challenge.getChallengeDistance().getDistance(),
+                            challenge.getChallengePeriod().getDays(),
+                            nickname,
+                            hashtags
+                    );
+                })
                 .collect(Collectors.toList());
     }
 

@@ -46,6 +46,10 @@ public class User extends BaseEntity{
     @OneToMany(mappedBy = "user")
     private List<RunningData> runningData = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    @Getter
+    private List<UserTag> userTags = new ArrayList<>();
+
     public void encodePassword(String password) {
         this.password = password;
     }

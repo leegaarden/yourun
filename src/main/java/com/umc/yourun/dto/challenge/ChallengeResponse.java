@@ -9,9 +9,8 @@ import java.util.List;
 
 public class ChallengeResponse {
 
-    // FIXME: 남은 인원 응답에 추가하기
-    @Schema(title = "CHALLENGE_RES_01 : 상태 별 크루 챌린지 응답 DTO")
-    public record CrewChallengeStatusRes(
+    @Schema(title = "CHALLENGE_RES_01 : 4명 결성 대기 중인 크루 챌린지 응답 DTO")
+    public record CrewChallengeRes(
             @Schema(description = "챌린지 ID", example = "1")
             Long challengeId,
 
@@ -25,12 +24,25 @@ public class ChallengeResponse {
             LocalDate endDate,
 
             @Schema(description = "챌린지 기간", example = "4")
-            int challengePeriod
+            int challengePeriod,
+
+            @Schema(description = "남은 인원", example = "1")
+            int remaining,
+
+            @Schema(description = "보상 개수", example = "2")
+            int reward,
+
+            @Schema(description = "참여자 ID 목록", example = """
+                    [
+                          1,
+                          2,
+                          3
+                        ]""")
+            List<Long> participantIds
     ) {}
 
-    // FIXME: 만든 사용자의 해시태그 응답에 추가
-    @Schema(title = "CHALLENGE_RES_02 : 상태 별 솔로 챌린지 응답 DTO")
-    public record SoloChallengeStatusRes(
+    @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 DTO")
+    public record SoloChallengeRes(
             @Schema(description = "챌린지 ID", example = "1")
             Long challengeId,
 
@@ -44,7 +56,16 @@ public class ChallengeResponse {
             int challengeDistance,
 
             @Schema(description = "챌린지 기간", example = "4")
-            int challengePeriod
+            int challengePeriod,
+
+            @Schema(description = "챌린지 메이트 닉네임", example = "청정원")
+            String challengeCreatorNickName,
+
+            @Schema(description = "챌린지 메이트의 해시태그")
+            List<String> challengeCreatorHashTags
+
+
+
     ) {}
 
     @Schema(title = "CHALLENGE_RES_03 : 솔로 챌린지 참여 응답 DTO")
@@ -61,12 +82,13 @@ public class ChallengeResponse {
             @Schema(description = "크루 챌린지 ID", example = "1")
             Long challengeId,
 
-            @Schema(description = "참여자 ID 목록", example = "[\n" +
-                    "      1,\n" +
-                    "      2,\n" +
-                    "      3,\n" +
-                    "      4\n" +
-                    "    ]")
+            @Schema(description = "참여자 ID 목록", example = """
+                    [
+                          1,
+                          2,
+                          3,
+                          4
+                        ]""")
             List<Long> participantIds
     ) {}
 

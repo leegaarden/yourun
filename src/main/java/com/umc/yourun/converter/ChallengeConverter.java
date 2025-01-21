@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ChallengeConverter {
@@ -58,29 +59,7 @@ public class ChallengeConverter {
 
     // 2. Entity -> DTO
 
-    // 2-1. 상태별 크루 챌린지 응답
-    public static ChallengeResponse.CrewChallengeStatusRes toStatusCrewChallengeRes (CrewChallenge challenge) {
-        return new ChallengeResponse.CrewChallengeStatusRes(
-                challenge.getId(),
-                challenge.getCrewName(),
-                challenge.getStartDate(),
-                challenge.getEndDate(),
-                challenge.getChallengePeriod().getDays()
-        );
-    }
-
-    // 2-2. 상탭별 솔로 챌린지 응답
-    public static ChallengeResponse.SoloChallengeStatusRes toStatusSoloChallengeRes (SoloChallenge challenge) {
-        return new ChallengeResponse.SoloChallengeStatusRes(
-                challenge.getId(),
-                challenge.getStartDate(),
-                challenge.getEndDate(),
-                challenge.getChallengeDistance().getDistance(),
-                challenge.getChallengePeriod().getDays()
-        );
-    }
-
-    // 2-3. 사용자 관련된 솔로 챌린지 정보 응답
+    // 2-1. 사용자 관련된 솔로 챌린지 정보 응답
     public static ChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
             SoloChallenge challenge,
             Long mateId,
@@ -98,7 +77,7 @@ public class ChallengeConverter {
         );
     }
 
-    // 2-4. 사용자 관련 크루 챌린지 정보 응답
+    // 2-2. 사용자 관련 크루 챌린지 정보 응답
     public static ChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
             CrewChallenge challenge,
             List<Long> crewMemberIds,
