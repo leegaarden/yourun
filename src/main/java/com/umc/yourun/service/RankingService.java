@@ -1,5 +1,7 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.config.exception.ErrorCode;
+import com.umc.yourun.config.exception.custom.RankingException;
 import com.umc.yourun.domain.Ranking;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -40,13 +43,20 @@ public class RankingService {
     }
 
     // 개인 PACE 랭킹 조회
-    public Optional<Ranking> getPersonalPaceRanking(User user) {
-        return rankingRepository.findByUserAndRankingType(user, RankingType.PACE);
+    public int getPersonalPaceRanking(User user) {
+        Integer integer = rankingRepository.findByUserAndRankingType(user, RankingType.PACE)
+                .map(Ranking::getSortOrder)
+                .orElseThrow(() -> new RankingException(ErrorCode.RANKING_NOT_FOUND));
+        return (int) integer;
     }
 
     // 개인 DISTANCE 랭킹 조회
-    public Optional<Ranking> getPersonalDailyRanking(User user) {
-        return rankingRepository.findByUserAndRankingType(user, RankingType.DISTANCE);
+    public int getPersonalDailyRanking(User user) {
+
+        Integer integer = rankingRepository.findByUserAndRankingType(user, RankingType.DISTANCE)
+                .map(Ranking::getSortOrder)
+                .orElseThrow(() -> new RankingException(ErrorCode.RANKING_NOT_FOUND));
+        return (int) integer;
     }
 
     // 신규 랭킹 추가
@@ -59,9 +69,14 @@ public class RankingService {
         rankingRepository.save(ranking);
     }
 
-    //하루에 한번 업데이트를 해야한다.
     @Scheduled(cron = "0 0 0 * * ?")
-    public void updateDistanceRanking() {
+    public void calculateScoreAndSort() {
+        updateDistanceRankingScore();
+        updateDistanceRankingSort();
+    }
+
+    //저장된 스코어를 다시 계산한다.
+    public void updateDistanceRankingScore() {
 
         List<Ranking> rankings = rankingRepository.findAllByRankingType(RankingType.DISTANCE);
 
@@ -72,9 +87,32 @@ public class RankingService {
                     .mapToInt(RunningData::getTotalDistance)
                     .sum();
 
-            ranking.updateScore(newScore);
+            // 점수가 변경될 경우에만 업데이트 수행
+            if (ranking.getScore() != newScore) {
+                ranking.updateScore(newScore);
+            }
         }
 
         rankingRepository.saveAll(rankings);
+    }
+
+    //랭킹 순위를 계산하여 저장합니다.
+    public void updateDistanceRankingSort() {
+
+        List<Ranking> rankings = rankingRepository.findAllByRankingTypeOrderByScore(RankingType.DISTANCE);
+
+        int rank = 1; // 초기 순위
+        for (int i = 0; i < rankings.size(); i++) {
+            Ranking ranking = rankings.get(i);
+
+            // 이전 순위와 점수가 다를 경우 랭크 업데이트
+            if (i > 0 && rankings.get(i).getScore() < rankings.get(i - 1).getScore()) {
+                rank = i + 1;
+            }
+
+            // sortOrder 업데이트
+            ranking.updateSortOrder(rank);
+            rankingRepository.save(ranking);
+        }
     }
 }

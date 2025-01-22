@@ -61,6 +61,7 @@ public class Ranking {
         this.score = score;
         this.rankingType = rankingType;
         this.lastUpdated = LocalDateTime.now();
+        this.sortOrder = 0;     //0이면 아직 정렬되지 않은 것
     }
 
     public void updateScore(int score) {
@@ -71,5 +72,14 @@ public class Ranking {
 
         this.score = score;
         this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void updateSortOrder(int sortOrder) {
+
+        if (sortOrder <= 0) {
+            throw new RankingException(ErrorCode.INVALID_RANKING_SORTORDER);
+        }
+
+        this.sortOrder = sortOrder;
     }
 }
