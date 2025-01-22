@@ -14,6 +14,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class CrewChallenge extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +35,11 @@ public class CrewChallenge extends BaseEntity {
     private ChallengePeriod challengePeriod;
 
     @Column(nullable = false)
-    private String crewName;    // 기존 crew의 name 속성
+    private String crewName;
 
     @Column(nullable = false)
     private String slogan;    // 구호
+
 
     @Setter
     @Column
