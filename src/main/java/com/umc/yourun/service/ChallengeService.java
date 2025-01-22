@@ -449,7 +449,7 @@ public class ChallengeService {
         return new ChallengeResponse.HomeChallengeRes(soloInfo, crewInfo);
     }
 
-    // 크루원들의 거리 정보 조회가 가능한 크루 챌린지 진행도 (홈 화면 - 크루 챌린지 클릭)
+    // 크루 챌린지의 상세 진행도 (홈 화면 - 크루 챌린지 클릭)
     public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long userId) {
 
         // 유저 조회
@@ -458,11 +458,11 @@ public class ChallengeService {
 
         // 1. 유저가 참여 중인 크루 챌린지
         Long challengeId = userCrewChallengeRepository.findByUserId(userId).getCrewChallenge().getId();
-        CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
+        CrewChallenge myCrew = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        int challengePeriod = challenge.getChallengePeriod().getDays();
-        String crewName = challenge.getCrewName();
+        int challengePeriod = myCrew.getChallengePeriod().getDays();
+        String crewName = myCrew.getCrewName();
 
         // 2. 유저가 속한 크루의 크루원들 정보
         List<ChallengeResponse.CrewMemberInfo> myCrewMembers = userCrewChallengeRepository
@@ -475,7 +475,7 @@ public class ChallengeService {
                 .toList();
 
         // 3. 매칭된 크루 정보 조회
-        CrewChallenge matchedCrew = crewChallengeRepository.findById(challenge.getMatchedCrewChallengeId())
+        CrewChallenge matchedCrew = crewChallengeRepository.findById(myCrew.getMatchedCrewChallengeId())
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
         String matchedCrewName = matchedCrew.getCrewName();
@@ -485,24 +485,23 @@ public class ChallengeService {
                 .map(uc -> uc.getUser().getId())
                 .toList();
 
-        // 4. 크루들의 총 달성 거리 계산
-        int myCrewTotalDistance = myCrewMembers.stream()
+        // 4. 전체 달성 거리 계산 (해당 유저의 달성 거리와 전체 거리)
+        int userDistance = calculateTotalDistance(challengeId, userId);
+
+        int totalDistance = myCrewMembers.stream()
                 .mapToInt(ChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
-
-        int matchedCrewTotalDistance = matchedCrewMemberIds.stream()
-                .mapToInt(memberId -> calculateTotalDistance(challenge.getMatchedCrewChallengeId(), memberId))
+        totalDistance += matchedCrewMemberIds.stream()
+                .mapToInt(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        // 5. 진행률 계산 (우리 크루의 달성 비율)
+        // 5. 진행률 계산 (유저의 달성 비율)
         double progressRatio = 0.0;
-        int totalDistance = myCrewTotalDistance + matchedCrewTotalDistance;
         if (totalDistance > 0) {
-            progressRatio = (double) myCrewTotalDistance / totalDistance * 100;
+            progressRatio = (double) userDistance / totalDistance * 100;
         }
-
-        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrewMembers,
-                matchedCrewName, matchedCrewMemberIds, progressRatio);
+        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
+                matchedCrewName, matchedCrew.getSlogan(), matchedCrewMemberIds, progressRatio);
 
     }
 
