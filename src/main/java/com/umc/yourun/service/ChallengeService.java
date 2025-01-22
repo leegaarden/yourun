@@ -122,7 +122,7 @@ public class ChallengeService {
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
         // PENDING 상태인 크루 챌린지 조회
-        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findRandomPendingChallenges(5);
 
         return pendingChallenges.stream()
                 .map(challenge -> {
@@ -171,7 +171,7 @@ public class ChallengeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
-        List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+        List<SoloChallenge> pendingChallenges = soloChallengeRepository.findRandomPendingChallenges(5);
 
         return pendingChallenges.stream()
                 .map(challenge -> {
