@@ -14,9 +14,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rankings")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "rankings",
+        indexes = {
+                @Index(name = "idx_score", columnList = "score DESC")
+        }
+)
 public class Ranking {
 
     @Id
@@ -37,6 +41,9 @@ public class Ranking {
 
     @Column(nullable = false)
     private LocalDateTime lastUpdated;
+
+    @Column(nullable = true)
+    private int sortOrder;
 
     @Builder
     public Ranking(User user, int score, RankingType rankingType) {
