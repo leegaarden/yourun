@@ -359,6 +359,7 @@ public class ChallengeService {
         // 3. 매칭된 크루 정보 조회
         String matchedCrewName = null;
         List<Long> matchedCrewMemberIds = new ArrayList<>();
+        String matchedCrewSlogan = null;
 
         if (myCrew.getMatchedCrewChallengeId() != null) {
             CrewChallenge matchedCrew = crewChallengeRepository
@@ -366,6 +367,7 @@ public class ChallengeService {
                     .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
             matchedCrewName = matchedCrew.getCrewName();
+            matchedCrewSlogan = matchedCrew.getSlogan();
             matchedCrewMemberIds = userCrewChallengeRepository
                     .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
                     .stream()
@@ -376,8 +378,10 @@ public class ChallengeService {
         return new ChallengeResponse.CrewMatchingRes(
                 myCrew.getChallengePeriod().getDays(),
                 myCrew.getCrewName(),
+                myCrew.getSlogan(),
                 crewMemberIds,
                 matchedCrewName,
+                matchedCrewSlogan,
                 matchedCrewMemberIds);
 
     }

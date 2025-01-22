@@ -13,7 +13,7 @@ public class ChallengeRequest {
     @Schema(title = "CHALLENGE_REQ_01 : 크루 챌린지 생성 요청")
     public record CreateCrewChallengeReq(
             @Schema(description = "크루 이름", example = "거진홍길동")
-            @ValidCrewName(message = "공백 포함 없이 한글로만 2-5자로 입력해주세요.")
+            @ValidCrewName(message = "이미 사용 중인 크루 이름입니다")
             String crewName,
 
             @Schema(description = "구호", example = "헤르메스 신발의 주인공")

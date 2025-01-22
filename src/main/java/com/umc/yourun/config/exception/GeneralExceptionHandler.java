@@ -40,7 +40,7 @@ public class GeneralExceptionHandler {
     public ApiResponse<Object> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
         log.error("Invalid PathParameters: {}", e.getMessage());
         return ApiResponse.error(ErrorCode.INVALID_PATH_PARAMETER);
-    }  // 닫는 괄호 추가
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ApiResponse<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {

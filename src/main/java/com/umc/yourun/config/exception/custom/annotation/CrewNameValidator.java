@@ -1,30 +1,20 @@
 package com.umc.yourun.config.exception.custom.annotation;
 
-import com.umc.yourun.config.exception.ErrorCode;
-import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.repository.CrewChallengeRepository;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-@AllArgsConstructor
+@Component
+@RequiredArgsConstructor
 public class CrewNameValidator implements ConstraintValidator<ValidCrewName, String> {
 
     private final CrewChallengeRepository crewChallengeRepository;
-    @Override
-    public void initialize(ValidCrewName constraintAnnotation) {
-        // 초기화가 필요한 경우 여기서 구현
-    }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-
-        // 중복 검사
-        if (crewChallengeRepository.existsByCrewNameIgnoreCase(value)) {
-            throw new ChallengeException(ErrorCode.DUPLICATE_CREW_NAME);
-        }
-
-        // 공백 검사
+        // 기본 유효성 검사
         if (value == null || value.trim().isEmpty()) {
             return false;
         }
@@ -34,7 +24,12 @@ public class CrewNameValidator implements ConstraintValidator<ValidCrewName, Str
             return false;
         }
 
-        // 한글과 공백만 포함하는지 검사
-        return value.matches("^[가-힣]{2,5}$");
+        // 한글만 포함하는지 검사
+        if (!value.matches("^[가-힣]{2,5}$")) {
+            return false;
+        }
+
+        // 중복 검사
+        return !crewChallengeRepository.existsByCrewNameIgnoreCase(value);
     }
 }

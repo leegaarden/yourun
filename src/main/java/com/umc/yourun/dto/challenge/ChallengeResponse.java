@@ -1,5 +1,6 @@
 package com.umc.yourun.dto.challenge;
 
+import com.umc.yourun.config.exception.custom.annotation.ValidSlogan;
 import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
@@ -41,7 +42,6 @@ public class ChallengeResponse {
             List<Long> participantIds
     ) {}
 
-    // TODO : 보상 추가 
     @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 DTO")
     public record SoloChallengeRes(
             @Schema(description = "챌린지 ID", example = "1")
@@ -96,6 +96,7 @@ public class ChallengeResponse {
             List<Long> participantIds
     ) {}
 
+    // TODO : 내 크루의 구호, 마챙된 크루의 구호
     @Schema(description = "CHALLENGE_RES_05 : 크루 챌린지 매칭 조회 응답 DTO")
     public record CrewMatchingRes(
             @Schema(description = "챌린지 기간(일)", example = "3")
@@ -103,6 +104,9 @@ public class ChallengeResponse {
 
             @Schema(description = "내 크루명", example = "거진홍길동")
             String crewName,
+
+            @Schema(description = "내 크루의 구호", example = "헤르메스 신발의 주인공")
+            String myCrewSlogan,
 
             @Schema(description = "내 크루원 ID 목록 (참여 순서대로)", example = """
                     [
@@ -115,6 +119,9 @@ public class ChallengeResponse {
 
             @Schema(description = "매칭된 크루명", example = "거진이봉주")
             String matchedCrewName,
+
+            @Schema(description = "매칭된 크루의 구호", example = "에르메스 신발의 주인공")
+            String matchedCrewSlogan,
 
             @Schema(description = "매칭된 크루원 ID 목록 (참여 순서대로)", example = """
                     [
