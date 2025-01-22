@@ -41,6 +41,7 @@ public class ChallengeResponse {
             List<Long> participantIds
     ) {}
 
+    // TODO : 보상 추가 
     @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 DTO")
     public record SoloChallengeRes(
             @Schema(description = "챌린지 ID", example = "1")
@@ -62,7 +63,10 @@ public class ChallengeResponse {
             String challengeCreatorNickName,
 
             @Schema(description = "챌린지 메이트의 해시태그")
-            List<String> challengeCreatorHashTags
+            List<String> challengeCreatorHashTags,
+
+            @Schema(description = "보상 개수", example = "2")
+            int reward
 
 
 

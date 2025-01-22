@@ -183,13 +183,21 @@ public class ChallengeService {
                     // 생성자의 닉네임과 해시태그 조회
                     User creatorUser = creator.getUser();
                     String nickname = userRepository.findNicknameById(creatorUser.getId())
-                            .orElse("Unknown");
+                            .orElse("Unknown"); // 이럴 일은 없지만 에러 때문에
 
                     // 해시태그 값 조회 (최대 2개)
                     List<String> hashtags = creatorUser.getUserTags().stream()
                             .map(userTag -> userTag.getTag().name())  // UserTag 엔티티에서 Tag enum의 이름을 가져옴
                             .limit(2)  // 최대 2개로 제한
                             .collect(Collectors.toList());
+
+                    // 기간에 따른 보상 계산
+                    int reward = switch (challenge.getChallengePeriod().getDays()) {
+                        case 3 -> 1;
+                        case 4 -> 2;
+                        case 5 -> 3;
+                        default -> 0;
+                    };
 
                     return new ChallengeResponse.SoloChallengeRes(
                             challenge.getId(),
@@ -198,7 +206,8 @@ public class ChallengeService {
                             challenge.getChallengeDistance().getDistance(),
                             challenge.getChallengePeriod().getDays(),
                             nickname,
-                            hashtags
+                            hashtags,
+                            reward
                     );
                 })
                 .collect(Collectors.toList());
