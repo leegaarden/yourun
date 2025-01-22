@@ -90,9 +90,25 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/match/detail-progress")
-    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewMatchDetailProgress(
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
             @RequestHeader("USER-ID") Long userId) {
-        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(userId);
+        ChallengeResponse.CrewChallengeDetailProgressRes response = challengeService.getCrewChallengeDetailProgress(userId);
         return ApiResponse.success("크루 챌린지 상세 진행도 정보입니다.", response);
+    }
+
+    @Operation(summary = "CREW_CHALLENGE_API_06 : 크루 챌린지 상세 페이지 조회", description = "크루 챌린지의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/pending/{challengeId}")
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewDetail(
+            @RequestHeader("USER-ID") Long userId,
+            @PathVariable Long challengeId) {
+        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, userId);
+        return ApiResponse.success("크루 챌린지 상세 정보입니다.", response);
     }
 }

@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -450,7 +447,7 @@ public class ChallengeService {
     }
 
     // 크루 챌린지의 상세 진행도 (홈 화면 - 크루 챌린지 클릭)
-    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long userId) {
+    public ChallengeResponse.CrewChallengeDetailProgressRes getCrewChallengeDetailProgress (Long userId) {
 
         // 유저 조회
         User user = userRepository.findById(userId)
@@ -500,11 +497,41 @@ public class ChallengeService {
         if (totalDistance > 0) {
             progressRatio = (double) userDistance / totalDistance * 100;
         }
-        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
+        return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 matchedCrewName, matchedCrew.getSlogan(), matchedCrewMemberIds, progressRatio);
 
     }
 
+    // 크루 챌린지 상세 조회
+    @Transactional(readOnly = true)
+    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long challengeId, Long userId) {
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 크루 챌린지 조회
+        Optional<CrewChallenge> crewChallenge = crewChallengeRepository.findById(challengeId);
+
+        List<Long> participants = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
+                .stream()
+                .map(uc -> uc.getUser().getId())
+                .toList();
+        int remaining = 4 - participants.size();
+        // 기간에 따른 보상 계산
+        int reward = switch (crewChallenge.get().getChallengePeriod().getDays()) {
+            case 3 -> 1;
+            case 4 -> 2;
+            case 5 -> 3;
+            default -> 0;
+        };
+
+        return new ChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(), crewChallenge.get().getStartDate(), crewChallenge.get().getEndDate(),
+                crewChallenge.get().getChallengePeriod().getDays(), remaining, reward, participants, crewChallenge.get().getSlogan());
+
+    }
+
+    // 활용 메소드들
     // 기간 검사
     private ChallengePeriod validateDates(LocalDate endDate) {
         LocalDate startDate = LocalDate.now().plusDays(1);

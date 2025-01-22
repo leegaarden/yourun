@@ -42,7 +42,7 @@ public class ChallengeResponse {
             List<Long> participantIds
     ) {}
 
-    @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 DTO")
+    @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 및 솔로 챌린지 상세 페이지 응답 DTO")
     public record SoloChallengeRes(
             @Schema(description = "챌린지 ID", example = "1")
             Long challengeId,
@@ -199,7 +199,7 @@ public class ChallengeResponse {
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 : 크루 챌린지 상세 진행도 응답 DTO")
-    public record CrewChallengeDetailRes(
+    public record CrewChallengeDetailProgressRes(
             @Schema(description = "설정된 기간", example = "3")
             int challengePeriod,
 
@@ -231,12 +231,45 @@ public class ChallengeResponse {
             double progressRatio
     ) {}
 
-    @Schema(description = "크루원 정보")
+    @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
     public record CrewMemberInfo(
             @Schema(description = "사용자 ID", example = "1")
             Long userId,
 
             @Schema(description = "달성한 거리(m)", example = "3000")
             int runningDistance
+    ) {}
+
+    @Schema(title = "CHALLENGE_RES_08 : 크루 챌린지 상세 페이지 응답 DTO")
+    public record CrewChallengeDetailRes(
+
+            @Schema(description = "크루명", example = "거진홍길동")
+            String crewName,
+
+            @Schema(description = "시작일", example = "2025-01-15")
+            LocalDate startDate,
+
+            @Schema(description = "마감일", example = "2025-01-20")
+            LocalDate endDate,
+
+            @Schema(description = "챌린지 기간", example = "4")
+            int challengePeriod,
+
+            @Schema(description = "남은 인원", example = "1")
+            int remaining,
+
+            @Schema(description = "보상 개수", example = "2")
+            int reward,
+
+            @Schema(description = "참여자 ID 목록", example = """
+                    [
+                          1,
+                          2,
+                          3
+                        ]""")
+            List<Long> participantIds,
+
+            @Schema(description = "크루 구호", example = "헤르메스 신발의 주인공")
+            String slogan
     ) {}
 }
