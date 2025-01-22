@@ -236,8 +236,8 @@ public class ChallengeResponse {
             @Schema(description = "사용자 ID", example = "1")
             Long userId,
 
-            @Schema(description = "달성한 거리(m)", example = "3000")
-            int runningDistance
+            @Schema(description = "달성한 거리(km)", example = "5.2")
+            double runningDistance
     ) {}
 
     @Schema(title = "CHALLENGE_RES_08 : 크루 챌린지 상세 페이지 응답 DTO")

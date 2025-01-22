@@ -467,7 +467,7 @@ public class ChallengeService {
                 .stream()
                 .map(member -> new ChallengeResponse.CrewMemberInfo(
                         member.getUser().getId(),
-                        calculateTotalDistance(challengeId, member.getUser().getId())
+                        calculateTotalDistance(challengeId, member.getUser().getId()) // 이미 km로 변환된 값
                 ))
                 .toList();
 
@@ -483,13 +483,13 @@ public class ChallengeService {
                 .toList();
 
         // 4. 전체 달성 거리 계산 (해당 유저의 달성 거리와 전체 거리)
-        int userDistance = calculateTotalDistance(challengeId, userId);
+        double userDistance = calculateTotalDistance(challengeId, userId);
 
-        int totalDistance = myCrewMembers.stream()
-                .mapToInt(ChallengeResponse.CrewMemberInfo::runningDistance)
+        double totalDistance = myCrewMembers.stream()
+                .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
         totalDistance += matchedCrewMemberIds.stream()
-                .mapToInt(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
+                .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
         // 5. 진행률 계산 (유저의 달성 비율)
@@ -557,22 +557,19 @@ public class ChallengeService {
     }
 
     // 크루원들이 달린 거리 계산
-    private int calculateTotalDistance(Long challengeId, Long userId) {
-        // 1. 챌린지 기간 조회
+    private double calculateTotalDistance(Long challengeId, Long userId) {
         CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        // 2. 시작일의 시작(00:00:00)과 현재 시간 설정
         LocalDateTime periodStart = challenge.getStartDate().atStartOfDay();
         LocalDateTime currentTime = LocalDateTime.now();
 
-        // 3. 챌린지가 아직 시작되지 않았다면 0 반환
         if (currentTime.isBefore(periodStart)) {
-            return 0;
+            return 0.0;
         }
 
-        // 4. 해당 기간 동안의 총 러닝 거리 조회
-        return runningDataRepository.sumDistanceByUserIdAndPeriod(userId, periodStart, currentTime);
+        // 미터 단위 합계를 킬로미터로 변환
+        return runningDataRepository.sumDistanceByUserIdAndPeriod(userId, periodStart, currentTime) / 1000.0;
     }
 
 
