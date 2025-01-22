@@ -31,7 +31,6 @@ public class CrewChallengeRestController {
     })
     @PostMapping("")
     public ApiResponse<Long> createCrewChallenge(
-            // @RequestHeader("Authorization") String token,
             @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
 
@@ -39,36 +38,21 @@ public class CrewChallengeRestController {
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
     }
 
-    @Operation(summary = "CREW_CHALLENGE_API_02 : 대기 중인 크루 챌린지 조회", description = "PENDING 상태인 크루 챌린지 목록을 조회합니다.")
+    @Operation(summary = "CREW_CHALLENGE_API_02 : 크루 결성 대기 중인 크루 챌린지 조회", description = "크루가 결성되지 않아 PENDING 상태인 크루 챌린지 목록을 조회합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending")
-    public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getPendingCrewChallenges(
-            // @RequestHeader("Authorization") String token
+    public ApiResponse<List<ChallengeResponse.CrewChallengeRes>> getPendingCrewChallenges(
             @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
     ) {
-        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getPendingCrewChallenges(userId);
-        return ApiResponse.success("대기 중인 크루 챌린지 목록입니다.", result);
+        List<ChallengeResponse.CrewChallengeRes> result = challengeService.getPendingCrewChallenges(userId);
+        return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", result);
     }
 
-    @Operation(summary = "CREW_CHALLENGE_API_03 : 진행 중인 크루 챌린지 조회", description = "IN_PROGRESS 상태인 크루 챌린지 목록을 조회합니다.")
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @GetMapping("/in-progress")
-    public ApiResponse<List<ChallengeResponse.CrewChallengeStatusRes>> getInProgressCrewChallenges(
-            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
-    ) {
-        List<ChallengeResponse.CrewChallengeStatusRes> result = challengeService.getInProgressCrewChallenges(userId);
-        return ApiResponse.success("진행 중인 크루 챌린지 목록입니다.", result);
-    }
-
-    @Operation(summary = "CREW_CHALLENGE_API_04 : 크루 챌린지 참여", description = "대기 중인 크루 챌린지에 참여합니다.")
+    @Operation(summary = "CREW_CHALLENGE_API_03 : 크루 챌린지 참여", description = "대기 중인 크루 챌린지에 참여합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
@@ -82,7 +66,7 @@ public class CrewChallengeRestController {
         return ApiResponse.success("크루 챌린지 참여가 완료되었습니다.", response);
     }
 
-    @Operation(summary = "CREW_CHALLENGE_API_05 : 크루 챌린지 매칭 조회", description = "사용자가 현재 참여중인 크루 챌린지의 매칭 정보를 조회합니다.")
+    @Operation(summary = "CREW_CHALLENGE_API_04 : 크루 챌린지 매칭 조회", description = "사용자가 현재 참여중인 크루 챌린지의 매칭 정보를 조회합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
@@ -97,7 +81,7 @@ public class CrewChallengeRestController {
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
 
-    @Operation(summary = "CREW_CHALLENGE_API_06 : 크루 챌린지 상세 진행도 조회", description = "홈 - 크루 챌린지 클릭시 조회됩니다.")
+    @Operation(summary = "CREW_CHALLENGE_API_05 : 크루 챌린지 상세 진행도 조회", description = "홈 - 크루 챌린지 클릭시 조회됩니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",

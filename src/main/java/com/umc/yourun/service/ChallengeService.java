@@ -7,6 +7,7 @@ import com.umc.yourun.converter.ChallengeConverter;
 import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
+import com.umc.yourun.domain.UserTag;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
@@ -24,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,9 +63,6 @@ public class ChallengeService {
             }
 
         }
-
-        // 크루명 검사
-        validateCrewName(request.crewName());
 
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
@@ -115,59 +114,102 @@ public class ChallengeService {
         return savedChallenge.getId();
     }
 
-    // PENDING 상태인 크루 챌린지 조회
+    // PENDING 상태인 크루 챌린지 조회 : 크루원이 4명 미만으로 아직 결성되지 않은
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getPendingCrewChallenges(Long userId) {
-
+    public List<ChallengeResponse.CrewChallengeRes> getPendingCrewChallenges(Long userId) {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
-        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+        // PENDING 상태인 크루 챌린지 조회
+        List<CrewChallenge> pendingChallenges = crewChallengeRepository.findRandomPendingChallenges(5);
+
         return pendingChallenges.stream()
-                .map(ChallengeConverter::toStatusCrewChallengeRes)
-                .collect(Collectors.toList());
-    }
+                .map(challenge -> {
+                    // 현재 참여 인원 조회
+                    List<Long> participants = userCrewChallengeRepository
+                            .findByCrewChallengeIdOrderByCreatedAt(challenge.getId())
+                            .stream()
+                            .map(uc -> uc.getUser().getId())
+                            .collect(Collectors.toList());
 
-    // IN_PROGRESS 상태인 크루 챌린지 조회
-    @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeStatusRes> getInProgressCrewChallenges(Long userId) {
+                    // 4명 미만인 크루만 필터링
+                    if (participants.size() >= 4) {
+                        return null;
+                    }
 
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+                    // 남은 자리 계산
+                    int remaining = 4 - participants.size();
 
-        List<CrewChallenge> inProgressChallenges = crewChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
-        return inProgressChallenges.stream()
-                .map(ChallengeConverter::toStatusCrewChallengeRes)
+                    // 기간에 따른 보상 계산
+                    int reward = switch (challenge.getChallengePeriod().getDays()) {
+                        case 3 -> 1;
+                        case 4 -> 2;
+                        case 5 -> 3;
+                        default -> 0;
+                    };
+
+                    return new ChallengeResponse.CrewChallengeRes(
+                            challenge.getId(),
+                            challenge.getCrewName(),
+                            challenge.getStartDate(),
+                            challenge.getEndDate(),
+                            challenge.getChallengePeriod().getDays(),
+                            remaining,
+                            reward,
+                            participants
+                    );
+                })
+                .filter(Objects::nonNull)  // 4명 이상인 크루 제외
                 .collect(Collectors.toList());
     }
 
     // PENDING 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getPendingSoloChallenges(Long userId) {
-
+    public List<ChallengeResponse.SoloChallengeRes> getPendingSoloChallenges(Long userId) {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
-        List<SoloChallenge> pendingChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.PENDING);
+        List<SoloChallenge> pendingChallenges = soloChallengeRepository.findRandomPendingChallenges(5);
+
         return pendingChallenges.stream()
-                .map(ChallengeConverter::toStatusSoloChallengeRes)
-                .collect(Collectors.toList());
-    }
+                .map(challenge -> {
+                    // 챌린지 생성자 조회
+                    UserSoloChallenge creator = userSoloChallengeRepository
+                            .findBySoloChallengeIdAndIsCreator(challenge.getId(), true)
+                            .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-    // IN_PROGRESS 상태인 솔로 챌린지 조회
-    @Transactional(readOnly = true)
-    public List<ChallengeResponse.SoloChallengeStatusRes> getInProgressSoloChallenges(Long userId) {
+                    // 생성자의 닉네임과 해시태그 조회
+                    User creatorUser = creator.getUser();
+                    String nickname = userRepository.findNicknameById(creatorUser.getId())
+                            .orElse("Unknown"); // 이럴 일은 없지만 에러 때문에
 
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+                    // 해시태그 값 조회 (최대 2개)
+                    List<String> hashtags = creatorUser.getUserTags().stream()
+                            .map(userTag -> userTag.getTag().name())  // UserTag 엔티티에서 Tag enum의 이름을 가져옴
+                            .limit(2)  // 최대 2개로 제한
+                            .collect(Collectors.toList());
 
-        List<SoloChallenge> inProgressChallenges = soloChallengeRepository.findByChallengeStatus(ChallengeStatus.IN_PROGRESS);
-        return inProgressChallenges.stream()
-                .map(ChallengeConverter::toStatusSoloChallengeRes)
+                    // 기간에 따른 보상 계산
+                    int reward = switch (challenge.getChallengePeriod().getDays()) {
+                        case 3 -> 1;
+                        case 4 -> 2;
+                        case 5 -> 3;
+                        default -> 0;
+                    };
+
+                    return new ChallengeResponse.SoloChallengeRes(
+                            challenge.getId(),
+                            challenge.getStartDate(),
+                            challenge.getEndDate(),
+                            challenge.getChallengeDistance().getDistance(),
+                            challenge.getChallengePeriod().getDays(),
+                            nickname,
+                            hashtags,
+                            reward
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
@@ -317,6 +359,7 @@ public class ChallengeService {
         // 3. 매칭된 크루 정보 조회
         String matchedCrewName = null;
         List<Long> matchedCrewMemberIds = new ArrayList<>();
+        String matchedCrewSlogan = null;
 
         if (myCrew.getMatchedCrewChallengeId() != null) {
             CrewChallenge matchedCrew = crewChallengeRepository
@@ -324,6 +367,7 @@ public class ChallengeService {
                     .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
             matchedCrewName = matchedCrew.getCrewName();
+            matchedCrewSlogan = matchedCrew.getSlogan();
             matchedCrewMemberIds = userCrewChallengeRepository
                     .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
                     .stream()
@@ -334,8 +378,10 @@ public class ChallengeService {
         return new ChallengeResponse.CrewMatchingRes(
                 myCrew.getChallengePeriod().getDays(),
                 myCrew.getCrewName(),
+                myCrew.getSlogan(),
                 crewMemberIds,
                 matchedCrewName,
+                matchedCrewSlogan,
                 matchedCrewMemberIds);
 
     }
@@ -369,14 +415,17 @@ public class ChallengeService {
 
             // 챌린지 메이트 조회
             Long mateId = null;
+            String mateNickname = "";
             if (challenge.getChallengeStatus() == ChallengeStatus.IN_PROGRESS) {
                 mateId = userSoloChallengeRepository
                         .findBySoloChallengeIdAndUserIdNot(challenge.getId(), userId)
                         .map(mate -> mate.getUser().getId())
                         .orElse(null);
+                mateNickname = userRepository.findNicknameById(userId)
+                        .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
             }
 
-            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, userId, mateId, soloCountDay);
+            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, mateId, soloCountDay, mateNickname);
         }
 
         ChallengeResponse.UserCrewChallengeInfo crewInfo = null;
@@ -400,7 +449,7 @@ public class ChallengeService {
         return new ChallengeResponse.HomeChallengeRes(soloInfo, crewInfo);
     }
 
-    // 크루원들의 거리 정보 조회가 가능한 크루 챌린지 진행도 (홈 화면 - 크루 챌린지 클릭)
+    // 크루 챌린지의 상세 진행도 (홈 화면 - 크루 챌린지 클릭)
     public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long userId) {
 
         // 유저 조회
@@ -409,11 +458,11 @@ public class ChallengeService {
 
         // 1. 유저가 참여 중인 크루 챌린지
         Long challengeId = userCrewChallengeRepository.findByUserId(userId).getCrewChallenge().getId();
-        CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
+        CrewChallenge myCrew = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        int challengePeriod = challenge.getChallengePeriod().getDays();
-        String crewName = challenge.getCrewName();
+        int challengePeriod = myCrew.getChallengePeriod().getDays();
+        String crewName = myCrew.getCrewName();
 
         // 2. 유저가 속한 크루의 크루원들 정보
         List<ChallengeResponse.CrewMemberInfo> myCrewMembers = userCrewChallengeRepository
@@ -426,7 +475,7 @@ public class ChallengeService {
                 .toList();
 
         // 3. 매칭된 크루 정보 조회
-        CrewChallenge matchedCrew = crewChallengeRepository.findById(challenge.getMatchedCrewChallengeId())
+        CrewChallenge matchedCrew = crewChallengeRepository.findById(myCrew.getMatchedCrewChallengeId())
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
         String matchedCrewName = matchedCrew.getCrewName();
@@ -436,49 +485,24 @@ public class ChallengeService {
                 .map(uc -> uc.getUser().getId())
                 .toList();
 
-        // 4. 크루들의 총 달성 거리 계산
-        int myCrewTotalDistance = myCrewMembers.stream()
+        // 4. 전체 달성 거리 계산 (해당 유저의 달성 거리와 전체 거리)
+        int userDistance = calculateTotalDistance(challengeId, userId);
+
+        int totalDistance = myCrewMembers.stream()
                 .mapToInt(ChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
-
-        int matchedCrewTotalDistance = matchedCrewMemberIds.stream()
-                .mapToInt(memberId -> calculateTotalDistance(challenge.getMatchedCrewChallengeId(), memberId))
+        totalDistance += matchedCrewMemberIds.stream()
+                .mapToInt(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        // 5. 진행률 계산 (우리 크루의 달성 비율)
+        // 5. 진행률 계산 (유저의 달성 비율)
         double progressRatio = 0.0;
-        int totalDistance = myCrewTotalDistance + matchedCrewTotalDistance;
         if (totalDistance > 0) {
-            progressRatio = (double) myCrewTotalDistance / totalDistance * 100;
+            progressRatio = (double) userDistance / totalDistance * 100;
         }
+        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
+                matchedCrewName, matchedCrew.getSlogan(), matchedCrewMemberIds, progressRatio);
 
-        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrewMembers,
-                matchedCrewName, matchedCrewMemberIds, progressRatio);
-
-    }
-
-    // 크루 이름 검사
-    // TODO: 한번에 검사하는 로직으로
-    private void validateCrewName(String crewName) {
-        // null 체크
-        if (crewName == null || crewName.trim().isEmpty()) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_NULL);
-        }
-
-        // 길이 검사 (2-5자)
-        if (crewName.length() < 2 || crewName.length() > 5) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT2);
-        }
-
-        // 한글만 허용하고 띄어쓰기 없는지 검사
-        if (!crewName.matches("^[가-힣]{2,5}$")) {
-            throw new ChallengeException(ErrorCode.INVALID_CREW_NAME_FORMAT1);
-        }
-
-        // 크루명 중복 검사
-        if (crewChallengeRepository.existsByCrewNameIgnoreCase(crewName)) {
-            throw new ChallengeException(ErrorCode.DUPLICATE_CREW_NAME);
-        }
     }
 
     // 기간 검사

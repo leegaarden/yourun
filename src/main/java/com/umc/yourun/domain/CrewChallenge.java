@@ -14,8 +14,6 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
-@AllArgsConstructor
 public class CrewChallenge extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +36,7 @@ public class CrewChallenge extends BaseEntity {
     private String crewName;
 
     @Column(nullable = false)
-    private String slogan;
+    private String slogan;    // 구호
 
     @Setter
     @Column
@@ -46,6 +44,16 @@ public class CrewChallenge extends BaseEntity {
 
     @OneToMany(mappedBy = "crewChallenge")
     private List<UserCrewChallenge> userCrews = new ArrayList<>();
+
+    @Builder
+    public CrewChallenge(String crewName, LocalDate endDate, ChallengePeriod challengePeriod, String slogan) {
+        this.crewName = crewName;
+        this.startDate = LocalDate.now().plusDays(1);
+        this.endDate = endDate;
+        this.challengeStatus = ChallengeStatus.PENDING;
+        this.challengePeriod = challengePeriod;
+        this.slogan = slogan;
+    }
 
     // 상태 변경
     public void updateStatus(ChallengeStatus status) {

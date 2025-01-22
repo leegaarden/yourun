@@ -39,35 +39,21 @@ public class SoloChallengeRestController {
         return ApiResponse.success("솔로 챌린지가 생성되었습니다.", challengeId);
     }
 
-    @Operation(summary = "SOLO_CHALLENGE_API_02 : 대기 중인 솔로 챌린지 조회", description = "PENDING 상태인 솔로 챌린지 목록을 조회합니다.")
+    @Operation(summary = "SOLO_CHALLENGE_API_02 : 대기 중인 솔로 챌린지 조회", description = "PENDING 상태 솔로 챌린지 목록을 조회합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending")
-    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getPendingSoloChallenges(
+    public ApiResponse<List<ChallengeResponse.SoloChallengeRes>> getPendingSoloChallenges(
             @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
     ) {
-        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getPendingSoloChallenges(userId);
+        List<ChallengeResponse.SoloChallengeRes> result = challengeService.getPendingSoloChallenges(userId);
         return ApiResponse.success("대기 중인 솔로 챌린지 목록입니다.", result);
     }
 
-    @Operation(summary = "SOLO_CHALLENGE_API_03 : 진행 중인 솔로 챌린지 조회", description = "IN_PROGRESS 상태인 솔로 챌린지 목록을 조회합니다.")
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @GetMapping("/in-progress")
-    public ApiResponse<List<ChallengeResponse.SoloChallengeStatusRes>> getInProgressSoloChallenges(
-            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
-    ) {
-        List<ChallengeResponse.SoloChallengeStatusRes> result = challengeService.getInProgressSoloChallenges(userId);
-        return ApiResponse.success("진행 중인 솔로 챌린지 목록입니다.", result);
-    }
-
-    @Operation(summary = "SOLO_CHALLENGE_API_04 : 솔로 챌린지 참여", description = "대기 중인 개인 챌린지에 참여합니다.")
+    @Operation(summary = "SOLO_CHALLENGE_API_03 : 솔로 챌린지 참여", description = "대기 중인 개인 챌린지에 참여합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
