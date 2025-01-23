@@ -20,4 +20,16 @@ public class RankingResponse {
         @Schema(description = "유저 태그", example = "에너자이저")
         List<String> tags
     ) {}
+
+    @Builder
+    public record rankingInfoUser(
+
+        @Schema(description = "닉네임", example = "홍길동")
+        String username,
+
+        @Schema(description = "rank", example = "10")
+        int rank,
+
+        List<rankingMateInfo> list
+    ) {}
 }

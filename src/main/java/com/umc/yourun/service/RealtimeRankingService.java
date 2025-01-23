@@ -1,7 +1,9 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.converter.RankingConverter;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
+import com.umc.yourun.dto.Ranking.RankingResponse;
 import com.umc.yourun.repository.RunningDataRepository;
 import com.umc.yourun.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class RealtimeRankingService {
 
+    private static final int PAGE_SIZE = 10;  // 페이지 크기 상수 설정
+
     private final RunningDataRepository runningDataRepository;
     private final UserRepository userRepository;
 
@@ -27,7 +31,8 @@ public class RealtimeRankingService {
         this.userRepository = userRepository;
     }
 
-    public Map<User, Integer> getRanking() {
+    public RankingResponse.rankingInfoUser getRanking(int page, User requestedUser) {
+
         List<User> users = userRepository.findAll();
 
         // 각 멤버의 총점 계산
@@ -39,16 +44,44 @@ public class RealtimeRankingService {
                                 .sum()
                 ));
 
-        // 점수를 기준으로 내림차순 정렬
-        return scores.entrySet()
+        // 점수를 기준으로 내림차순 정렬 후 리스트로 변환 (순위 계산을 위해)
+        List<Map.Entry<User, Integer>> sortedRanking = scores.entrySet()
                 .stream()
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                .collect(Collectors.toList());
+
+        // 요청한 유저의 등수 계산 (1-based index)
+        int rank = 1;
+        for (Map.Entry<User, Integer> entry : sortedRanking) {
+            if (entry.getKey().equals(requestedUser)) {
+                break;
+            }
+            rank++;
+        }
+
+
+        // 페이지네이션 적용
+        Map<User, Integer> paginatedScores = sortedRanking.stream()
+                .skip((long) page * PAGE_SIZE)
+                .limit(PAGE_SIZE)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
                         (e1, e2) -> e1,
-                        LinkedHashMap::new  // 순서 유지
+                        LinkedHashMap::new
                 ));
+
+        List<RankingResponse.rankingMateInfo> list = paginatedScores.entrySet()
+                .stream()
+                .map(RankingConverter::toRankingRealtimeInfo)
+                .collect(Collectors.toList());
+
+        return RankingResponse.rankingInfoUser
+                .builder()
+                .rank(rank)
+                .username(requestedUser.getNickname())
+                .list(list)
+                .build();
     }
 
 }
