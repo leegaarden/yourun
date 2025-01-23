@@ -5,6 +5,7 @@ import com.umc.yourun.converter.RankingConverter;
 import com.umc.yourun.domain.Ranking;
 import com.umc.yourun.dto.Ranking.RankingResponse;
 import com.umc.yourun.service.RankingService;
+import com.umc.yourun.service.RealtimeRankingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,27 +21,33 @@ import java.util.stream.Collectors;
 @Tag(name = "Ranking", description = "Ranking API")
 public class RankingController {
 
-    private final RankingService rankingService;
+    private final RealtimeRankingService rankingService;
 
-    @GetMapping("/distance-ranking")
-    public ApiResponse<List<RankingResponse.rankingMateInfo>> getDistanceRanking() {
-        List<RankingResponse.rankingMateInfo> rankingMateInfos = rankingService.getDistanceRanking()
+//    @GetMapping("/distance-ranking")
+//    public ApiResponse<List<RankingResponse.rankingMateInfo>> getDistanceRanking() {
+//        List<RankingResponse.rankingMateInfo> rankingMateInfos = rankingService.getDistanceRanking()
+//                .stream()
+//                .map(RankingConverter::toRankingMateInto)
+//                .collect(Collectors.toList());
+//        return ApiResponse.success("거리에 따른 등수 리스트 반환", rankingMateInfos);
+//    }
+//
+//    @GetMapping("/pace-ranking")
+//    public ApiResponse<List<RankingResponse.rankingMateInfo>> getPaceRanking() {
+//        List<RankingResponse.rankingMateInfo> rankingMateInfos = rankingService.getPaceRanking()
+//                .stream()
+//                .map(RankingConverter::toRankingMateInto)
+//                .collect(Collectors.toList());
+//        return ApiResponse.success("페이스에 따른 등수 리스트 반환", rankingMateInfos);
+//    }
+
+    @GetMapping("/ranking")
+    public ApiResponse<List<RankingResponse.rankingMateInfo>> getRanking() {
+        List<RankingResponse.rankingMateInfo> rankingList = rankingService.getRanking().entrySet()
                 .stream()
-                .map(RankingConverter::toRankingMateInto)
+                .map(RankingConverter::toRankingRealtimeInfo)
                 .collect(Collectors.toList());
-        return ApiResponse.success("거리에 따른 등수 리스트 반환", rankingMateInfos);
+        return ApiResponse.success("랭킹 리스트의 반환", rankingList);
     }
-
-    @GetMapping("/pace-ranking")
-    public ApiResponse<List<RankingResponse.rankingMateInfo>> getPaceRanking() {
-        List<RankingResponse.rankingMateInfo> rankingMateInfos = rankingService.getPaceRanking()
-                .stream()
-                .map(RankingConverter::toRankingMateInto)
-                .collect(Collectors.toList());
-        return ApiResponse.success("페이스에 따른 등수 리스트 반환", rankingMateInfos);
-    }
-
-
-
 
 }

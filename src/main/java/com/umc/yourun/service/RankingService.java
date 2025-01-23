@@ -51,7 +51,7 @@ public class RankingService {
     }
 
     // 개인 DISTANCE 랭킹 조회
-    public int getPersonalDailyRanking(User user) {
+    public int getPersonalDistanceRanking(User user) {
 
         Integer integer = rankingRepository.findByUserAndRankingType(user, RankingType.DISTANCE)
                 .map(Ranking::getSortOrder)
