@@ -1,7 +1,6 @@
 package com.umc.yourun.repository;
 
 import com.umc.yourun.domain.enums.ChallengeStatus;
-import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -38,4 +37,5 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
 
     // 사용자의 크루 챌린지 참여 정보 조회
     UserCrewChallenge findByUserId(Long userId);
+
 }

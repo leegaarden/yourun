@@ -69,18 +69,7 @@ public class ChallengeMatchService {
                         challenge.getId()
                 );
 
-        // 매칭 가능한 크루가 있으면 랜덤 매칭
-//        if (!potentialMatches.isEmpty()) {
-//            CrewChallenge matchedChallenge = potentialMatches.get(
-//                    new Random().nextInt(potentialMatches.size())
-//            );
-//
-//            // 두 크루 모두 상태 업데이트
-//            challenge.updateStatus(ChallengeStatus.IN_PROGRESS);
-//            matchedChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
-//        }
-
-        // 매칭 가능한 크루가 있으면 가장 먼저 생성된 크루와 매칭
+        // 매칭 가능한 크루가 있으면 가장 먼저 생성된 크루와 매칭 (순서대로)
         if (!potentialMatches.isEmpty()) {
             CrewChallenge matchedChallenge = potentialMatches.get(0);
 

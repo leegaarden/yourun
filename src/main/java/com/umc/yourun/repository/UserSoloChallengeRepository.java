@@ -38,4 +38,7 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
     // 사용자의 챌린지 메이트 찾기
     Optional<UserSoloChallenge> findBySoloChallengeIdAndUserIdNot(Long challengeId, Long userId);
 
+    // 챌린지 아이디와 생성자 여부로 찾기 (챌린지 메이트 찾기)
+    Optional<UserSoloChallenge> findBySoloChallengeIdAndIsCreator(Long challengeId, boolean isCreator);
+
 }
