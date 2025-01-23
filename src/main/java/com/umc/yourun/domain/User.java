@@ -2,12 +2,16 @@ package com.umc.yourun.domain;
 
 import com.umc.yourun.domain.enums.Tendency;
 import com.umc.yourun.domain.enums.UserStatus;
+import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,7 +40,6 @@ public class User extends BaseEntity{
     @Column(length = 100, nullable = false)
     private String password;
 
-
     @Pattern(regexp = "^[가-힣]{2,4}$", message = "닉네임은 띄어쓰기 없이 한글 2~4자만 가능합니다.")
     @Column(length = 10, nullable = false, unique = true)
     private String nickname;
@@ -56,6 +59,10 @@ public class User extends BaseEntity{
     private UserStatus status;
 
     private LocalDateTime inactive_date;
+
+    // FIXME: 챌린지 조회 중 러닝데이터가 필요해서  임의로 넣었습니다. 이후에 수정해주세요.
+    @OneToMany(mappedBy = "user")
+    private List<RunningData> runningData = new ArrayList<>();
 
     public void encodePassword(String password) {
         this.password = password;

@@ -11,7 +11,13 @@ import java.util.Optional;
 @Repository
 public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChallenge, Long> {
 
-    // 사용자의 챌린지 상태 찾기 (하나의 솔로 챌린지의 생성 및 참여를 위해)
+    // Optional 반환
+    Optional<UserSoloChallenge> findByUserIdAndSoloChallenge_ChallengeStatusIn(
+            Long userId,
+            List<ChallengeStatus> statuses
+    );
+
+    // boolean 반환
     boolean existsByUserIdAndSoloChallenge_ChallengeStatusIn(
             Long userId,
             List<ChallengeStatus> statuses
@@ -28,5 +34,8 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
 
     // 사용자 아이디로 찾은 UserSoloChallenge
     UserSoloChallenge findByUserId (Long UserId);
+
+    // 사용자의 챌린지 메이트 찾기
+    Optional<UserSoloChallenge> findBySoloChallengeIdAndUserIdNot(Long challengeId, Long userId);
 
 }

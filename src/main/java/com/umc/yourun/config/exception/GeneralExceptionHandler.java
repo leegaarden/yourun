@@ -16,8 +16,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
-// 커스텀 익셉션 응답 구조 설정
 @Slf4j
 @RestControllerAdvice
 public class GeneralExceptionHandler {
@@ -29,22 +29,19 @@ public class GeneralExceptionHandler {
         return ApiResponse.error(errorCode);
     }
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(RunningException.class)
     public ApiResponse<Object> handleRunningException(RunningException e) {
         log.error("Running Exception: {}", e.getMessage());
         ErrorCode errorCode = e.getErrorCode();
         return ApiResponse.error(errorCode);
     }
 
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ApiResponse<Object> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        log.error("Invalid PathParameters: {}", e.getMessage());
+        return ApiResponse.error(ErrorCode.INVALID_PATH_PARAMETER);
+    }  // 닫는 괄호 추가
 
-
-    @ExceptionHandler(Exception.class)
-    public ApiResponse<Object> handleException(Exception e) {
-        log.error("Internal Server Error: {}", e.getMessage());
-        return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
-    }
-
-    // ENUM 타입에서 에러난 경우
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ApiResponse<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error("Invalid Enum Value: {}", e.getMessage());
@@ -54,16 +51,38 @@ public class GeneralExceptionHandler {
         return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE);
     }
 
-    //DTO형식에서 에러난 경우
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
-    public ApiResponse<List<Map<String,String>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ApiResponse<List<Map<String,String>>> handleValidationException(Exception e) {  // 파라미터 타입을 Exception으로 변경
         log.error("Invalid DTO Value: {}", e.getMessage());
-        List<Map<String, String>> fieldErrors = e.getBindingResult().getFieldErrors().stream()
-            .map(fieldError -> Map.of(
-                "field", fieldError.getField(),
-                "message", Objects.requireNonNull(fieldError.getDefaultMessage())
-            ))
-            .toList();
-        return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE,fieldErrors);
+        if (e instanceof MethodArgumentNotValidException) {
+            MethodArgumentNotValidException validException = (MethodArgumentNotValidException) e;
+            List<Map<String, String>> fieldErrors = validException.getBindingResult().getFieldErrors().stream()
+                    .map(fieldError -> Map.of(
+                            "field", fieldError.getField(),
+                            "message", Objects.requireNonNull(fieldError.getDefaultMessage())
+                    ))
+                    .toList();
+            return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE, fieldErrors);
+        }
+        // ConstraintViolationException 처리
+        return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE, null);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ApiResponse<Object> handleRuntimeException(RuntimeException e) {
+        log.error("Runtime Exception: {}", e.getMessage());
+
+        if (e instanceof GeneralException) {
+            GeneralException generalException = (GeneralException) e;
+            return ApiResponse.error(generalException.getErrorCode());
+        }
+
+        return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ApiResponse<Object> handleException(Exception e) {
+        log.error("Internal Server Error: {}", e.getMessage());
+        return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 }

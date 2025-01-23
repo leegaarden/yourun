@@ -78,7 +78,7 @@ public class UserService {
         return token;
     }
 
-    public Boolean deleteUser(String accessToken){
+    public Boolean deleteUser(String accessToken) {
         User user = jwtTokenProvider.getUserByToken(accessToken);
         user.setStatus(UserStatus.valueOf("INACTIVE"));
         user.setInactive_date(LocalDateTime.now());

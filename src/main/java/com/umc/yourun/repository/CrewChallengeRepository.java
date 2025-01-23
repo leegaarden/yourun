@@ -40,12 +40,6 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
     List<CrewChallenge> findPendingCrewsWithFourMembers();
 
     // 매칭 가능한 크루 찾기 (같은 기간, 4명, PENDING 상태)
-//    @Query("SELECT cc FROM CrewChallenge cc " +
-//            "WHERE cc.challengeStatus = 'PENDING' " +
-//            "AND cc.challengePeriod = :period " +
-//            "AND cc.id != :excludeId " +
-//            "AND (SELECT COUNT(ucc) FROM UserCrewChallenge ucc WHERE ucc.crewChallenge = cc) = 4")
-//    List<CrewChallenge> findMatchableCrew(ChallengePeriod period, Long excludeId);
     @Query("SELECT cc FROM CrewChallenge cc " +
             "WHERE cc.challengeStatus = 'PENDING' " +
             "AND cc.challengePeriod = :period " +

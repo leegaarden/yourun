@@ -1,4 +1,4 @@
-package com.umc.yourun.service.challenge;
+package com.umc.yourun.service;
 
 import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;

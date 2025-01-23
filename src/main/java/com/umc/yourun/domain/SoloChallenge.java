@@ -44,6 +44,7 @@ public class SoloChallenge extends BaseEntity {
     private ChallengePeriod challengePeriod;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ChallengeStatus challengeStatus;
 
     @OneToMany(mappedBy = "soloChallenge")
