@@ -44,7 +44,8 @@ public enum ErrorCode {
     RANKING_NOT_FOUND(400, "RK004", "아직 Ranking이 생성되지 않았습니다."),
 
     // User 관련 에러
-    USER_NOT_FOUND(500, "U001", "존재하지 않는 사용자입니다.");
+    INVALID_PATH_PARAMETER(400, "P001", "잘못된 PathParameter입니다."),
+    USER_NOT_FOUND(400, "U001", "존재하지 않는 사용자입니다.");
 
     private final int status;
     private final String code;

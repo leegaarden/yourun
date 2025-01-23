@@ -30,4 +30,19 @@ public class RunningDataResponseDTO{
 		Integer totalTime
 
 	) {}
+
+	@Schema(title = "RUNNING_RES_02 : 특정 월/일 러닝 데이터 조회 응답 DTO")
+	@Builder
+	public record RunningDataMonthlyResponseDTO(
+
+		@Schema(description = "러닝 결과 ID", example = "1")
+		Long id,
+
+		@Schema(description = "총 거리 (m) ", example = "5000")
+		Integer totalDistance,
+
+		@Schema(description = "총 시간 (s) ", example = "500000")
+		Integer totalTime
+
+	) {}
 }

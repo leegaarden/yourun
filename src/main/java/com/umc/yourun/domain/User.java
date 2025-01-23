@@ -1,9 +1,13 @@
 package com.umc.yourun.domain;
 
 import com.umc.yourun.domain.enums.UserStatus;
+import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,6 +41,14 @@ public class User extends BaseEntity{
     private UserStatus status;
 
     private LocalDateTime inactive_date;
+
+    // FIXME: 챌린지 조회 중 러닝데이터가 필요해서  임의로 넣었습니다. 이후에 수정해주세요.
+    @OneToMany(mappedBy = "user")
+    private List<RunningData> runningData = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    @Getter
+    private List<UserTag> userTags = new ArrayList<>();
 
     public void encodePassword(String password) {
         this.password = password;

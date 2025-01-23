@@ -2,10 +2,7 @@ package com.umc.yourun.domain;
 
 import com.umc.yourun.domain.enums.Tag;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Builder
@@ -16,6 +13,7 @@ public class UserTag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
     private Tag tag;

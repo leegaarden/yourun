@@ -1,5 +1,7 @@
 package com.umc.yourun.converter;
 
+import java.util.List;
+
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.dto.runningdata.RunningDataRequestDTO;
@@ -27,5 +29,15 @@ public class RunningDataConverter {
 			.totalDistance(runningData.getTotalDistance())
 			.totalTime(runningData.getTotalTime())
 			.build();
+	}
+
+	public static List<RunningDataResponseDTO.RunningDataMonthlyResponseDTO> toRunningDataMonthlyRes(List<RunningData> runningDataList) {
+		return runningDataList.stream()
+			.map(runningData -> RunningDataResponseDTO.RunningDataMonthlyResponseDTO.builder()
+				.id(runningData.getId())
+				.totalDistance(runningData.getTotalDistance())
+				.totalTime(runningData.getTotalTime())
+				.build())
+			.toList();
 	}
 }

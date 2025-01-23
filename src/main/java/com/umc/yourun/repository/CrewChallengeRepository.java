@@ -5,6 +5,7 @@ import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -40,12 +41,6 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
     List<CrewChallenge> findPendingCrewsWithFourMembers();
 
     // 매칭 가능한 크루 찾기 (같은 기간, 4명, PENDING 상태)
-//    @Query("SELECT cc FROM CrewChallenge cc " +
-//            "WHERE cc.challengeStatus = 'PENDING' " +
-//            "AND cc.challengePeriod = :period " +
-//            "AND cc.id != :excludeId " +
-//            "AND (SELECT COUNT(ucc) FROM UserCrewChallenge ucc WHERE ucc.crewChallenge = cc) = 4")
-//    List<CrewChallenge> findMatchableCrew(ChallengePeriod period, Long excludeId);
     @Query("SELECT cc FROM CrewChallenge cc " +
             "WHERE cc.challengeStatus = 'PENDING' " +
             "AND cc.challengePeriod = :period " +
@@ -56,4 +51,9 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
 
     // 이미 존재하는 크루명인지 확인
     boolean existsByCrewNameIgnoreCase(String name);
+
+    // PENDING 상태인 챌린지를 랜덤하게 5개 조회
+    @Query(value = "SELECT * FROM crew_challenge WHERE challenge_status = 'PENDING' ORDER BY RAND() LIMIT :size",
+            nativeQuery = true)
+    List<CrewChallenge> findRandomPendingChallenges(@Param("size") int size);
 }

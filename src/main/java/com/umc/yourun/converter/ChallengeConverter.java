@@ -4,18 +4,20 @@ import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
+import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
+import lombok.Builder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ChallengeConverter {
-
-
     //  1. DTO -> Entity
 
     // 1-1. 크루 챌린지 생성
@@ -23,6 +25,7 @@ public class ChallengeConverter {
         return CrewChallenge.builder()
                 .crewName(request.crewName())
                 .endDate(request.endDate())
+                .slogan(request.slogan())
                 .challengePeriod(challengePeriod)
                 .build();
     }
@@ -56,67 +59,37 @@ public class ChallengeConverter {
 
     // 2. Entity -> DTO
 
-    // 2-1. 상태별 크루 챌린지 응답
-    public static ChallengeResponse.CrewChallengeStatusRes toStatusCrewChallengeRes (CrewChallenge challenge) {
-        return new ChallengeResponse.CrewChallengeStatusRes(
-                challenge.getId(),
-                challenge.getCrewName(),
-                challenge.getStartDate(),
-                challenge.getEndDate(),
-                challenge.getChallengePeriod().getDays()
-        );
-    }
-
-    // 2-2. 상탭별 솔로 챌린지 응답
-    public static ChallengeResponse.SoloChallengeStatusRes toStatusSoloChallengeRes (SoloChallenge challenge) {
-        return new ChallengeResponse.SoloChallengeStatusRes(
-                challenge.getId(),
-                challenge.getStartDate(),
-                challenge.getEndDate(),
-                challenge.getChallengeDistance().getDistance(),
-                challenge.getChallengePeriod().getDays()
-        );
-    }
-
-    // 2-3. 사용자 관련된 솔로 챌린지 정보 응답
+    // 2-1. 사용자 관련된 솔로 챌린지 정보 응답
     public static ChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
             SoloChallenge challenge,
-            Long userId,
-            Long mateId) {
+            Long mateId,
+            int soloCountDay,
+            String mateNickName) {
         return new ChallengeResponse.UserSoloChallengeInfo(
                 challenge.getId(),
                 challenge.getChallengeStatus(),
                 challenge.getChallengeDistance().getDistance(),
                 challenge.getChallengePeriod().getDays(),
-                mateId
+                mateId,
+                mateNickName,
+                soloCountDay,
+                challenge.getStartDate()
         );
     }
 
-    // 2-4. 사용자 관련 크루 챌린지 정보 응답
+    // 2-2. 사용자 관련 크루 챌린지 정보 응답
     public static ChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
             CrewChallenge challenge,
-            List<Long> crewMemberIds) {
+            List<Long> crewMemberIds,
+            int crewCountDay) {
         return new ChallengeResponse.UserCrewChallengeInfo(
                 challenge.getId(),
                 challenge.getCrewName(),
                 challenge.getChallengeStatus(),
                 challenge.getChallengePeriod().getDays(),
-                crewMemberIds
-        );
-    }
-
-    // 2-5. 크루 챌린지 매칭 응답
-    public static ChallengeResponse.CrewMatchingRes toCrewMatchingRes(
-            CrewChallenge myCrew,
-            List<Long> crewMemberIds,
-            String matchedCrewName,
-            List<Long> matchedCrewMemberIds) {
-        return new ChallengeResponse.CrewMatchingRes(
-                myCrew.getChallengePeriod().getDays(),
-                myCrew.getCrewName(),
                 crewMemberIds,
-                matchedCrewName,
-                matchedCrewMemberIds
+                crewCountDay,
+                challenge.getStartDate()
         );
     }
 

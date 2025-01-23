@@ -98,10 +98,10 @@ public class UserService {
         // 토큰 검증 및 Claims 추출
         try {
             claims = Jwts.parserBuilder()
-                            .setSigningKey(SECRET_KEY) // 비밀 키 설정
-                            .build()
-                            .parseClaimsJws(token) // 토큰 검증
-                            .getBody(); // Claims 반환
+                    .setSigningKey(SECRET_KEY) // 비밀 키 설정
+                    .build()
+                    .parseClaimsJws(token) // 토큰 검증
+                    .getBody(); // Claims 반환
         } catch (Exception e) {
             throw new RuntimeException("Invalid JWT token", e);
         }
