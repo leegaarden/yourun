@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.Provider;
 import java.util.Collection;
@@ -30,16 +31,16 @@ import java.util.UUID;
 @Configuration
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .securityMatcher("/users/**")
+//                .securityMatcher("/users/**")
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/users/login", "/users").permitAll()
-                      //.requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable());
-
         return http.build();
     }
 

@@ -1,5 +1,6 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.converter.UserConverter;
 import com.umc.yourun.converter.UserTagConverter;
 import com.umc.yourun.domain.User;
@@ -22,10 +23,7 @@ import org.springframework.stereotype.Service;
 import com.umc.yourun.config.exception.custom.UserException;
 import java.security.Key;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -34,18 +32,22 @@ public class UserService {
     private final UserTagRepository userTagRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserService(UserRepository userRepository, UserTagRepository userTagRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public UserService(UserRepository userRepository, UserTagRepository userTagRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.userTagRepository = userTagRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public boolean joinMember(UserRequestDTO.JoinDto request) {
         if(!request.password().equals(request.passwordcheck())){
+            return false;
+        }
+        if(request.tag1().equals(request.tag2())){
             return false;
         }
 
@@ -69,49 +71,14 @@ public class UserService {
         // 인증 컨텍스트에 저장
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // 토큰 생성 헤더
-        Map<String, Object> headers = new HashMap<>();
-        headers.put("alg", "HS256");
-        headers.put("typ", "JWT");
-
-        // 클레임 (Payload)
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("email", loginDto.email());
-        //claims.put("role", "USER");
-
         Map<String, String> token = new HashMap<>();
 
-        // 현재 시간
-        long now = System.currentTimeMillis();
-
-        token.put("access_token", Jwts.builder()
-                                    .setHeader(headers)
-                                    .setClaims(claims)
-                                    .setSubject("AccessToken") // 토큰 용도
-                                    .setIssuedAt(new Date(now)) // 발행 시간
-                                    .setExpiration(new Date(now + 1000 * 60 * 15)) // 만료 시간
-                                    .signWith(SECRET_KEY) // 서명
-                                    .compact());
+        token.put("access_token", jwtTokenProvider.createToken(loginDto.email(), Collections.singletonList("USER")));
         return token;
     }
 
-    public Optional<User> getUserByToken(String token){
-        Claims claims;
-        // 토큰 검증 및 Claims 추출
-        try {
-            claims = Jwts.parserBuilder()
-                            .setSigningKey(SECRET_KEY) // 비밀 키 설정
-                            .build()
-                            .parseClaimsJws(token) // 토큰 검증
-                            .getBody(); // Claims 반환
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid JWT token", e);
-        }
-        return userRepository.findByEmail((String) claims.get("email"));
-    }
-
     public Boolean deleteUser(String accessToken){
-        User user = getUserByToken(accessToken).get();
+        User user = jwtTokenProvider.getUserByToken(accessToken);
         user.setStatus(UserStatus.valueOf("INACTIVE"));
         user.setInactive_date(LocalDateTime.now());
         return true;

@@ -1,6 +1,7 @@
 package com.umc.yourun.dto.user;
 
 import com.umc.yourun.domain.enums.Tag;
+import com.umc.yourun.domain.enums.Tendency;
 
 public class UserRequestDTO {
     public record JoinDto(
@@ -8,6 +9,7 @@ public class UserRequestDTO {
         String password,
         String passwordcheck,
         String nickname,
+        Tendency tendency,
         Tag tag1,
         Tag tag2
     ){}
