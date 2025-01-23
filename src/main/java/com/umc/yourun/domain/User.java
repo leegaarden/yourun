@@ -32,15 +32,12 @@ public class User extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Email(message = "올바른 형식의 이메일 주소여야 합니다.")
     @Column(length = 30, nullable = false, unique = true)
     private String email;
 
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Pattern(regexp = "^[가-힣]{2,4}$", message = "닉네임은 띄어쓰기 없이 한글 2~4자만 가능합니다.")
     @Column(length = 10, nullable = false, unique = true)
     private String nickname;
 
@@ -60,7 +57,7 @@ public class User extends BaseEntity{
 
     private LocalDateTime inactive_date;
 
-    // FIXME: 챌린지 조회 중 러닝데이터가 필요해서  임의로 넣었습니다. 이후에 수정해주세요.
+    // FIXME: 챌린지 조회 중 러닝데이터가 필요해서 임의로 넣었습니다. 이후에 수정해주세요.
     @OneToMany(mappedBy = "user")
     private List<RunningData> runningData = new ArrayList<>();
 
