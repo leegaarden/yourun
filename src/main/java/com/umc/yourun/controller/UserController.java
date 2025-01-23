@@ -30,6 +30,10 @@ public class UserController {
             return  ApiResponse.error(INVALID_INPUT_VALUE);
         }
     }
+    @PatchMapping("")
+    public ApiResponse<Boolean> delete(@RequestHeader("Authorization") String acesstoken){
+        return ApiResponse.success("회원의 상태가 비활성화 상태가 되었습니다. 3일 안에 회원 탈퇴를 취소하지 않으면 계정을 복구할 수 없습니다.", userService.deleteUser(acesstoken));
+    }
 
     @PostMapping("/login")
     public ApiResponse<Map<String,String>> getAccessToken(@RequestBody UserRequestDTO.LoginDto loginDto){
