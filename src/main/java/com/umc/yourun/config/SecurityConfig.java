@@ -1,6 +1,8 @@
 package com.umc.yourun.config;
 
 import com.umc.yourun.domain.User;
+import com.umc.yourun.service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +21,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.Provider;
 import java.util.Collection;
@@ -28,16 +31,16 @@ import java.util.UUID;
 @Configuration
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .securityMatcher("/users/**")
+//                .securityMatcher("/users/**")
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/users/login", "/users").permitAll()
-                      //.requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/users/login", "/api/v1/users", "/swagger-ui/**", "/api-docs/**").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable());
-
         return http.build();
     }
 
@@ -58,9 +61,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
+    public AuthorizationServerSettings authorizationServerSettings(@Value("${springdoc.security.oauth2.client.registration.custom-client.token-uri}") String tokenUri){
         return AuthorizationServerSettings.builder()
-                .issuer("http://localhost:8080") // 인증 서버의 기본 주소
+                .issuer(tokenUri) // 인증 서버의 기본 주소
                 .tokenEndpoint("/oauth/token")
                 .build();
     }
@@ -68,16 +71,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
-                org.springframework.security.core.userdetails.User
-                .withUsername("seokun921@naver.com")
-                .password(passwordEncoder().encode("chltjr123@"))
-                .build()
-        );
     }
 
     @Bean

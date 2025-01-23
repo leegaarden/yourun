@@ -36,12 +36,15 @@ public class GeneralExceptionHandler {
         return ApiResponse.error(errorCode);
     }
 
+    // 잘못된 PathParameters가 들어온 경우
     @ExceptionHandler(HandlerMethodValidationException.class)
-public ApiResponse<Object> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
-    log.error("Invalid PathParameters: {}", e.getMessage());
-    return ApiResponse.error(ErrorCode.INVALID_PATH_PARAMETER);
+    public ApiResponse<Object> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        log.error("Invalid PathParameters: {}", e.getMessage());
+        return ApiResponse.error(ErrorCode.INVALID_PATH_PARAMETER);
     }
 
+
+    // ENUM 타입에서 에러난 경우
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ApiResponse<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error("Invalid Enum Value: {}", e.getMessage());
@@ -72,11 +75,13 @@ public ApiResponse<Object> handleHandlerMethodValidationException(HandlerMethodV
     public ApiResponse<Object> handleRuntimeException(RuntimeException e) {
         log.error("Runtime Exception: {}", e.getMessage());
 
+        // GeneralException인 경우
         if (e instanceof GeneralException) {
             GeneralException generalException = (GeneralException) e;
             return ApiResponse.error(generalException.getErrorCode());
         }
 
+        // 그 외의 RuntimeException인 경우
         return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 

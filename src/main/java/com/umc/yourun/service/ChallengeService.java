@@ -1,5 +1,6 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorCode;
 import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.config.exception.custom.ChallengeException;
@@ -22,10 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,21 +37,21 @@ public class ChallengeService {
     private final UserCrewChallengeRepository userCrewChallengeRepository;
     private final UserRepository userRepository;
     private final RunningDataRepository runningDataRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 크루 챌린지 생성
     @Transactional
-    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, Long userId) {
+    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
 
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+        User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 이미 진행 중 (혹은 대기) 인 크루 챌린지가 있는지 검사
         if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(
-                userId,
+                user.getId(),
                 Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
 
-            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(userId);
+            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
 
             // 사용자가 생성자였던 경우
             if (userCrewChallenge.isCreator()) {
@@ -117,31 +115,32 @@ public class ChallengeService {
     // PENDING 상태인 크루 챌린지 조회 : 크루원이 4명 미만으로 아직 결성되지 않은
     @Transactional(readOnly = true)
     public List<ChallengeResponse.CrewChallengeRes> getPendingCrewChallenges(Long userId) {
-        // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
-        // PENDING 상태인 크루 챌린지 조회
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findRandomPendingChallenges(5);
 
         return pendingChallenges.stream()
                 .map(challenge -> {
-                    // 현재 참여 인원 조회
-                    List<Long> participants = userCrewChallengeRepository
+                    // 현재 참여자들의 ID와 성향 정보 조회
+                    List<ChallengeResponse.CrewMemberTendencyInfo> participantInfos = userCrewChallengeRepository
                             .findByCrewChallengeIdOrderByCreatedAt(challenge.getId())
                             .stream()
-                            .map(uc -> uc.getUser().getId())
+                            .map(uc -> {
+                                User participant = uc.getUser();
+                                return new ChallengeResponse.CrewMemberTendencyInfo(
+                                        participant.getId(),
+                                        participant.getTendency()
+                                );
+                            })
                             .collect(Collectors.toList());
 
-                    // 4명 미만인 크루만 필터링
-                    if (participants.size() >= 4) {
+                    if (participantInfos.size() >= 4) {
                         return null;
                     }
 
-                    // 남은 자리 계산
-                    int remaining = 4 - participants.size();
+                    int remaining = 4 - participantInfos.size();
 
-                    // 기간에 따른 보상 계산
                     int reward = switch (challenge.getChallengePeriod().getDays()) {
                         case 3 -> 1;
                         case 4 -> 2;
@@ -157,10 +156,10 @@ public class ChallengeService {
                             challenge.getChallengePeriod().getDays(),
                             remaining,
                             reward,
-                            participants
+                            participantInfos
                     );
                 })
-                .filter(Objects::nonNull)  // 4명 이상인 크루 제외
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -450,7 +449,7 @@ public class ChallengeService {
     }
 
     // 크루 챌린지의 상세 진행도 (홈 화면 - 크루 챌린지 클릭)
-    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long userId) {
+    public ChallengeResponse.CrewChallengeDetailProgressRes getCrewChallengeDetailProgress (Long userId) {
 
         // 유저 조회
         User user = userRepository.findById(userId)
@@ -470,7 +469,7 @@ public class ChallengeService {
                 .stream()
                 .map(member -> new ChallengeResponse.CrewMemberInfo(
                         member.getUser().getId(),
-                        calculateTotalDistance(challengeId, member.getUser().getId())
+                        calculateTotalDistance(challengeId, member.getUser().getId()) // 이미 km로 변환된 값
                 ))
                 .toList();
 
@@ -486,13 +485,13 @@ public class ChallengeService {
                 .toList();
 
         // 4. 전체 달성 거리 계산 (해당 유저의 달성 거리와 전체 거리)
-        int userDistance = calculateTotalDistance(challengeId, userId);
+        double userDistance = calculateTotalDistance(challengeId, userId);
 
-        int totalDistance = myCrewMembers.stream()
-                .mapToInt(ChallengeResponse.CrewMemberInfo::runningDistance)
+        double totalDistance = myCrewMembers.stream()
+                .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
         totalDistance += matchedCrewMemberIds.stream()
-                .mapToInt(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
+                .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
         // 5. 진행률 계산 (유저의 달성 비율)
@@ -500,11 +499,41 @@ public class ChallengeService {
         if (totalDistance > 0) {
             progressRatio = (double) userDistance / totalDistance * 100;
         }
-        return new ChallengeResponse.CrewChallengeDetailRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
+        return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 matchedCrewName, matchedCrew.getSlogan(), matchedCrewMemberIds, progressRatio);
 
     }
 
+    // 크루 챌린지 상세 조회
+    @Transactional(readOnly = true)
+    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long challengeId, Long userId) {
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        // 크루 챌린지 조회
+        Optional<CrewChallenge> crewChallenge = crewChallengeRepository.findById(challengeId);
+
+        List<Long> participants = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
+                .stream()
+                .map(uc -> uc.getUser().getId())
+                .toList();
+        int remaining = 4 - participants.size();
+        // 기간에 따른 보상 계산
+        int reward = switch (crewChallenge.get().getChallengePeriod().getDays()) {
+            case 3 -> 1;
+            case 4 -> 2;
+            case 5 -> 3;
+            default -> 0;
+        };
+
+        return new ChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(), crewChallenge.get().getStartDate(), crewChallenge.get().getEndDate(),
+                crewChallenge.get().getChallengePeriod().getDays(), remaining, reward, participants, crewChallenge.get().getSlogan());
+
+    }
+
+    // 활용 메소드들
     // 기간 검사
     private ChallengePeriod validateDates(LocalDate endDate) {
         LocalDate startDate = LocalDate.now().plusDays(1);
@@ -530,22 +559,19 @@ public class ChallengeService {
     }
 
     // 크루원들이 달린 거리 계산
-    private int calculateTotalDistance(Long challengeId, Long userId) {
-        // 1. 챌린지 기간 조회
+    private double calculateTotalDistance(Long challengeId, Long userId) {
         CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        // 2. 시작일의 시작(00:00:00)과 현재 시간 설정
         LocalDateTime periodStart = challenge.getStartDate().atStartOfDay();
         LocalDateTime currentTime = LocalDateTime.now();
 
-        // 3. 챌린지가 아직 시작되지 않았다면 0 반환
         if (currentTime.isBefore(periodStart)) {
-            return 0;
+            return 0.0;
         }
 
-        // 4. 해당 기간 동안의 총 러닝 거리 조회
-        return runningDataRepository.sumDistanceByUserIdAndPeriod(userId, periodStart, currentTime);
+        // 미터 단위 합계를 킬로미터로 변환
+        return runningDataRepository.sumDistanceByUserIdAndPeriod(userId, periodStart, currentTime) / 1000.0;
     }
 
 
