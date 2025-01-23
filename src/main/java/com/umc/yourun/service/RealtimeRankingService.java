@@ -17,7 +17,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class RealtimeRankingService {
 
     private static final int PAGE_SIZE = 10;  // 페이지 크기 상수 설정
