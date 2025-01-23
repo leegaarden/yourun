@@ -1,13 +1,11 @@
 package com.umc.yourun.dto.challenge;
 
-import com.umc.yourun.config.exception.custom.annotation.ValidSlogan;
-import com.umc.yourun.domain.enums.ChallengeDistance;
-import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
 
+// TODO : 성향 받아야 함
 public class ChallengeResponse {
 
     @Schema(title = "CHALLENGE_RES_01 : 4명 결성 대기 중인 크루 챌린지 응답 DTO")
@@ -42,7 +40,7 @@ public class ChallengeResponse {
             List<Long> participantIds
     ) {}
 
-    @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 및 솔로 챌린지 상세 페이지 응답 DTO")
+    @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 DTO")
     public record SoloChallengeRes(
             @Schema(description = "챌린지 ID", example = "1")
             Long challengeId,
@@ -67,8 +65,6 @@ public class ChallengeResponse {
 
             @Schema(description = "보상 개수", example = "2")
             int reward
-
-
 
     ) {}
 
@@ -271,5 +267,31 @@ public class ChallengeResponse {
 
             @Schema(description = "크루 구호", example = "헤르메스 신발의 주인공")
             String slogan
+    ) {}
+
+    @Schema(title = "CHALLENGE_RES_09 : 솔로 챌린지 상세 페이지 응답 DTO")
+    public record SoloChallengeDetailRes(
+
+            @Schema(description = "시작일", example = "2025-01-15")
+            LocalDate startDate,
+
+            @Schema(description = "마감일", example = "2025-01-20")
+            LocalDate endDate,
+
+            @Schema(description = "챌린지 거리", example = "1")
+            int challengeDistance,
+
+            @Schema(description = "챌린지 기간", example = "4")
+            int challengePeriod,
+
+            @Schema(description = "챌린지 메이트 닉네임", example = "청정원")
+            String challengeCreatorNickName,
+
+            @Schema(description = "챌린지 메이트의 해시태그")
+            List<String> challengeCreatorHashTags,
+
+            @Schema(description = "보상 개수", example = "2")
+            int reward
+
     ) {}
 }
