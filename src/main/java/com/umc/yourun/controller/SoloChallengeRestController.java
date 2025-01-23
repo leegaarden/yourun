@@ -32,10 +32,9 @@ public class SoloChallengeRestController {
     })
     @PostMapping()
     public ApiResponse<Long> createSoloChallenge(
-            // @RequestHeader("Authorization") String token,
-            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
-        Long challengeId = challengeService.createSoloChallenge(request, userId);
+        Long challengeId = challengeService.createSoloChallenge(request, accessToken);
         return ApiResponse.success("솔로 챌린지가 생성되었습니다.", challengeId);
     }
 
@@ -46,10 +45,10 @@ public class SoloChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending")
-    public ApiResponse<List<ChallengeResponse.SoloChallengeRes>> getPendingSoloChallenges(
-            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    public ApiResponse<ChallengeResponse.SoloChallenge> getPendingSoloChallenges(
+            @RequestHeader(value = "Authorization") String accessToken
     ) {
-        List<ChallengeResponse.SoloChallengeRes> result = challengeService.getPendingSoloChallenges(userId);
+        ChallengeResponse.SoloChallenge result = challengeService.getPendingSoloChallenges(accessToken);
         return ApiResponse.success("대기 중인 솔로 챌린지 목록입니다.", result);
     }
 
@@ -61,9 +60,9 @@ public class SoloChallengeRestController {
     })
     @PostMapping("/{challengeId}/join")
     public ApiResponse<ChallengeResponse.ChallengeMateRes> joinSoloChallenge(
-            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.ChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, userId);
+        ChallengeResponse.ChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, accessToken);
         return ApiResponse.success("솔로 챌린지 참여가 완료되었습니다.", response);
     }
 
