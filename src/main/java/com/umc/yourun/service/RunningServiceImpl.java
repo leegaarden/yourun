@@ -13,6 +13,7 @@ import com.umc.yourun.config.exception.custom.RunningException;
 import com.umc.yourun.converter.RunningDataConverter;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
+import com.umc.yourun.domain.enums.RunningDataStatus;
 import com.umc.yourun.dto.runningdata.RunningDataRequestDTO;
 import com.umc.yourun.repository.RunningDataRepository;
 import com.umc.yourun.repository.UserRepository;
@@ -47,7 +48,20 @@ public class RunningServiceImpl implements RunningService{
 		User user=userRepository.findById(1L).orElseThrow(()->new RunningException(ErrorCode.USER_NOT_FOUND));
 		LocalDateTime startDateTime = LocalDateTime.of(years, months, 1, 0, 0, 0);
 		LocalDateTime endDateTime = startDateTime.plusMonths(1);
-		return runningDataRepository.findByStartTimeBetweenAndUser(startDateTime,endDateTime,user);
+		return runningDataRepository.findByStatusAndStartTimeBetweenAndUser(RunningDataStatus.ACTIVE,startDateTime,endDateTime,user);
+	}
+
+	@Override
+	public RunningData getRunningDataById(Long id) {
+		return runningDataRepository.findByIdAndStatus(id,RunningDataStatus.ACTIVE).orElseThrow(()->new RunningException(ErrorCode.RUNNING_DATA_NOT_FOUND));
+	}
+
+	@Override
+	@Transactional
+	public RunningData updateRunningData(Long id, RunningDataStatus status) {
+		RunningData runningData=runningDataRepository.findByIdAndStatus(id,RunningDataStatus.ACTIVE).orElseThrow(()->new RunningException(ErrorCode.RUNNING_DATA_NOT_FOUND));
+		runningData.setStatus(status);
+		return runningData;
 	}
 
 	private Integer calculateTotalTime(LocalDateTime startTime, LocalDateTime endTime) {

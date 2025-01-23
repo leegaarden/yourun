@@ -36,6 +36,7 @@ public enum ErrorCode {
 
     //Running 관련 에러
     INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
+    RUNNING_DATA_NOT_FOUND(400, "R002", "존재하지 않는 러닝 데이터입니다."),
 
     // User 관련 에러
     INVALID_PATH_PARAMETER(400, "P001", "잘못된 PathParameter입니다."),

@@ -31,13 +31,19 @@ public class RunningDataConverter {
 			.build();
 	}
 
-	public static List<RunningDataResponseDTO.RunningDataMonthlyResponseDTO> toRunningDataMonthlyRes(List<RunningData> runningDataList) {
+	public static List<RunningDataResponseDTO.RunningDataInfo> toRunningDataRes(List<RunningData> runningDataList) {
 		return runningDataList.stream()
-			.map(runningData -> RunningDataResponseDTO.RunningDataMonthlyResponseDTO.builder()
-				.id(runningData.getId())
-				.totalDistance(runningData.getTotalDistance())
-				.totalTime(runningData.getTotalTime())
-				.build())
+			.map(RunningDataConverter::toRunningDataRes)
 			.toList();
+	}
+
+	public static RunningDataResponseDTO.RunningDataInfo toRunningDataRes(RunningData runningData) {
+		return RunningDataResponseDTO.RunningDataInfo.builder()
+			.id(runningData.getId())
+			.totalDistance(runningData.getTotalDistance())
+			.totalTime(runningData.getTotalTime())
+			.pace(runningData.getPace())
+			.createdAt(runningData.getCreatedAt())
+			.build();
 	}
 }
