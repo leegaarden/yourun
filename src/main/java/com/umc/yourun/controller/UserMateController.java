@@ -21,15 +21,16 @@ public class UserMateController {
         this.userMateService = userMateService;
     }
 
-//    @PostMapping("/{userId}/mates/{mateId}")
-//    @ResponseBody
-//    public ApiResponse addMate(@PathVariable Long userId,@PathVariable Long mateId){
-//        if(userMateService.addmate(userId, mateId).equals(true)) {
-//            return ApiResponse.success("메이트 추가에 성공했습니다.", true);
-//        }else{
-//            return ApiResponse.error(INVALID_INPUT_VALUE);
-//        }
-//    }
+    @PostMapping("/mates/{mateId}")
+    @ResponseBody
+    public ApiResponse<Boolean> addMate(@RequestHeader("Authorization") String accessToken, @PathVariable Long mateId){
+        System.out.println(accessToken);
+        if(userMateService.addmate(accessToken, mateId)) {
+            return ApiResponse.success("메이트 추가에 성공했습니다.", true);
+        }else{
+            return ApiResponse.error(INVALID_INPUT_VALUE);
+        }
+    }
 
 //    @GetMapping("/{userId}/mates")
 //    @ResponseBody
