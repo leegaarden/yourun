@@ -1,6 +1,7 @@
 package com.umc.yourun.dto.challenge;
 
 import com.umc.yourun.domain.enums.ChallengeStatus;
+import com.umc.yourun.domain.enums.Tendency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,13 +32,18 @@ public class ChallengeResponse {
             @Schema(description = "보상 개수", example = "2")
             int reward,
 
-            @Schema(description = "참여자 ID 목록", example = """
-                    [
-                          1,
-                          2,
-                          3
-                        ]""")
-            List<Long> participantIds
+            @Schema(description = "참여자 ID 및 성향 목록")
+            List<CrewMemberTendencyInfo> participantIdsInfo
+
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_01 - 1 : 크루원 성향 정보")
+    public record CrewMemberTendencyInfo(
+            @Schema(description = "사용자 ID", example = "1")
+            Long userId,
+
+            @Schema(description = "크루원의 성향", example = "페이스메이커")
+            Tendency memberTendency
     ) {}
 
     @Schema(title = "CHALLENGE_RES_02 : 매칭 대기 중인 솔로 챌린지 응답 DTO")

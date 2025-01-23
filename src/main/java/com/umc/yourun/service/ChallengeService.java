@@ -114,31 +114,32 @@ public class ChallengeService {
     // PENDING 상태인 크루 챌린지 조회 : 크루원이 4명 미만으로 아직 결성되지 않은
     @Transactional(readOnly = true)
     public List<ChallengeResponse.CrewChallengeRes> getPendingCrewChallenges(Long userId) {
-        // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
-        // PENDING 상태인 크루 챌린지 조회
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findRandomPendingChallenges(5);
 
         return pendingChallenges.stream()
                 .map(challenge -> {
-                    // 현재 참여 인원 조회
-                    List<Long> participants = userCrewChallengeRepository
+                    // 현재 참여자들의 ID와 성향 정보 조회
+                    List<ChallengeResponse.CrewMemberTendencyInfo> participantInfos = userCrewChallengeRepository
                             .findByCrewChallengeIdOrderByCreatedAt(challenge.getId())
                             .stream()
-                            .map(uc -> uc.getUser().getId())
+                            .map(uc -> {
+                                User participant = uc.getUser();
+                                return new ChallengeResponse.CrewMemberTendencyInfo(
+                                        participant.getId(),
+                                        participant.getTendency()
+                                );
+                            })
                             .collect(Collectors.toList());
 
-                    // 4명 미만인 크루만 필터링
-                    if (participants.size() >= 4) {
+                    if (participantInfos.size() >= 4) {
                         return null;
                     }
 
-                    // 남은 자리 계산
-                    int remaining = 4 - participants.size();
+                    int remaining = 4 - participantInfos.size();
 
-                    // 기간에 따른 보상 계산
                     int reward = switch (challenge.getChallengePeriod().getDays()) {
                         case 3 -> 1;
                         case 4 -> 2;
@@ -154,10 +155,10 @@ public class ChallengeService {
                             challenge.getChallengePeriod().getDays(),
                             remaining,
                             reward,
-                            participants
+                            participantInfos
                     );
                 })
-                .filter(Objects::nonNull)  // 4명 이상인 크루 제외
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
