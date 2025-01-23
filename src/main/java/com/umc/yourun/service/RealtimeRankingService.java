@@ -36,13 +36,7 @@ public class RealtimeRankingService {
         List<User> users = userRepository.findAll();
 
         // 각 멤버의 총점 계산
-        Map<User, Integer> scores = users.stream()
-                .collect(Collectors.toMap(
-                        user -> user,
-                        user -> runningDataRepository.findByUser(user).stream()
-                                .mapToInt(RunningData::getTotalDistance)
-                                .sum()
-                ));
+        Map<User, Integer> scores = calculateUserScore(users);
 
         // 점수를 기준으로 내림차순 정렬 후 리스트로 변환
         List<Map.Entry<User, Integer>> sortedRanking = scores.entrySet()
@@ -51,13 +45,7 @@ public class RealtimeRankingService {
                 .collect(Collectors.toList());
 
         // 요청한 유저의 등수 계산
-        int rank = 1;
-        for (Map.Entry<User, Integer> entry : sortedRanking) {
-            if (entry.getKey().equals(requestedUser)) {
-                break;
-            }
-            rank++;
-        }
+        int rank = calculateUserRank(requestedUser, sortedRanking);
 
 
         // 페이지네이션 적용
@@ -82,6 +70,28 @@ public class RealtimeRankingService {
                 .username(requestedUser.getNickname())
                 .list(list)
                 .build();
+    }
+
+    private static int calculateUserRank(User requestedUser, List<Map.Entry<User, Integer>> sortedRanking) {
+        int rank = 1;
+        for (Map.Entry<User, Integer> entry : sortedRanking) {
+            if (entry.getKey().equals(requestedUser)) {
+                break;
+            }
+            rank++;
+        }
+        return rank;
+    }
+
+    private Map<User, Integer> calculateUserScore(List<User> users) {
+        Map<User, Integer> scores = users.stream()
+                .collect(Collectors.toMap(
+                        user -> user,
+                        user -> runningDataRepository.findByUser(user).stream()
+                                .mapToInt(RunningData::getTotalDistance)
+                                .sum()
+                ));
+        return scores;
     }
 
 }
