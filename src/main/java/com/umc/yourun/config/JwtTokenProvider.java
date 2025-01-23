@@ -49,7 +49,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(token.substring(7))
                 .getBody(); // Claims 추출
 
         return userRepository.findByEmail(claims.getSubject()).get(); // "sub" 필드 사용
