@@ -44,13 +44,13 @@ public class RealtimeRankingService {
                                 .sum()
                 ));
 
-        // 점수를 기준으로 내림차순 정렬 후 리스트로 변환 (순위 계산을 위해)
+        // 점수를 기준으로 내림차순 정렬 후 리스트로 변환
         List<Map.Entry<User, Integer>> sortedRanking = scores.entrySet()
                 .stream()
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                 .collect(Collectors.toList());
 
-        // 요청한 유저의 등수 계산 (1-based index)
+        // 요청한 유저의 등수 계산
         int rank = 1;
         for (Map.Entry<User, Integer> entry : sortedRanking) {
             if (entry.getKey().equals(requestedUser)) {
