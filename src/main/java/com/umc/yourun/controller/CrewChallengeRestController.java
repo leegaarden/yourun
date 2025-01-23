@@ -31,10 +31,10 @@ public class CrewChallengeRestController {
     })
     @PostMapping("")
     public ApiResponse<Long> createCrewChallenge(
-            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
 
-        Long challengeId = challengeService.createCrewChallenge(request, userId );
+        Long challengeId = challengeService.createCrewChallenge(request, accessToken);
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
     }
 

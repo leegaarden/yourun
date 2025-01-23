@@ -1,5 +1,6 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorCode;
 import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.config.exception.custom.ChallengeException;
@@ -36,21 +37,21 @@ public class ChallengeService {
     private final UserCrewChallengeRepository userCrewChallengeRepository;
     private final UserRepository userRepository;
     private final RunningDataRepository runningDataRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 크루 챌린지 생성
     @Transactional
-    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, Long userId) {
+    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
 
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+        User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 이미 진행 중 (혹은 대기) 인 크루 챌린지가 있는지 검사
         if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(
-                userId,
+                user.getId(),
                 Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
 
-            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(userId);
+            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
 
             // 사용자가 생성자였던 경우
             if (userCrewChallenge.isCreator()) {
