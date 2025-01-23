@@ -9,6 +9,9 @@ public enum RunningTargetTime {
 	private final int time;
 
 	RunningTargetTime(int time) {
+		if(time%15 != 0) {
+			throw new IllegalArgumentException("시간은 15의 배수여야 합니다.");
+		}
 		this.time = time;
 	}
 
