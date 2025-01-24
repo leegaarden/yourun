@@ -45,10 +45,10 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending")
-    public ApiResponse<List<ChallengeResponse.CrewChallengeRes>> getPendingCrewChallenges(
-            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    public ApiResponse<ChallengeResponse.CrewChallenge> getPendingCrewChallenges(
+            @RequestHeader(value = "Authorization") String accessToken
     ) {
-        List<ChallengeResponse.CrewChallengeRes> result = challengeService.getPendingCrewChallenges(userId);
+        ChallengeResponse.CrewChallenge result = challengeService.getPendingCrewChallenges(accessToken);
         return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", result);
     }
 
@@ -60,9 +60,9 @@ public class CrewChallengeRestController {
     })
     @PostMapping("/{challengeId}/join")
     public ApiResponse<ChallengeResponse.CrewChallengeMateRes> joinCrewChallenge(
-            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.CrewChallengeMateRes response = challengeService.joinCrewChallenge(challengeId, userId);
+        ChallengeResponse.CrewChallengeMateRes response = challengeService.joinCrewChallenge(challengeId, accessToken);
         return ApiResponse.success("크루 챌린지 참여가 완료되었습니다.", response);
     }
 
@@ -76,8 +76,8 @@ public class CrewChallengeRestController {
     })
     @GetMapping("/match")
     public ApiResponse<ChallengeResponse.CrewMatchingRes> getCrewMatch(
-            @RequestHeader("USER-ID") Long userId) {
-        ChallengeResponse.CrewMatchingRes response = challengeService.getCrewMatch(userId);
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.CrewMatchingRes response = challengeService.getCrewMatch(accessToken);
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
 
@@ -91,8 +91,8 @@ public class CrewChallengeRestController {
     })
     @GetMapping("/match/detail-progress")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
-            @RequestHeader("USER-ID") Long userId) {
-        ChallengeResponse.CrewChallengeDetailProgressRes response = challengeService.getCrewChallengeDetailProgress(userId);
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.CrewChallengeDetailProgressRes response = challengeService.getCrewChallengeDetailProgress(accessToken);
         return ApiResponse.success("크루 챌린지 상세 진행도 정보입니다.", response);
     }
 
@@ -105,10 +105,10 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending/{challengeId}")
-    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewDetail(
-            @RequestHeader("USER-ID") Long userId,
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewChallengeDetail(
+            @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, userId);
+        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, accessToken);
         return ApiResponse.success("크루 챌린지 상세 정보입니다.", response);
     }
 }
