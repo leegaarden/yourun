@@ -18,6 +18,8 @@ import java.util.Optional;
 public interface RunningDataRepository extends JpaRepository<RunningData, Long> {
 	List<RunningData> findByStatusAndStartTimeBetweenAndUser(RunningDataStatus status, LocalDateTime startTimeAfter, LocalDateTime startTimeBefore, User user);
 
+    List<RunningData> findByUser(User user);
+
 	Optional<RunningData> findByIdAndStatus(Long id, RunningDataStatus status);
 
     // 특정 사용자의 특정 기간 동안의 총 러닝 거리 조회 (크루원별 달린 거리 포함된 진행도 확인용)

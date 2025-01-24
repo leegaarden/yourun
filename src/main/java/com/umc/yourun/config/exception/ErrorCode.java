@@ -38,6 +38,12 @@ public enum ErrorCode {
     INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
     RUNNING_DATA_NOT_FOUND(400, "R002", "존재하지 않는 러닝 데이터입니다."),
 
+    //Ranking 관련 에러
+    INVALID_RANKING_SCORE(400, "RK001", "Ranking Score는 0 이상이어야 합니다"),
+    INVALID_RANKING_SORTORDER(400, "RK002", "Ranking SortOrder는 1 이상이어야 합니다"),
+    INVALID_RANKING_TYPE(400, "RK003", "Ranking Type이 올바르지 않습니다."),
+    RANKING_NOT_FOUND(400, "RK004", "아직 Ranking이 생성되지 않았습니다."),
+
     // User 관련 에러
     INVALID_PATH_PARAMETER(400, "P001", "잘못된 PathParameter입니다."),
     USER_NOT_FOUND(400, "U001", "존재하지 않는 사용자입니다.");
