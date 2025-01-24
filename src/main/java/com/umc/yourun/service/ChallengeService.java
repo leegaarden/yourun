@@ -39,9 +39,9 @@ public class ChallengeService {
     private final RunningDataRepository runningDataRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // 크루 챌린지 생성
+    // 크루 챌린지 생성 및 응답
     @Transactional
-    public Long createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
+    public ChallengeResponse.CrewChallengeCreate createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -71,7 +71,10 @@ public class ChallengeService {
         UserCrewChallenge userCrewChallenge = ChallengeConverter.toUserCrewChallenge(user, savedCrewChallenge, true);
         userCrewChallengeRepository.save(userCrewChallenge);
 
-        return savedCrewChallenge.getId();
+        // return savedCrewChallenge.getId();
+        return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
+                savedCrewChallenge.getCrewName(), savedCrewChallenge.getStartDate(), savedCrewChallenge.getEndDate(),
+                savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
     // 솔로 챌린지 생성

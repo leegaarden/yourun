@@ -30,12 +30,12 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("")
-    public ApiResponse<Long> createCrewChallenge(
+    public ApiResponse<ChallengeResponse.CrewChallengeCreate> createCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
 
-        Long challengeId = challengeService.createCrewChallenge(request, accessToken);
-        return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
+        ChallengeResponse.CrewChallengeCreate response = challengeService.createCrewChallenge(request, accessToken);
+        return ApiResponse.success("크루 챌린지가 생성되었습니다.", response);
     }
 
     @Operation(summary = "CREW_CHALLENGE_API_02 : 크루 결성 대기 중인 크루 챌린지 조회", description = "크루가 결성되지 않아 PENDING 상태인 크루 챌린지 목록을 조회합니다.")
@@ -48,8 +48,8 @@ public class CrewChallengeRestController {
     public ApiResponse<ChallengeResponse.CrewChallenge> getPendingCrewChallenges(
             @RequestHeader(value = "Authorization") String accessToken
     ) {
-        ChallengeResponse.CrewChallenge result = challengeService.getPendingCrewChallenges(accessToken);
-        return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", result);
+        ChallengeResponse.CrewChallenge response = challengeService.getPendingCrewChallenges(accessToken);
+        return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", response);
     }
 
     @Operation(summary = "CREW_CHALLENGE_API_03 : 크루 챌린지 참여", description = "대기 중인 크루 챌린지에 참여합니다.")
