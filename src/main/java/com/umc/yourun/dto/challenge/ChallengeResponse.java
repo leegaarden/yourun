@@ -325,4 +325,47 @@ public class ChallengeResponse {
             int countDay
 
     ) {}
+
+    @Schema(title = "CHALLENGE_RES_10 : 크루 챌린지 생성 응답 DTO")
+    public record CrewChallengeCreate (
+
+            @Schema(description = "생성된 크루 챌린지 ID", example = "1")
+            Long challengeId,
+
+            @Schema(description = "크루명", example = "거진홍길동")
+            String crewName,
+
+            @Schema(description = "챌린지 시작일", example = "2025-01-14")
+            LocalDate startDate,
+
+            @Schema(description = "챌린지 마감일", example = "2025-01-16")
+            LocalDate endDate,
+
+            @Schema(description = "챌린지 기간", example = "3")
+            int challengePeriod,
+
+            @Schema(description = "유저 성향", example = "스프린터")
+            Tendency tendency
+
+    ) {}
+
+    @Schema(title = "CHALLENGE_RES_11 : 솔로 챌린지 생성 응답 DTO")
+    public record SoloChallengeCreate (
+
+            @Schema(description = "생성된 솔로 챌린지 ID", example = "1")
+            Long challengeId,
+
+            @Schema(description = "챌린지 시작일", example = "2025-01-14")
+            LocalDate startDate,
+
+            @Schema(description = "챌린지 마감일", example = "2025-01-16")
+            LocalDate endDate,
+
+            @Schema(description = "챌린지 기간", example = "3")
+            int challengePeriod,
+
+            @Schema(description = "유저 성향", example = "스프린터")
+            Tendency tendency
+
+    ) {}
 }
