@@ -71,7 +71,6 @@ public class ChallengeService {
         UserCrewChallenge userCrewChallenge = ChallengeConverter.toUserCrewChallenge(user, savedCrewChallenge, true);
         userCrewChallengeRepository.save(userCrewChallenge);
 
-        // return savedCrewChallenge.getId();
         return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
                 savedCrewChallenge.getCrewName(), savedCrewChallenge.getStartDate(), savedCrewChallenge.getEndDate(),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
@@ -79,7 +78,7 @@ public class ChallengeService {
 
     // 솔로 챌린지 생성
     @Transactional
-    public Long createSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, String accessToken) {
+    public ChallengeResponse.SoloChallengeCreate createSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -105,13 +104,15 @@ public class ChallengeService {
 
         // 솔로 챌린지 생성 및 저장
         SoloChallenge soloChallenge = ChallengeConverter.toSoloChallenge(request, period);
-        SoloChallenge savedChallenge = soloChallengeRepository.save(soloChallenge);
+        SoloChallenge savedSoloChallenge = soloChallengeRepository.save(soloChallenge);
 
         // UserSoloChallenge 생성 및 저장
-        UserSoloChallenge userSoloChallenge = ChallengeConverter.toUserSoloChallenge(user, savedChallenge, true);
+        UserSoloChallenge userSoloChallenge = ChallengeConverter.toUserSoloChallenge(user, savedSoloChallenge, true);
         userSoloChallengeRepository.save(userSoloChallenge);
 
-        return savedChallenge.getId();
+        return new ChallengeResponse.SoloChallengeCreate(savedSoloChallenge.getId(),
+                savedSoloChallenge.getStartDate(), savedSoloChallenge.getEndDate(),
+                savedSoloChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
     // PENDING 상태인 크루 챌린지 조회 : 크루원이 4명 미만으로 아직 결성되지 않은

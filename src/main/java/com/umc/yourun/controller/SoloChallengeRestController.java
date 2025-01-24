@@ -31,11 +31,11 @@ public class SoloChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping()
-    public ApiResponse<Long> createSoloChallenge(
+    public ApiResponse<ChallengeResponse.SoloChallengeCreate> createSoloChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
-        Long challengeId = challengeService.createSoloChallenge(request, accessToken);
-        return ApiResponse.success("솔로 챌린지가 생성되었습니다.", challengeId);
+        ChallengeResponse.SoloChallengeCreate response = challengeService.createSoloChallenge(request, accessToken);
+        return ApiResponse.success("솔로 챌린지가 생성되었습니다.", response);
     }
 
     @Operation(summary = "SOLO_CHALLENGE_API_02 : 대기 중인 솔로 챌린지 조회", description = "PENDING 상태 솔로 챌린지 목록을 조회합니다.")
