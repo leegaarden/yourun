@@ -91,7 +91,7 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 기간", example = "4")
             int challengePeriod,
 
-            @Schema(description = "챌린지 메이트 닉네임", example = "청정원")
+            @Schema(description = "챌린지 생성자닉네임", example = "청정원")
             String challengeCreatorNickName,
 
             @Schema(description = "챌린지 생성자의 해시태그")
@@ -248,7 +248,7 @@ public class ChallengeResponse {
             String matchedCrewSlogan,
 
             @Schema(description = "매칭된 크루원 ID 및 성향 목록")
-            List<MemberTendencyInfo> matchedParticipantIdsInfo,
+            List<MemberTendencyInfo> matchedParticipantIdsInfos,
 
             @Schema(description = "전체 거리 대비 유저의 달성 비율(%)", example = "55.5")
             double progressRatio
@@ -263,10 +263,9 @@ public class ChallengeResponse {
             double runningDistance,
 
             @Schema(description = "크루원 성향", example = "스프린터")
-            Tendency tendency
+            Tendency userTendency
     ) {}
 
-    // TODO : 남은 인원이 아니라 참여 인원으로 수정
     @Schema(title = "CHALLENGE_RES_08 : 크루 챌린지 상세 페이지 응답 DTO")
     public record CrewChallengeDetailRes(
 
@@ -313,8 +312,11 @@ public class ChallengeResponse {
             @Schema(description = "챌린지 생성자 닉네임", example = "청정원")
             String challengeCreatorNickName,
 
-            @Schema(description = "챌린지 메이트의 해시태그")
+            @Schema(description = "챌린지 생성자 해시태그")
             List<String> challengeCreatorHashTags,
+
+            @Schema(description = "챌린지 생성자 성향", example = "트레일러너")
+            Tendency tendency,
 
             @Schema(description = "보상 개수", example = "2")
             int reward,

@@ -533,6 +533,48 @@ public class ChallengeService {
 
     }
 
+    // 솔로 챌린지 상세 조회
+    @Transactional(readOnly = true)
+    public ChallengeResponse.SoloChallengeDetailRes getSoloChallengeDetail (Long challengeId, String accessToken) {
+
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 솔로 챌린지 조회
+        Optional<SoloChallenge> soloChallenge = soloChallengeRepository.findById(challengeId);
+
+        // 챌린지 생성자 조회
+        UserSoloChallenge creator = userSoloChallengeRepository
+                .findBySoloChallengeIdAndIsCreator(challengeId, true)
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        // 생성자의 닉네임과 해시태그 조회
+        User creatorUser = creator.getUser();
+        String nickname = userRepository.findNicknameById(creatorUser.getId())
+                .orElse("Unknown"); // 이럴 일은 없지만 에러 때문에
+
+        // 해시태그 값 조회 (최대 2개)
+        List<String> hashtags = creatorUser.getUserTags().stream()
+                .map(userTag -> userTag.getTag().name())  // UserTag 엔티티에서 Tag enum의 이름을 가져옴
+                .limit(2)  // 최대 2개로 제한
+                .collect(Collectors.toList());
+
+        // 기간에 따른 보상 계산
+        int reward = switch (soloChallenge.get().getChallengePeriod().getDays()) {
+            case 3 -> 1;
+            case 4 -> 2;
+            case 5 -> 3;
+            default -> 0;
+        };
+
+        int countDay = calculateCountDay(user.getCreatedAt().toLocalDate());
+
+        return new ChallengeResponse.SoloChallengeDetailRes(soloChallenge.get().getStartDate(),
+                soloChallenge.get().getEndDate(), soloChallenge.get().getChallengeDistance().getDistance(),
+                soloChallenge.get().getChallengePeriod().getDays(), nickname,hashtags,creatorUser.getTendency(),
+                reward, countDay);
+    }
+
     // 활용 메소드들
     // 기간 검사
     private ChallengePeriod validateDates(LocalDate endDate) {

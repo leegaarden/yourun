@@ -105,7 +105,7 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending/{challengeId}")
-    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewDetail(
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewChallengeDetail(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
         ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, accessToken);
