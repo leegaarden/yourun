@@ -222,7 +222,7 @@ public class ChallengeService {
 
     // 솔로 챌린지에 참여하기
     @Transactional
-    public ChallengeResponse.ChallengeMateRes joinSoloChallenge(Long challengeId, String accessToken) {
+    public ChallengeResponse.SoloChallengeMateRes joinSoloChallenge(Long challengeId, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -268,7 +268,7 @@ public class ChallengeService {
         // 8. 챌린지 상태 업데이트
         soloChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
 
-        return new ChallengeResponse.ChallengeMateRes(challengeId, creatorChallenge.getUser().getId());
+        return new ChallengeResponse.SoloChallengeMateRes(challengeId, creatorChallenge.getUser().getId());
     }
 
     // 크루 챌린지에 참여하기
@@ -335,7 +335,7 @@ public class ChallengeService {
 
     // 크루 챌린지 매칭 화면
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewMatchingRes getCrewMatch(String accessToken) {
+    public ChallengeResponse.CrewChallengeMatchingRes getCrewMatch(String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -372,7 +372,7 @@ public class ChallengeService {
 
         }
 
-        return new ChallengeResponse.CrewMatchingRes(
+        return new ChallengeResponse.CrewChallengeMatchingRes(
                 myCrew.getChallengePeriod().getDays(),
                 myCrew.getCrewName(),
                 myCrew.getSlogan(),

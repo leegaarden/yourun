@@ -59,10 +59,10 @@ public class SoloChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/{challengeId}/join")
-    public ApiResponse<ChallengeResponse.ChallengeMateRes> joinSoloChallenge(
+    public ApiResponse<ChallengeResponse.SoloChallengeMateRes> joinSoloChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.ChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, accessToken);
+        ChallengeResponse.SoloChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, accessToken);
         return ApiResponse.success("솔로 챌린지 참여가 완료되었습니다.", response);
     }
 

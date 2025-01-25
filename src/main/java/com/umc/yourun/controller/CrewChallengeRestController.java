@@ -75,9 +75,9 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/match")
-    public ApiResponse<ChallengeResponse.CrewMatchingRes> getCrewMatch(
+    public ApiResponse<ChallengeResponse.CrewChallengeMatchingRes> getCrewMatch(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.CrewMatchingRes response = challengeService.getCrewMatch(accessToken);
+        ChallengeResponse.CrewChallengeMatchingRes response = challengeService.getCrewMatch(accessToken);
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
 
