@@ -403,5 +403,34 @@ public class ChallengeResponse {
 
     ) {}
 
+    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 결과 조회 응답 DTO")
+    public record CrewChallengeContribution (
 
+            @Schema(description = "챌린지 기간", example = "3")
+            int challengePeriod,
+
+            @Schema(description = "챌린지 보상 개수", example = "1")
+            int reward,
+
+            @Schema(description = "크루명", example = "거진홍길동")
+            String crewName,
+
+            @Schema(description = "크루원 별 기여도")
+            List<CrewMemberContribution> CrewMemberContributions,
+
+            @Schema(description = "mvp 유저 ID", example = "1")
+            Long mvpId
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_13 - 1 : 크루원 별 기여도 및 성향")
+    public record CrewMemberContribution (
+            @Schema(description = "사용자 ID", example = "1")
+            Long userId,
+
+            @Schema(description = "기여도", example = "20.2")
+            double contribution,
+
+            @Schema(description = "유저 성향", example = "스프린터")
+            Tendency tendency
+    ) {}
 }
