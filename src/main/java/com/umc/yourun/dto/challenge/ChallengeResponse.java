@@ -386,13 +386,13 @@ public class ChallengeResponse {
             @Schema(description = "유저 앱 사용 기간", example = "27")
             int userCountDay,
 
-            @Schema(description = "챌린지 메이트 해시태그")
+            @Schema(description = "유저 해시태그")
             List<String> userHashTags,
 
             @Schema(description = "챌린지 메이트 성향", example = "페이스메이커")
             Tendency challengeMateTendency,
 
-            @Schema(description = "챌린지 메이트 닉네임", example = "청정원")
+            @Schema(description = "챌린지 메이트 닉네임", example = "루시")
             String challengeMateNickName,
 
             @Schema(description = "챌린지 메이트 앱 사용 기간", example = "27")

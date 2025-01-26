@@ -80,4 +80,18 @@ public class SoloChallengeRestController {
         return ApiResponse.success("솔로 챌린지 상세 조회 정보입니다.", response);
     }
 
+    @Operation(summary = "SOLO_CHALLENGE_API_05 : 솔로 챌린지 매칭 조회", description = "매칭된 솔로 챌린지 조회 화면입니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/match")
+    public ApiResponse<ChallengeResponse.SoloChallengeMatchingRes> getSoloMatch (
+            @RequestHeader(value = "Authorization") String accessToken,
+            @PathVariable Long challengeId) {
+        ChallengeResponse.SoloChallengeMatchingRes response = challengeService.getSoloChallengeMatching(accessToken);
+        return ApiResponse.success("솔로 챌린지 매칭 정보입니다.", response);
+    }
+
 }
