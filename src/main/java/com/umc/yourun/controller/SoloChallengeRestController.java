@@ -30,7 +30,7 @@ public class SoloChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping()
+    @PostMapping("")
     public ApiResponse<ChallengeResponse.SoloChallengeCreate> createSoloChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
@@ -86,10 +86,9 @@ public class SoloChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/match")
+    @PostMapping("/matching")
     public ApiResponse<ChallengeResponse.SoloChallengeMatchingRes> getSoloMatch (
-            @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable Long challengeId) {
+            @RequestHeader(value = "Authorization") String accessToken) {
         ChallengeResponse.SoloChallengeMatchingRes response = challengeService.getSoloChallengeMatching(accessToken);
         return ApiResponse.success("솔로 챌린지 매칭 정보입니다.", response);
     }

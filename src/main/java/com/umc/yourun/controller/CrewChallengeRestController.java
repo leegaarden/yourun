@@ -74,7 +74,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/match")
+    @GetMapping("/matching")
     public ApiResponse<ChallengeResponse.CrewChallengeMatchingRes> getCrewMatch(
             @RequestHeader(value = "Authorization") String accessToken) {
         ChallengeResponse.CrewChallengeMatchingRes response = challengeService.getCrewMatch(accessToken);
@@ -89,7 +89,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/match/detail-progress")
+    @GetMapping("/detail-progress")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
             @RequestHeader(value = "Authorization") String accessToken) {
         ChallengeResponse.CrewChallengeDetailProgressRes response = challengeService.getCrewChallengeDetailProgress(accessToken);
