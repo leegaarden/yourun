@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorCode;
 import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.config.exception.custom.RunningException;
@@ -29,23 +30,23 @@ public class RunningServiceImpl implements RunningService{
 	private final RunningDataRepository runningDataRepository;
 	private final UserRepository userRepository;
 	private final UserService UserService;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Override
 	@Transactional
-	public RunningData createRunningData(RunningDataRequestDTO.@Valid CreateRunningDataReq request) {
+	public RunningData createRunningData(String accessToken,RunningDataRequestDTO.@Valid CreateRunningDataReq request) {
+		User user = jwtTokenProvider.getUserByToken(accessToken);
 		Integer totalTime=calculateTotalTime(request.startTime(),request.endTime());
 		if(totalTime<0) {
 			throw new RunningException(ErrorCode.INVALID_END_TIME);
 		}
-		User user=userRepository.findById(request.userId()).orElseThrow(()->new RunningException(ErrorCode.USER_NOT_FOUND));
 		RunningData runningData= RunningDataConverter.toRunningData(request,totalTime,user);
 		return runningDataRepository.save(runningData);
 	}
 
 	@Override
-	public List<RunningData> getRunningDataMonthly(int years, int months) {
-		//TODO: 토큰에서 가져오기
-		User user=userRepository.findById(1L).orElseThrow(()->new RunningException(ErrorCode.USER_NOT_FOUND));
+	public List<RunningData> getRunningDataMonthly(String accessToken,int years, int months) {
+		User user = jwtTokenProvider.getUserByToken(accessToken);
 		LocalDateTime startDateTime = LocalDateTime.of(years, months, 1, 0, 0, 0);
 		LocalDateTime endDateTime = startDateTime.plusMonths(1);
 		return runningDataRepository.findByStatusAndStartTimeBetweenAndUser(RunningDataStatus.ACTIVE,startDateTime,endDateTime,user);
