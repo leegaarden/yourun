@@ -200,7 +200,7 @@ public class ChallengeResponse {
             int soloDayCount,
 
             @Schema(description = "솔로 챌린지 시작일", example = "2025-01-22")
-            LocalDate soloStartDate
+            String soloStartDate
     ) {}
 
     @Builder
@@ -225,7 +225,7 @@ public class ChallengeResponse {
             int crewDayCount,
 
             @Schema(description = "크루 챌린지 시작일", example = "2025-01-22")
-            LocalDate crewStartDate
+            String crewStartDate
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 : 크루 챌린지 상세 진행도 응답 DTO")
@@ -280,10 +280,10 @@ public class ChallengeResponse {
             String crewName,
 
             @Schema(description = "시작일", example = "2025-01-15")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "마감일", example = "2025-01-20")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 기간", example = "4")
             int challengePeriod,
@@ -305,10 +305,10 @@ public class ChallengeResponse {
     public record SoloChallengeDetailRes(
 
             @Schema(description = "시작일", example = "2025-01-15")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "마감일", example = "2025-01-20")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 거리", example = "1")
             int challengeDistance,
@@ -346,10 +346,10 @@ public class ChallengeResponse {
             String slogan,
 
             @Schema(description = "챌린지 시작일", example = "2025-01-14")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "챌린지 마감일", example = "2025-01-16")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 기간", example = "3")
             int challengePeriod,
@@ -366,10 +366,10 @@ public class ChallengeResponse {
             Long challengeId,
 
             @Schema(description = "챌린지 시작일", example = "2025-01-14")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "챌린지 마감일", example = "2025-01-16")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 기간", example = "3")
             int challengePeriod,
@@ -413,8 +413,8 @@ public class ChallengeResponse {
 
     ) {}
 
-    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 기여도 결과 조회 응답 DTO")
-    public record CrewChallengeContribution (
+    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 순위 결과 조회 응답 DTO")
+    public record CrewChallengeContributionRes (
 
             @Schema(description = "챌린지 기간", example = "3")
             int challengePeriod,
@@ -425,22 +425,14 @@ public class ChallengeResponse {
             @Schema(description = "크루명", example = "거진홍길동")
             String crewName,
 
-            @Schema(description = "크루원 별 기여도")
-            List<CrewMemberContribution> CrewMemberContributions,
+            @Schema(description = "크루원 별 달린 거리")
+            List<CrewMemberInfo> CrewMemberDistance,
 
             @Schema(description = "mvp 유저 ID", example = "1")
-            Long mvpId
+            Long mvpId,
+
+            @Schema(description = "내 크루가 이겼는지", example = "true")
+            boolean win
     ) {}
 
-    @Schema(description = "CHALLENGE_RES_13 - 1 : 크루원 별 기여도 및 성향")
-    public record CrewMemberContribution (
-            @Schema(description = "사용자 ID", example = "1")
-            Long userId,
-
-            @Schema(description = "기여도", example = "20.2")
-            double contribution,
-
-            @Schema(description = "유저 성향", example = "스프린터")
-            Tendency tendency
-    ) {}
 }

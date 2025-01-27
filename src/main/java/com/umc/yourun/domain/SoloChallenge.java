@@ -27,10 +27,10 @@ public class SoloChallenge extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,8 +48,8 @@ public class SoloChallenge extends BaseEntity {
     private List<UserSoloChallenge> userSoloChallenges = new ArrayList<>();
 
     @Builder
-    public SoloChallenge(LocalDate endDate, ChallengeDistance challengeDistance, ChallengePeriod challengePeriod) {
-        this.startDate = LocalDate.now().plusDays(1);
+    public SoloChallenge(LocalDateTime startDate, LocalDateTime endDate, ChallengeDistance challengeDistance, ChallengePeriod challengePeriod) {
+        this.startDate = startDate;
         this.endDate = endDate;
         this.challengeDistance = challengeDistance;
         this.challengeStatus = ChallengeStatus.PENDING;

@@ -20,10 +20,10 @@ public class CrewChallenge extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     private ChallengeStatus challengeStatus;
@@ -46,9 +46,9 @@ public class CrewChallenge extends BaseEntity {
     private List<UserCrewChallenge> userCrews = new ArrayList<>();
 
     @Builder
-    public CrewChallenge(String crewName, LocalDate endDate, ChallengePeriod challengePeriod, String slogan) {
+    public CrewChallenge(String crewName, LocalDateTime startDate, LocalDateTime endDate, ChallengePeriod challengePeriod, String slogan) {
         this.crewName = crewName;
-        this.startDate = LocalDate.now().plusDays(1);
+        this.startDate = startDate;
         this.endDate = endDate;
         this.challengeStatus = ChallengeStatus.PENDING;
         this.challengePeriod = challengePeriod;
