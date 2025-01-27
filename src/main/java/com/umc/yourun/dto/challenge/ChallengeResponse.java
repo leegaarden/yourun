@@ -403,7 +403,7 @@ public class ChallengeResponse {
 
     ) {}
 
-    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 결과 조회 응답 DTO")
+    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 기여도 결과 조회 응답 DTO")
     public record CrewChallengeContribution (
 
             @Schema(description = "챌린지 기간", example = "3")

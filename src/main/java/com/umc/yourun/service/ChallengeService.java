@@ -16,6 +16,7 @@ import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.repository.*;
+import jakarta.validation.constraints.Null;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -500,7 +501,7 @@ public class ChallengeService {
         // 5. 진행률 계산 (유저의 달성 비율)
         double progressRatio = 0.0;
         if (totalDistance > 0) {
-            progressRatio = (double) userDistance / totalDistance * 100;
+            progressRatio = userDistance / totalDistance * 100;
         }
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 matchedCrewName, matchedCrew.getSlogan(), participantInfos, progressRatio);
@@ -578,8 +579,8 @@ public class ChallengeService {
                 reward, countDay);
     }
 
-    @Transactional(readOnly = true)
     // 솔로 챌린지 매칭 화면
+    @Transactional(readOnly = true)
     public ChallengeResponse.SoloChallengeMatchingRes getSoloChallengeMatching(String accessToken) {
 
         // 유저 조회
@@ -617,6 +618,64 @@ public class ChallengeService {
                 user.getNickname(), userCountDay, userHashtags, challengeMate.get().getTendency(),
                 challengeMate.get().getNickname(), challengeMateCountDay, challengeHashtags);
 
+    }
+
+    // 크루 챌린지 기여도 결과 화면
+    @Transactional(readOnly = true)
+    public ChallengeResponse.CrewChallengeContribution getCrewChallengeContribution(String accessToken) {
+
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 1. 유저의 현재 크루 챌린지 조회
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
+        CrewChallenge crewChallenge = userCrewChallenge.getCrewChallenge();
+
+        // 2. 크루의 총 달린 거리 계산
+        List<UserCrewChallenge> crewMembers = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(crewChallenge.getId());
+
+        double totalCrewDistance = crewMembers.stream()
+                .mapToDouble(member -> calculateTotalDistance(crewChallenge.getId(), member.getUser().getId()))
+                .sum();
+
+        // 3. 각 크루원의 기여도 계산
+        List<ChallengeResponse.CrewMemberContribution> crewMemberContributions = crewMembers.stream()
+                .map(member -> {
+                    double memberDistance = calculateTotalDistance(crewChallenge.getId(), member.getUser().getId());
+                    double contribution = totalCrewDistance > 0
+                            ? (memberDistance / totalCrewDistance) * 100
+                            : 0.0;
+
+                    return new ChallengeResponse.CrewMemberContribution(
+                            member.getUser().getId(),
+                            contribution,
+                            member.getUser().getTendency()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        // 4. MVP 선정 (기여도가 가장 높은 사람)
+        Long mvpId = crewMemberContributions.stream()
+                .max(Comparator.comparingDouble(ChallengeResponse.CrewMemberContribution::contribution))
+                .map(ChallengeResponse.CrewMemberContribution::userId)
+                .orElse(null);
+
+        // 5. 보상 계산
+        int reward = switch (crewChallenge.getChallengePeriod().getDays()) {
+            case 3 -> 1;
+            case 4 -> 2;
+            case 5 -> 3;
+            default -> 0;
+        };
+
+        return new ChallengeResponse.CrewChallengeContribution(
+                crewChallenge.getChallengePeriod().getDays(),
+                reward,
+                crewChallenge.getCrewName(),
+                crewMemberContributions,
+                mvpId
+        );
     }
 
     // 활용 메소드들
@@ -671,5 +730,4 @@ public class ChallengeService {
                 ))
                 .collect(Collectors.toList());
     }
-
 }
