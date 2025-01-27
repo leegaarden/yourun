@@ -31,12 +31,14 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 생성 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @PostMapping("")
-    public ApiResponse<Long> createCrewChallenge(
-            @RequestHeader("Authorization") String accessToken, // TODO: 토큰 구현시 수정
+    public ApiResponse<ChallengeResponse.CrewChallengeCreate> createCrewChallenge(
+            @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
-        Long challengeId = challengeService.createCrewChallenge(request, jwtTokenProvider.getUserByToken(accessToken).getId());
-        return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
+
+        ChallengeResponse.CrewChallengeCreate response = challengeService.createCrewChallenge(request, accessToken);
+        return ApiResponse.success("크루 챌린지가 생성되었습니다.", response);
     }
 
     @Operation(summary = "CREW_CHALLENGE_API_02 : 크루 결성 대기 중인 크루 챌린지 조회", description = "크루가 결성되지 않아 PENDING 상태인 크루 챌린지 목록을 조회합니다.")
@@ -46,11 +48,11 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/pending")
-    public ApiResponse<List<ChallengeResponse.CrewChallengeRes>> getPendingCrewChallenges(
-            @RequestHeader("USER-ID") Long userId // TODO: 토큰 구현시 수정
+    public ApiResponse<ChallengeResponse.CrewChallenge> getPendingCrewChallenges(
+            @RequestHeader(value = "Authorization") String accessToken
     ) {
-        List<ChallengeResponse.CrewChallengeRes> result = challengeService.getPendingCrewChallenges(userId);
-        return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", result);
+        ChallengeResponse.CrewChallenge response = challengeService.getPendingCrewChallenges(accessToken);
+        return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", response);
     }
 
     @Operation(summary = "CREW_CHALLENGE_API_03 : 크루 챌린지 참여", description = "대기 중인 크루 챌린지에 참여합니다.")
@@ -61,9 +63,9 @@ public class CrewChallengeRestController {
     })
     @PostMapping("/{challengeId}/join")
     public ApiResponse<ChallengeResponse.CrewChallengeMateRes> joinCrewChallenge(
-            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.CrewChallengeMateRes response = challengeService.joinCrewChallenge(challengeId, userId);
+        ChallengeResponse.CrewChallengeMateRes response = challengeService.joinCrewChallenge(challengeId, accessToken);
         return ApiResponse.success("크루 챌린지 참여가 완료되었습니다.", response);
     }
 
@@ -75,10 +77,10 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/match")
-    public ApiResponse<ChallengeResponse.CrewMatchingRes> getCrewMatch(
-            @RequestHeader("USER-ID") Long userId) {
-        ChallengeResponse.CrewMatchingRes response = challengeService.getCrewMatch(userId);
+    @GetMapping("/matching")
+    public ApiResponse<ChallengeResponse.CrewChallengeMatchingRes> getCrewMatch(
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.CrewChallengeMatchingRes response = challengeService.getCrewMatch(accessToken);
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
 
@@ -90,10 +92,26 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/match/detail-progress")
-    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewMatchDetailProgress(
-            @RequestHeader("USER-ID") Long userId) {
-        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(userId);
+    @GetMapping("/detail-progress")
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.CrewChallengeDetailProgressRes response = challengeService.getCrewChallengeDetailProgress(accessToken);
         return ApiResponse.success("크루 챌린지 상세 진행도 정보입니다.", response);
+    }
+
+    @Operation(summary = "CREW_CHALLENGE_API_06 : 크루 챌린지 상세 페이지 조회", description = "크루 챌린지의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/pending/{challengeId}")
+    public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewChallengeDetail(
+            @RequestHeader(value = "Authorization") String accessToken,
+            @PathVariable Long challengeId) {
+        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, accessToken);
+        return ApiResponse.success("크루 챌린지 상세 정보입니다.", response);
     }
 }

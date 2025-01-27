@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Long> {
@@ -56,4 +57,5 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
     @Query(value = "SELECT * FROM crew_challenge WHERE challenge_status = 'PENDING' ORDER BY RAND() LIMIT :size",
             nativeQuery = true)
     List<CrewChallenge> findRandomPendingChallenges(@Param("size") int size);
+
 }

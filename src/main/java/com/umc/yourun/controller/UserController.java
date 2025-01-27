@@ -50,8 +50,8 @@ public class UserController {
     })
     @GetMapping("/home/challenges")
     public ApiResponse<ChallengeResponse.HomeChallengeRes> getUserChallenges(
-            @RequestHeader("USER-ID") Long userId) {
-        ChallengeResponse.HomeChallengeRes response = challengeService.getUserChallenges(userId);
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.HomeChallengeRes response = challengeService.getUserChallenges(accessToken);
         return ApiResponse.success("홈 화면 : 사용자와 관련된 챌린지 정보입니다.", response);
     }
 }

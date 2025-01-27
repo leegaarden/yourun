@@ -1,4 +1,4 @@
 package com.umc.yourun.config.exception;
 
-public record ErrorResponse(int code, String message) {
+public record ErrorResponse(int status,String code, String message) {
 }

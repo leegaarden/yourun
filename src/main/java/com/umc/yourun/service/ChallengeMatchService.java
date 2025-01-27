@@ -41,6 +41,24 @@ public class ChallengeMatchService {
         }
     }
 
+    // 1분마다 4명이 결성도 되지 않은 크루 챌린지 체크
+    @Scheduled(fixedRate = 60000)  // 60000ms = 1분
+    public void checkUnJoin4CrewChallenges() {
+        // PENDING 상태의 크루 챌린지 조회
+        List<CrewChallenge> pendingCrewChallenges = crewChallengeRepository
+                .findByChallengeStatus(ChallengeStatus.PENDING);
+
+        for (CrewChallenge challenge : pendingCrewChallenges) {
+            // 현재 참여 인원 확인
+            long memberCount = userCrewChallengeRepository.countByCrewChallengeId(challenge.getId());
+
+            // 4명 미만이고 24시간 초과된 경우 삭제
+            if (memberCount < 4 && !challenge.isMatchable()) {
+                deleteCrewChallenge(challenge);
+            }
+        }
+    }
+
     // 1분마다 매칭 시도
     @Scheduled(fixedRate = 60000)  // 60000ms = 1분
     public void attemptCrewMatching() {

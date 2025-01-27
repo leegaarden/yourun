@@ -1,5 +1,7 @@
 package com.umc.yourun.config;
 
+import com.umc.yourun.config.exception.ErrorCode;
+import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.repository.UserRepository;
 import io.jsonwebtoken.*;
@@ -46,13 +48,23 @@ public class JwtTokenProvider {
     }
 
     public User getUserByToken(String token) {
+
+        if (token == null) {
+            throw new IllegalArgumentException("토큰이 필요합니다");
+        }
+        // token이 "Bearer " 로 시작하는지 확인
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
-                .parseClaimsJws(token.substring(7))
-                .getBody(); // Claims 추출
+                .parseClaimsJws(token)
+                .getBody();
 
-        return userRepository.findByEmail(claims.getSubject()).get(); // "sub" 필드 사용
+        return userRepository.findByEmail(claims.getSubject())
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
     }
 
     public String resolveToken(HttpServletRequest request) {

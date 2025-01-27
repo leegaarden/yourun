@@ -14,8 +14,6 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
-@AllArgsConstructor
 public class CrewChallenge extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +37,6 @@ public class CrewChallenge extends BaseEntity {
 
     @Column(nullable = false)
     private String slogan;    // 구호
-
 
     @Setter
     @Column

@@ -5,6 +5,7 @@ import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
+import com.umc.yourun.domain.enums.Tendency;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
@@ -62,35 +63,41 @@ public class ChallengeConverter {
     // 2-1. 사용자 관련된 솔로 챌린지 정보 응답
     public static ChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
             SoloChallenge challenge,
-            Long mateId,
-            int soloCountDay,
-            String mateNickName) {
-        return new ChallengeResponse.UserSoloChallengeInfo(
-                challenge.getId(),
-                challenge.getChallengeStatus(),
-                challenge.getChallengeDistance().getDistance(),
-                challenge.getChallengePeriod().getDays(),
-                mateId,
-                mateNickName,
-                soloCountDay,
-                challenge.getStartDate()
-        );
+            User user,
+            Long challengeMateId,
+            String challengeMateNickName,
+            Tendency challengeMateTendency,
+            int soloCountDay) {
+        return ChallengeResponse.UserSoloChallengeInfo.builder()
+                .challengeDistance(challenge.getChallengeDistance().getDistance())
+                .challengeId(challenge.getId())
+                .status(challenge.getChallengeStatus())
+                .challengePeriod(challenge.getChallengePeriod().getDays())
+                .challengeMateId(challengeMateId)
+                .challengeMateNickName(challengeMateNickName)
+                .challengeMateTendency(challengeMateTendency)
+                .userId(user.getId())
+                .userNickName(user.getNickname())
+                .userTendency(user.getTendency())
+                .soloDayCount(soloCountDay)
+                .build();
+
     }
 
-    // 2-2. 사용자 관련 크루 챌린지 정보 응답
+//    // 2-2. 사용자 관련 크루 챌린지 정보 응답
     public static ChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
             CrewChallenge challenge,
-            List<Long> crewMemberIds,
+            List<ChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo,
             int crewCountDay) {
-        return new ChallengeResponse.UserCrewChallengeInfo(
-                challenge.getId(),
-                challenge.getCrewName(),
-                challenge.getChallengeStatus(),
-                challenge.getChallengePeriod().getDays(),
-                crewMemberIds,
-                crewCountDay,
-                challenge.getStartDate()
-        );
+        return ChallengeResponse.UserCrewChallengeInfo.builder()
+                .challengeId(challenge.getId())
+                .crewName(challenge.getCrewName())
+                .challengeStatus(challenge.getChallengeStatus())
+                .challengePeriod(challenge.getChallengePeriod().getDays())
+                .myParticipantIdsInfo(myParticipantIdsInfo)
+                .crewDayCount(crewCountDay)
+                .crewStartDate(challenge.getStartDate())
+                .build();
     }
 
 }

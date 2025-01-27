@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChallenge, Long> {
 
+    // 유저 아이디와 상태로 찾기
     // Optional 반환
     Optional<UserSoloChallenge> findByUserIdAndSoloChallenge_ChallengeStatusIn(
             Long userId,
