@@ -1,5 +1,6 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.converter.RankingConverter;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
@@ -24,14 +25,18 @@ public class RealtimeRankingService {
 
     private final RunningDataRepository runningDataRepository;
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public RealtimeRankingService(RunningDataRepository runningDataRepository, UserRepository userRepository) {
+    public RealtimeRankingService(RunningDataRepository runningDataRepository, UserRepository userRepository, JwtTokenProvider provider) {
         this.runningDataRepository = runningDataRepository;
         this.userRepository = userRepository;
+        this.jwtTokenProvider = provider;
     }
 
-    public RankingResponse.rankingInfoUser getRanking(int page, User requestedUser) {
+    public RankingResponse.rankingInfoUser getRanking(int page, String accessToken) {
+
+        User requestedUser = jwtTokenProvider.getUserByToken(accessToken);
 
         List<User> users = userRepository.findAll();
 
