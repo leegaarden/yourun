@@ -9,9 +9,9 @@ import com.umc.yourun.dto.runningdata.RunningDataRequestDTO;
 import jakarta.validation.Valid;
 
 public interface RunningService {
-	RunningData createRunningData(RunningDataRequestDTO.@Valid CreateRunningDataReq request);
+	RunningData createRunningData(String accessToken,RunningDataRequestDTO.@Valid CreateRunningDataReq request);
 
-	List<RunningData> getRunningDataMonthly(int years, int months);
+	List<RunningData> getRunningDataMonthly(String accessToken,int years, int months);
 
 	RunningData getRunningDataById(Long id);
 
