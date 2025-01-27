@@ -1,6 +1,7 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorResponse;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
@@ -23,6 +24,7 @@ import java.util.List;
 public class CrewChallengeRestController {
 
     private final ChallengeService challengeService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "CREW_CHALLENGE_API_01 : 크루 챌린지 생성", description = "새로운 크루 챌린지를 생성합니다.")
     @ApiResponses(value = {
@@ -31,10 +33,9 @@ public class CrewChallengeRestController {
     })
     @PostMapping("")
     public ApiResponse<Long> createCrewChallenge(
-            @RequestHeader("USER-ID") Long userId, // TODO: 토큰 구현시 수정
+            @RequestHeader("Authorization") String accessToken, // TODO: 토큰 구현시 수정
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
-
-        Long challengeId = challengeService.createCrewChallenge(request, userId );
+        Long challengeId = challengeService.createCrewChallenge(request, jwtTokenProvider.getUserByToken(accessToken).getId());
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", challengeId);
     }
 
