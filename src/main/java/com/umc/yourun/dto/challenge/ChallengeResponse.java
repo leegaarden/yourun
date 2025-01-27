@@ -106,7 +106,7 @@ public class ChallengeResponse {
     ) {}
 
     @Schema(title = "CHALLENGE_RES_03 : 솔로 챌린지 참여 응답 DTO")
-    public record ChallengeMateRes(
+    public record SoloChallengeMateRes(
             @Schema(description = "솔로 챌린지 ID", example = "1")
             Long challengeId,
 
@@ -130,7 +130,7 @@ public class ChallengeResponse {
     ) {}
 
     @Schema(description = "CHALLENGE_RES_05 : 크루 챌린지 매칭 조회 응답 DTO")
-    public record CrewMatchingRes(
+    public record CrewChallengeMatchingRes(
             @Schema(description = "챌린지 기간(일)", example = "3")
             int period,
 
@@ -368,4 +368,40 @@ public class ChallengeResponse {
             Tendency tendency
 
     ) {}
+
+    @Schema(description = "CHALLENGE_RES_12 : 솔로 챌린지 매칭 조회 응답 DTO")
+    public record SoloChallengeMatchingRes(
+            @Schema(description = "챌린지 기간(일)", example = "3")
+            int period,
+
+            @Schema(description = "챌린지 거리", example = "1")
+            int challengeDistance,
+
+            @Schema(description = "유저 성향", example = "페이스메이커")
+            Tendency userTendency,
+
+            @Schema(description = "유저 닉네임", example = "청정원")
+            String userNickName,
+
+            @Schema(description = "유저 앱 사용 기간", example = "27")
+            int userCountDay,
+
+            @Schema(description = "유저 해시태그")
+            List<String> userHashTags,
+
+            @Schema(description = "챌린지 메이트 성향", example = "페이스메이커")
+            Tendency challengeMateTendency,
+
+            @Schema(description = "챌린지 메이트 닉네임", example = "루시")
+            String challengeMateNickName,
+
+            @Schema(description = "챌린지 메이트 앱 사용 기간", example = "27")
+            int challengeMateCountDay,
+
+            @Schema(description = "챌린지 메이트 해시태그")
+            List<String> challengeMateHashTags
+
+    ) {}
+
+
 }

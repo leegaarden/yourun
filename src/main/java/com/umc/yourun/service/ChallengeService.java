@@ -117,7 +117,7 @@ public class ChallengeService {
 
     // PENDING 상태인 크루 챌린지 조회 : 크루원이 4명 미만으로 아직 결성되지 않은
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallenge getPendingCrewChallenges (String accessToken) {
+    public ChallengeResponse.CrewChallenge getPendingCrewChallenges(String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
@@ -125,7 +125,7 @@ public class ChallengeService {
         List<ChallengeResponse.CrewChallengeRes> pendingCrewChallenges = getPendingCrewChallenge();
 
         return new ChallengeResponse.CrewChallenge(user.getId(), user.getTendency(),
-                user.getCrewReward(), user.getPersonalReward(),pendingCrewChallenges);
+                user.getCrewReward(), user.getPersonalReward(), pendingCrewChallenges);
 
     }
 
@@ -166,7 +166,7 @@ public class ChallengeService {
 
     // PENDING 상태인 솔로 챌린지 조회
     @Transactional(readOnly = true)
-    public ChallengeResponse.SoloChallenge getPendingSoloChallenges (String accessToken) {
+    public ChallengeResponse.SoloChallenge getPendingSoloChallenges(String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
         List<ChallengeResponse.SoloChallengeRes> pendingSoloChallenges = getPendingSoloChallenge();
@@ -222,7 +222,7 @@ public class ChallengeService {
 
     // 솔로 챌린지에 참여하기
     @Transactional
-    public ChallengeResponse.ChallengeMateRes joinSoloChallenge(Long challengeId, String accessToken) {
+    public ChallengeResponse.SoloChallengeMateRes joinSoloChallenge(Long challengeId, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -268,7 +268,7 @@ public class ChallengeService {
         // 8. 챌린지 상태 업데이트
         soloChallenge.updateStatus(ChallengeStatus.IN_PROGRESS);
 
-        return new ChallengeResponse.ChallengeMateRes(challengeId, creatorChallenge.getUser().getId());
+        return new ChallengeResponse.SoloChallengeMateRes(challengeId, creatorChallenge.getUser().getId());
     }
 
     // 크루 챌린지에 참여하기
@@ -334,8 +334,8 @@ public class ChallengeService {
     }
 
     // 크루 챌린지 매칭 화면
-    @Transactional(readOnly = true)
-    public ChallengeResponse.CrewMatchingRes getCrewMatch(String accessToken) {
+    @Transactional
+    public ChallengeResponse.CrewChallengeMatchingRes getCrewMatch(String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -344,14 +344,13 @@ public class ChallengeService {
         UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
                 .findByUserIdAndCrewChallenge_ChallengeStatusIn(user.getId(),
                         List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS));
-                // .orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
+        // .orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
 
         if (userCrewChallenge == null) {
             throw new GeneralException(ErrorCode.NO_CREW_CHALLENGE_FOUND);
         }
 
         // 2. 내 크루원 ID 목록 조회 (참여 순서대로)
-
         CrewChallenge myCrew = userCrewChallenge.getCrewChallenge();
 
         List<ChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo = getMemberTendencyInfos(userCrewChallenge.getCrewChallenge().getId());
@@ -372,7 +371,7 @@ public class ChallengeService {
 
         }
 
-        return new ChallengeResponse.CrewMatchingRes(
+        return new ChallengeResponse.CrewChallengeMatchingRes(
                 myCrew.getChallengePeriod().getDays(),
                 myCrew.getCrewName(),
                 myCrew.getSlogan(),
@@ -451,7 +450,7 @@ public class ChallengeService {
     }
 
     // 크루 챌린지의 상세 진행도 (홈 화면 - 크루 챌린지 클릭)
-    public ChallengeResponse.CrewChallengeDetailProgressRes getCrewChallengeDetailProgress (String accessToken) {
+    public ChallengeResponse.CrewChallengeDetailProgressRes getCrewChallengeDetailProgress(String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -510,7 +509,7 @@ public class ChallengeService {
 
     // 크루 챌린지 상세 조회
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail (Long challengeId, String accessToken) {
+    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail(Long challengeId, String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
@@ -539,7 +538,7 @@ public class ChallengeService {
 
     // 솔로 챌린지 상세 조회
     @Transactional(readOnly = true)
-    public ChallengeResponse.SoloChallengeDetailRes getSoloChallengeDetail (Long challengeId, String accessToken) {
+    public ChallengeResponse.SoloChallengeDetailRes getSoloChallengeDetail(Long challengeId, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -575,8 +574,49 @@ public class ChallengeService {
 
         return new ChallengeResponse.SoloChallengeDetailRes(soloChallenge.get().getStartDate(),
                 soloChallenge.get().getEndDate(), soloChallenge.get().getChallengeDistance().getDistance(),
-                soloChallenge.get().getChallengePeriod().getDays(), nickname,hashtags,creatorUser.getTendency(),
+                soloChallenge.get().getChallengePeriod().getDays(), nickname, hashtags, creatorUser.getTendency(),
                 reward, countDay);
+    }
+
+    @Transactional(readOnly = true)
+    // 솔로 챌린지 매칭 화면
+    public ChallengeResponse.SoloChallengeMatchingRes getSoloChallengeMatching(String accessToken) {
+
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 유저가 참여 중인 챌린지 조회
+        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(user.getId());
+        SoloChallenge soloChallenge = userSoloChallenge.getSoloChallenge();
+
+        // 챌린지 메이트 조회
+        Long mateId = userSoloChallengeRepository
+                .findBySoloChallengeIdAndUserIdNot(soloChallenge.getId(), user.getId())
+                .map(mate -> mate.getUser().getId())
+                .orElse(null);
+
+        Optional<User> challengeMate = userRepository.findById(mateId);
+
+        // 해시 태그
+        List<String> userHashtags = user.getUserTags().stream()
+                .map(userTag -> userTag.getTag().name())  // UserTag 엔티티에서 Tag enum의 이름을 가져옴
+                .limit(2)  // 최대 2개로 제한
+                .toList();
+
+        List<String> challengeHashtags = challengeMate.get().getUserTags().stream()
+                .map(userTag -> userTag.getTag().name())  // UserTag 엔티티에서 Tag enum의 이름을 가져옴
+                .limit(2)  // 최대 2개로 제한
+                .toList();
+
+        // 앱 사용 기간
+        int userCountDay = calculateCountDay(user.getCreatedAt().toLocalDate());
+        int challengeMateCountDay = calculateCountDay(challengeMate.get().getCreatedAt().toLocalDate());
+
+        return new ChallengeResponse.SoloChallengeMatchingRes(soloChallenge.getChallengePeriod().getDays(),
+                soloChallenge.getChallengeDistance().getDistance(), user.getTendency(),
+                user.getNickname(), userCountDay, userHashtags, challengeMate.get().getTendency(),
+                challengeMate.get().getNickname(), challengeMateCountDay, challengeHashtags);
+
     }
 
     // 활용 메소드들
@@ -631,6 +671,5 @@ public class ChallengeService {
                 ))
                 .collect(Collectors.toList());
     }
-
 
 }
