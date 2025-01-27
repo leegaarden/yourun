@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 // TODO : 성향 받아야 함
@@ -241,17 +242,23 @@ public class ChallengeResponse {
             @Schema(description = "내 크루원 정보 목록(거리 및 성향)")
             List<CrewMemberInfo> myCrewMembers,
 
+            @Schema(description = "내 크루 달린 거리", example = "20.5")
+            double myCrewDistance,
+
             @Schema(description = "매칭된 크루명", example = "거진이봉주")
             String matchedCrewName,
 
             @Schema(description = "매칭된 크루의 구호", example = "에르메스 신발의 주인공")
             String matchedCrewSlogan,
 
-            @Schema(description = "매칭된 크루원 ID 및 성향 목록")
-            List<MemberTendencyInfo> matchedParticipantIdsInfos,
+            @Schema(description = "매칭된 크루 생성자 성향", example = "스프린터")
+            Tendency matchedCrewCreatorTendency,
 
-            @Schema(description = "전체 거리 대비 유저의 달성 비율(%)", example = "55.5")
-            double progressRatio
+            @Schema(description = "매칭된 크루 달린 거리", example = "15.5")
+            double matchedCrewDistance,
+
+            @Schema(description = "현재시간", example = "2024/01/23 14:30")
+            String now
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
@@ -334,6 +341,9 @@ public class ChallengeResponse {
 
             @Schema(description = "크루명", example = "거진홍길동")
             String crewName,
+
+            @Schema(description = "크루 구호", example = "헤르메스 신발의 주인공")
+            String slogan,
 
             @Schema(description = "챌린지 시작일", example = "2025-01-14")
             LocalDate startDate,

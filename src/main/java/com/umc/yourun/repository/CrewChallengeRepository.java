@@ -58,4 +58,10 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
             nativeQuery = true)
     List<CrewChallenge> findRandomPendingChallenges(@Param("size") int size);
 
+    // 마감 시간 지난 챌린지 조회
+    List<CrewChallenge> findByChallengeStatusAndEndDateBefore(
+            ChallengeStatus status,
+            LocalDate date
+    );
+
 }

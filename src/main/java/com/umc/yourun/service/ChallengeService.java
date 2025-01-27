@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,7 +74,8 @@ public class ChallengeService {
         userCrewChallengeRepository.save(userCrewChallenge);
 
         return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
-                savedCrewChallenge.getCrewName(), savedCrewChallenge.getStartDate(), savedCrewChallenge.getEndDate(),
+                savedCrewChallenge.getCrewName(), savedCrewChallenge.getSlogan(),
+                savedCrewChallenge.getStartDate(), savedCrewChallenge.getEndDate(),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -465,46 +467,38 @@ public class ChallengeService {
         String crewName = myCrew.getCrewName();
 
         // 2. 유저가 속한 크루의 크루원들 정보
-        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = userCrewChallengeRepository
-                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
-                .stream()
-                .map(member -> new ChallengeResponse.CrewMemberInfo(
-                        member.getUser().getId(),
-                        calculateTotalDistance(challengeId, member.getUser().getId()),
-                        member.getUser().getTendency()
-                ))
-                .toList();
+        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = sortCrewMembersWithUser(user.getId(), challengeId);
 
         // 3. 매칭된 크루 정보 조회
         CrewChallenge matchedCrew = crewChallengeRepository.findById(myCrew.getMatchedCrewChallengeId())
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
         String matchedCrewName = matchedCrew.getCrewName();
+        Optional<UserCrewChallenge> matchedCrewCreator = userCrewChallengeRepository.findByCrewChallengeIdAndIsCreator(matchedCrew.getId(), true);
 
-        List<ChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(matchedCrew.getId());
-
-        // 4. 전체 달성 거리 계산 (해당 유저의 달성 거리와 전체 거리)
-        List<Long> matchedCrewMemberIds = userCrewChallengeRepository
+        // 4. 유저 크루와 매칭된 크루의 거리
+                List<Long> matchedCrewMemberIds = userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
                 .stream()
                 .map(uc -> uc.getUser().getId())
                 .toList();
-        double userDistance = calculateTotalDistance(challengeId, user.getId());
 
-        double totalDistance = myCrewMembers.stream()
+        double myCrewDistance = myCrewMembers.stream()
                 .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
-        totalDistance += matchedCrewMemberIds.stream()
+        double matchedCrewDistance = matchedCrewMemberIds.stream()
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        // 5. 진행률 계산 (유저의 달성 비율)
-        double progressRatio = 0.0;
-        if (totalDistance > 0) {
-            progressRatio = userDistance / totalDistance * 100;
-        }
+        // 포맷터 정의
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+
+        LocalDateTime dateTime = LocalDateTime.now();
+        String formattedDate = dateTime.format(formatter);
+
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
-                matchedCrewName, matchedCrew.getSlogan(), participantInfos, progressRatio);
+                myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
+                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formattedDate);
 
     }
 
@@ -729,5 +723,23 @@ public class ChallengeService {
                         uc.getUser().getTendency()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    // 유저가 맨 앞으로, 이후로는 참여한 순서대로 (크루 챌린지 상세 진행도 및 결과 화면)
+    private List<ChallengeResponse.CrewMemberInfo> sortCrewMembersWithUser(Long userId, Long challengeId) {
+        return userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
+                .stream()
+                .map(member -> new ChallengeResponse.CrewMemberInfo(
+                        member.getUser().getId(),
+                        calculateTotalDistance(challengeId, member.getUser().getId()),
+                        member.getUser().getTendency()
+                ))
+                .sorted((m1, m2) -> {
+                    if (m1.userId().equals(userId)) return -1;
+                    if (m2.userId().equals(userId)) return 1;
+                    return 0;
+                })
+                .toList();
     }
 }
