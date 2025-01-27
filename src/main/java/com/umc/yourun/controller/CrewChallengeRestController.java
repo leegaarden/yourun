@@ -24,7 +24,6 @@ import java.util.List;
 public class CrewChallengeRestController {
 
     private final ChallengeService challengeService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "CREW_CHALLENGE_API_01 : 크루 챌린지 생성", description = "새로운 크루 챌린지를 생성합니다.")
     @ApiResponses(value = {
@@ -47,6 +46,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/pending")
     public ApiResponse<ChallengeResponse.CrewChallenge> getPendingCrewChallenges(
             @RequestHeader(value = "Authorization") String accessToken
@@ -61,6 +61,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @PostMapping("/{challengeId}/join")
     public ApiResponse<ChallengeResponse.CrewChallengeMateRes> joinCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
@@ -77,6 +78,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/matching")
     public ApiResponse<ChallengeResponse.CrewChallengeMatchingRes> getCrewMatch(
             @RequestHeader(value = "Authorization") String accessToken) {
@@ -92,6 +94,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/detail-progress")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
             @RequestHeader(value = "Authorization") String accessToken) {
@@ -107,6 +110,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/pending/{challengeId}")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewChallengeDetail(
             @RequestHeader(value = "Authorization") String accessToken,
