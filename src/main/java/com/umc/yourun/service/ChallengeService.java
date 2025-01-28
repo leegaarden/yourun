@@ -49,12 +49,12 @@ public class ChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 현재 시간 기준으로 시작 시간 설정 (다음날 같은 시간) 및 종료 시간
-        LocalDateTime startDateTime = LocalDateTime.now().plusDays(1);
+        LocalDateTime startDateTime = parseDateTime(formatDateTime(LocalDateTime.now().plusDays(1)));
         // 종료일에 현재 시간 결합
-        LocalDateTime endDateTime = LocalDateTime.of(
+        LocalDateTime endDateTime = parseDateTime(formatDateTime(LocalDateTime.of(
                 request.endDate(),
                 startDateTime.toLocalTime()
-        );
+        )));
 
 
         // 이미 진행 중 (혹은 대기) 인 크루 챌린지가 있는지 검사
@@ -84,7 +84,7 @@ public class ChallengeService {
 
         return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
                 savedCrewChallenge.getCrewName(), savedCrewChallenge.getSlogan(),
-                formatDate(savedCrewChallenge.getStartDate()), formatDate(savedCrewChallenge.getEndDate()),
+                formatDate(startDateTime), formatDate(endDateTime),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -96,12 +96,12 @@ public class ChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 현재 시간 기준으로 시작 시간 설정 (다음날 같은 시간) 및 종료 시간
-        LocalDateTime startDateTime = LocalDateTime.now().plusDays(1);
+        LocalDateTime startDateTime = parseDateTime(formatDateTime(LocalDateTime.now().plusDays(1)));
         // 종료일에 현재 시간 결합
-        LocalDateTime endDateTime = LocalDateTime.of(
+        LocalDateTime endDateTime = parseDateTime(formatDateTime(LocalDateTime.of(
                 request.endDate(),
                 startDateTime.toLocalTime()
-        );
+        )));
 
         // 이미 진행 중(혹은 대기) 인 솔로 챌린지가 있는지 검사
         if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatusIn(
@@ -131,7 +131,7 @@ public class ChallengeService {
         userSoloChallengeRepository.save(userSoloChallenge);
 
         return new ChallengeResponse.SoloChallengeCreate(savedSoloChallenge.getId(),
-                formatDate(savedSoloChallenge.getStartDate()), formatDate(savedSoloChallenge.getEndDate()),
+                formatDate(startDateTime), formatDate(endDateTime),
                 savedSoloChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -509,9 +509,16 @@ public class ChallengeService {
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
+        boolean win = true;
+        if (myCrewDistance >= matchedCrewDistance) {
+            win = true;
+        } else {
+            win = false;
+        }
+
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
-                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()));
+                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()), win);
 
     }
 
@@ -767,8 +774,11 @@ public class ChallengeService {
         return dateTime.format(DATE_TIME_FORMATTER);
     }
 
+    // 날짜만을 위한 포맷터 상수 정의
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     // LocalDateTime -> 날짜만 String으로 변환
     private String formatDate(LocalDateTime dateTime) {
-        return dateTime.format(DATE_TIME_FORMATTER);
+        return dateTime.format(DATE_FORMATTER);
     }
 }

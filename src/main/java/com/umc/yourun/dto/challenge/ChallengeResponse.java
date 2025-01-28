@@ -4,9 +4,6 @@ import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.enums.Tendency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 // TODO : 성향 받아야 함
@@ -258,7 +255,10 @@ public class ChallengeResponse {
             double matchedCrewDistance,
 
             @Schema(description = "현재시간", example = "2024/01/23 14:30")
-            String now
+            String now,
+
+            @Schema(description = "유저 크루가 이기고 있는지", example = "true")
+            boolean win
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
