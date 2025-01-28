@@ -25,4 +25,10 @@ public interface SoloChallengeRepository extends JpaRepository<SoloChallenge, Lo
             nativeQuery = true)
     List<SoloChallenge> findRandomPendingChallenges(@Param("size") int size);
 
+    // 마감 시간 지난 챌린지 조회
+    List<SoloChallenge> findByChallengeStatusAndEndDateBefore(
+            ChallengeStatus status,
+            LocalDate date
+    );
+
 }

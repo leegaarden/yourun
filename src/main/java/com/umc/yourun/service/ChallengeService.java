@@ -16,12 +16,14 @@ import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.repository.*;
+import jakarta.validation.constraints.Null;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,6 +48,15 @@ public class ChallengeService {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
+        // 현재 시간 기준으로 시작 시간 설정 (다음날 같은 시간) 및 종료 시간
+        LocalDateTime startDateTime = parseDateTime(formatDateTime(LocalDateTime.now().plusDays(1)));
+        // 종료일에 현재 시간 결합
+        LocalDateTime endDateTime = parseDateTime(formatDateTime(LocalDateTime.of(
+                request.endDate(),
+                startDateTime.toLocalTime()
+        )));
+
+
         // 이미 진행 중 (혹은 대기) 인 크루 챌린지가 있는지 검사
         if (userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(
                 user.getId(),
@@ -65,14 +76,15 @@ public class ChallengeService {
         // 날짜 검사 및 기간 반환
         ChallengePeriod period = validateDates(request.endDate());
 
-        CrewChallenge crewChallenge = ChallengeConverter.toCrewChallenge(request, period);
+        CrewChallenge crewChallenge = ChallengeConverter.toCrewChallenge(request, startDateTime, endDateTime, period);
         CrewChallenge savedCrewChallenge = crewChallengeRepository.save(crewChallenge);
 
         UserCrewChallenge userCrewChallenge = ChallengeConverter.toUserCrewChallenge(user, savedCrewChallenge, true);
         userCrewChallengeRepository.save(userCrewChallenge);
 
         return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
-                savedCrewChallenge.getCrewName(), savedCrewChallenge.getStartDate(), savedCrewChallenge.getEndDate(),
+                savedCrewChallenge.getCrewName(), savedCrewChallenge.getSlogan(),
+                formatDate(startDateTime), formatDate(endDateTime),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -82,6 +94,14 @@ public class ChallengeService {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 현재 시간 기준으로 시작 시간 설정 (다음날 같은 시간) 및 종료 시간
+        LocalDateTime startDateTime = parseDateTime(formatDateTime(LocalDateTime.now().plusDays(1)));
+        // 종료일에 현재 시간 결합
+        LocalDateTime endDateTime = parseDateTime(formatDateTime(LocalDateTime.of(
+                request.endDate(),
+                startDateTime.toLocalTime()
+        )));
 
         // 이미 진행 중(혹은 대기) 인 솔로 챌린지가 있는지 검사
         if (userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatusIn(
@@ -103,7 +123,7 @@ public class ChallengeService {
         ChallengePeriod period = validateDates(request.endDate());
 
         // 솔로 챌린지 생성 및 저장
-        SoloChallenge soloChallenge = ChallengeConverter.toSoloChallenge(request, period);
+        SoloChallenge soloChallenge = ChallengeConverter.toSoloChallenge(request, startDateTime, endDateTime, period);
         SoloChallenge savedSoloChallenge = soloChallengeRepository.save(soloChallenge);
 
         // UserSoloChallenge 생성 및 저장
@@ -111,7 +131,7 @@ public class ChallengeService {
         userSoloChallengeRepository.save(userSoloChallenge);
 
         return new ChallengeResponse.SoloChallengeCreate(savedSoloChallenge.getId(),
-                savedSoloChallenge.getStartDate(), savedSoloChallenge.getEndDate(),
+                formatDate(startDateTime), formatDate(endDateTime),
                 savedSoloChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -406,12 +426,13 @@ public class ChallengeService {
         ChallengeResponse.UserSoloChallengeInfo soloInfo = null;
         if (userSoloChallenge != null) {
             SoloChallenge challenge = userSoloChallenge.getSoloChallenge();
-            int soloCountDay = calculateCountDay(challenge.getStartDate());
+            int soloCountDay = calculateCountDay(challenge.getStartDate().toLocalDate());
 
             // 챌린지 메이트 조회
             Long mateId = null;
             String mateNickname = "";
             Tendency tendency = null;
+            LocalDateTime soloStartDate = userSoloChallenge.getSoloChallenge().getStartDate();
 
             if (challenge.getChallengeStatus() == ChallengeStatus.IN_PROGRESS) {
                 mateId = userSoloChallengeRepository
@@ -429,20 +450,21 @@ public class ChallengeService {
 
             }
 
-            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, user, mateId, mateNickname, tendency, soloCountDay);
+            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, user, mateId, mateNickname, tendency, soloCountDay, formatDate(soloStartDate));
         }
 
         ChallengeResponse.UserCrewChallengeInfo crewInfo = null;
+        LocalDateTime crewStartDate = userCrewChallenge.getCrewChallenge().getStartDate();
         if (userCrewChallenge != null) {
             CrewChallenge challenge = userCrewChallenge.getCrewChallenge();
-            int crewCountDay = calculateCountDay(challenge.getStartDate());
+            int crewCountDay = calculateCountDay(challenge.getStartDate().toLocalDate());
 
             // 크루원 수 확인
             long memberCount = userCrewChallengeRepository.countByCrewChallengeId(challenge.getId());
             if (memberCount == 4) {  // 4명이 모인 크루만 응답
                 List<ChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(challenge.getId());
 
-                crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, participantInfos, crewCountDay);
+                crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, participantInfos, crewCountDay, formatDate(crewStartDate));
             }
         }
 
@@ -464,46 +486,34 @@ public class ChallengeService {
         String crewName = myCrew.getCrewName();
 
         // 2. 유저가 속한 크루의 크루원들 정보
-        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = userCrewChallengeRepository
-                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
-                .stream()
-                .map(member -> new ChallengeResponse.CrewMemberInfo(
-                        member.getUser().getId(),
-                        calculateTotalDistance(challengeId, member.getUser().getId()),
-                        member.getUser().getTendency()
-                ))
-                .toList();
+        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = sortCrewMembersWithUser(user.getId(), challengeId);
 
         // 3. 매칭된 크루 정보 조회
         CrewChallenge matchedCrew = crewChallengeRepository.findById(myCrew.getMatchedCrewChallengeId())
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
         String matchedCrewName = matchedCrew.getCrewName();
+        Optional<UserCrewChallenge> matchedCrewCreator = userCrewChallengeRepository.findByCrewChallengeIdAndIsCreator(matchedCrew.getId(), true);
 
-        List<ChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(matchedCrew.getId());
-
-        // 4. 전체 달성 거리 계산 (해당 유저의 달성 거리와 전체 거리)
-        List<Long> matchedCrewMemberIds = userCrewChallengeRepository
+        // 4. 유저 크루와 매칭된 크루의 거리
+                List<Long> matchedCrewMemberIds = userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
                 .stream()
                 .map(uc -> uc.getUser().getId())
                 .toList();
-        double userDistance = calculateTotalDistance(challengeId, user.getId());
 
-        double totalDistance = myCrewMembers.stream()
+        double myCrewDistance = myCrewMembers.stream()
                 .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
-        totalDistance += matchedCrewMemberIds.stream()
+        double matchedCrewDistance = matchedCrewMemberIds.stream()
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        // 5. 진행률 계산 (유저의 달성 비율)
-        double progressRatio = 0.0;
-        if (totalDistance > 0) {
-            progressRatio = (double) userDistance / totalDistance * 100;
-        }
+        boolean win = myCrewDistance >= matchedCrewDistance;
+
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
-                matchedCrewName, matchedCrew.getSlogan(), participantInfos, progressRatio);
+                myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
+                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()), win);
 
     }
 
@@ -531,7 +541,8 @@ public class ChallengeService {
             default -> 0;
         };
 
-        return new ChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(), crewChallenge.get().getStartDate(), crewChallenge.get().getEndDate(),
+        return new ChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(),
+                formatDate(crewChallenge.get().getStartDate()), formatDate(crewChallenge.get().getEndDate()),
                 crewChallenge.get().getChallengePeriod().getDays(), participants.size(), reward, participantInfos, crewChallenge.get().getSlogan());
 
     }
@@ -572,14 +583,14 @@ public class ChallengeService {
 
         int countDay = calculateCountDay(user.getCreatedAt().toLocalDate());
 
-        return new ChallengeResponse.SoloChallengeDetailRes(soloChallenge.get().getStartDate(),
-                soloChallenge.get().getEndDate(), soloChallenge.get().getChallengeDistance().getDistance(),
+        return new ChallengeResponse.SoloChallengeDetailRes(formatDate(soloChallenge.get().getStartDate()),
+                formatDate(soloChallenge.get().getEndDate()), soloChallenge.get().getChallengeDistance().getDistance(),
                 soloChallenge.get().getChallengePeriod().getDays(), nickname, hashtags, creatorUser.getTendency(),
                 reward, countDay);
     }
 
-    @Transactional(readOnly = true)
     // 솔로 챌린지 매칭 화면
+    @Transactional(readOnly = true)
     public ChallengeResponse.SoloChallengeMatchingRes getSoloChallengeMatching(String accessToken) {
 
         // 유저 조회
@@ -619,6 +630,90 @@ public class ChallengeService {
 
     }
 
+    // 크루 챌린지 기여도 결과 화면
+    @Transactional(readOnly = true)
+    public ChallengeResponse.CrewChallengeContributionRes getCrewChallengeContribution(String accessToken) {
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 1. 유저의 현재 크루 챌린지 조회
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
+        CrewChallenge crewChallenge = userCrewChallenge.getCrewChallenge();
+
+        // 2. 크루원들과 거리 정보 조회
+        List<UserCrewChallenge> crewMembers = userCrewChallengeRepository.findByCrewChallengeIdOrderByCreatedAt(crewChallenge.getId());
+
+        // 3. 거리 정보와 순위를 포함한 크루원 정보 리스트 생성
+        List<ChallengeResponse.CrewMemberRankingInfo> crewMemberRankings = new ArrayList<>();
+
+        // 먼저 모든 거리 정보 수집 및 정렬
+        List<Double> sortedDistances = crewMembers.stream()
+                .map(member -> calculateTotalDistance(crewChallenge.getId(), member.getUser().getId()))
+                .sorted(Comparator.reverseOrder())
+                .distinct()
+                .toList();
+
+        // 유저를 먼저 처리하고, 나머지는 참여 순서대로
+        for (UserCrewChallenge member : crewMembers) {
+            double distance = calculateTotalDistance(crewChallenge.getId(), member.getUser().getId());
+            int rank = sortedDistances.indexOf(distance) + 1;
+
+            ChallengeResponse.CrewMemberRankingInfo rankingInfo = new ChallengeResponse.CrewMemberRankingInfo(
+                    member.getUser().getId(),
+                    distance,
+                    member.getUser().getTendency(),
+                    rank
+            );
+
+            // 현재 유저의 정보는 리스트의 맨 앞으로
+            if (member.getUser().getId().equals(user.getId())) {
+                crewMemberRankings.add(0, rankingInfo);
+            } else {
+                crewMemberRankings.add(rankingInfo);
+            }
+        }
+
+        // 4. MVP 선정 (1등)
+        Long mvpId = crewMemberRankings.stream()
+                .filter(member -> member.rank() == 1)
+                .findFirst()
+                .map(ChallengeResponse.CrewMemberRankingInfo::userId)
+                .orElse(null);
+
+        // 5. 보상 계산
+        int reward = switch (crewChallenge.getChallengePeriod().getDays()) {
+            case 3 -> 1;
+            case 4 -> 2;
+            case 5 -> 3;
+            default -> 0;
+        };
+
+        // 6. 승패 여부 계산
+        double myCrewTotalDistance = crewMemberRankings.stream()
+                .mapToDouble(ChallengeResponse.CrewMemberRankingInfo::runningDistance)
+                .sum();
+
+        CrewChallenge matchedCrew = crewChallengeRepository.findById(crewChallenge.getMatchedCrewChallengeId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        double matchedCrewTotalDistance = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(matchedCrew.getId())
+                .stream()
+                .mapToDouble(member -> calculateTotalDistance(matchedCrew.getId(), member.getUser().getId()))
+                .sum();
+
+        boolean win = myCrewTotalDistance >= matchedCrewTotalDistance;
+
+        return new ChallengeResponse.CrewChallengeContributionRes(
+                crewChallenge.getChallengePeriod().getDays(),
+                reward,
+                crewChallenge.getCrewName(),
+                crewMemberRankings,
+                mvpId,
+                win
+        );
+    }
+
     // 활용 메소드들
     // 기간 검사
     private ChallengePeriod validateDates(LocalDate endDate) {
@@ -644,12 +739,12 @@ public class ChallengeService {
         return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
     }
 
-    // 크루원들이 달린 거리 계산
+    // 달린 거리 계산
     private double calculateTotalDistance(Long challengeId, Long userId) {
         CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        LocalDateTime periodStart = challenge.getStartDate().atStartOfDay();
+        LocalDateTime periodStart = challenge.getStartDate();
         LocalDateTime currentTime = LocalDateTime.now();
 
         if (currentTime.isBefore(periodStart)) {
@@ -672,4 +767,42 @@ public class ChallengeService {
                 .collect(Collectors.toList());
     }
 
+    // 유저가 맨 앞으로, 이후로는 참여한 순서대로 (크루 챌린지 상세 진행도 및 결과 화면)
+    private List<ChallengeResponse.CrewMemberInfo> sortCrewMembersWithUser(Long userId, Long challengeId) {
+        return userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(challengeId)
+                .stream()
+                .map(member -> new ChallengeResponse.CrewMemberInfo(
+                        member.getUser().getId(),
+                        calculateTotalDistance(challengeId, member.getUser().getId()),
+                        member.getUser().getTendency()
+                ))
+                .sorted((m1, m2) -> {
+                    if (m1.userId().equals(userId)) return -1;
+                    if (m2.userId().equals(userId)) return 1;
+                    return 0;
+                })
+                .toList();
+    }
+
+    // 포맷터를 상수로 정의
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    // String -> LocalDateTime 변환
+    private LocalDateTime parseDateTime(String dateTimeStr) {
+        return LocalDateTime.parse(dateTimeStr, DATE_TIME_FORMATTER);
+    }
+
+    // LocalDateTime -> String 변환
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime.format(DATE_TIME_FORMATTER);
+    }
+
+    // 날짜만을 위한 포맷터 상수 정의
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    // LocalDateTime -> 날짜만 String으로 변환
+    private String formatDate(LocalDateTime dateTime) {
+        return dateTime.format(DATE_FORMATTER);
+    }
 }

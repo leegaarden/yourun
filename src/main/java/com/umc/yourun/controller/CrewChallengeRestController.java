@@ -111,4 +111,19 @@ public class CrewChallengeRestController {
         ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, accessToken);
         return ApiResponse.success("크루 챌린지 상세 정보입니다.", response);
     }
+
+    @Operation(summary = "CREW_CHALLENGE_API_07 : 크루 챌린지 순위 결과 조회", description = "크루 챌린지의 기여도 결과를 조회합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/ranking-result")
+    public ApiResponse<ChallengeResponse.CrewChallengeContributionRes> getCrewChallengeContribution(
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.CrewChallengeContributionRes response = challengeService.getCrewChallengeContribution(accessToken);
+        return ApiResponse.success("크루 챌린지 순위 결과입니다.", response);
+    }
 }

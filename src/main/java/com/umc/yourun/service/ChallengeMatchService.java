@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
@@ -99,6 +100,36 @@ public class ChallengeMatchService {
             matchedChallenge.setMatchedCrewChallengeId(challenge.getId());  // 매칭된 크루 정보 저장
         }
 
+    }
+
+    // 마감시간이 된 챌린지들 상태 COMPLETED 로 변경
+    @Scheduled(fixedRate = 60000) // 1분 마다 실행
+    public void completeExpiredChallenges() {
+        LocalDate today = LocalDate.now();
+
+        // 1. 솔로 챌린지 종료 처리
+        List<SoloChallenge> expiredSoloChallenges = soloChallengeRepository
+                .findByChallengeStatusAndEndDateBefore(
+                        ChallengeStatus.IN_PROGRESS,
+                        today
+                );
+
+        for (SoloChallenge challenge : expiredSoloChallenges) {
+            challenge.updateStatus(ChallengeStatus.COMPLETED);
+            soloChallengeRepository.save(challenge);
+        }
+
+        // 2. 크루 챌린지 종료 처리
+        List<CrewChallenge> expiredCrewChallenges = crewChallengeRepository
+                .findByChallengeStatusAndEndDateBefore(
+                        ChallengeStatus.IN_PROGRESS,
+                        today
+                );
+
+        for (CrewChallenge challenge : expiredCrewChallenges) {
+            challenge.updateStatus(ChallengeStatus.COMPLETED);
+            crewChallengeRepository.save(challenge);
+        }
     }
 
     // 유저솔로챌린지, 솔로챌린지 삭제

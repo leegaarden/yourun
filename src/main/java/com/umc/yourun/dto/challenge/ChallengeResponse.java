@@ -4,8 +4,6 @@ import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.enums.Tendency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-
-import java.time.LocalDate;
 import java.util.List;
 
 // TODO : 성향 받아야 함
@@ -199,7 +197,7 @@ public class ChallengeResponse {
             int soloDayCount,
 
             @Schema(description = "솔로 챌린지 시작일", example = "2025-01-22")
-            LocalDate soloStartDate
+            String soloStartDate
     ) {}
 
     @Builder
@@ -224,7 +222,7 @@ public class ChallengeResponse {
             int crewDayCount,
 
             @Schema(description = "크루 챌린지 시작일", example = "2025-01-22")
-            LocalDate crewStartDate
+            String crewStartDate
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 : 크루 챌린지 상세 진행도 응답 DTO")
@@ -241,17 +239,26 @@ public class ChallengeResponse {
             @Schema(description = "내 크루원 정보 목록(거리 및 성향)")
             List<CrewMemberInfo> myCrewMembers,
 
+            @Schema(description = "내 크루 달린 거리", example = "20.5")
+            double myCrewDistance,
+
             @Schema(description = "매칭된 크루명", example = "거진이봉주")
             String matchedCrewName,
 
             @Schema(description = "매칭된 크루의 구호", example = "에르메스 신발의 주인공")
             String matchedCrewSlogan,
 
-            @Schema(description = "매칭된 크루원 ID 및 성향 목록")
-            List<MemberTendencyInfo> matchedParticipantIdsInfos,
+            @Schema(description = "매칭된 크루 생성자 성향", example = "스프린터")
+            Tendency matchedCrewCreatorTendency,
 
-            @Schema(description = "전체 거리 대비 유저의 달성 비율(%)", example = "55.5")
-            double progressRatio
+            @Schema(description = "매칭된 크루 달린 거리", example = "15.5")
+            double matchedCrewDistance,
+
+            @Schema(description = "현재시간", example = "2024/01/23 14:30")
+            String now,
+
+            @Schema(description = "유저 크루가 이기고 있는지", example = "true")
+            boolean win
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
@@ -273,10 +280,10 @@ public class ChallengeResponse {
             String crewName,
 
             @Schema(description = "시작일", example = "2025-01-15")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "마감일", example = "2025-01-20")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 기간", example = "4")
             int challengePeriod,
@@ -298,10 +305,10 @@ public class ChallengeResponse {
     public record SoloChallengeDetailRes(
 
             @Schema(description = "시작일", example = "2025-01-15")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "마감일", example = "2025-01-20")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 거리", example = "1")
             int challengeDistance,
@@ -335,11 +342,14 @@ public class ChallengeResponse {
             @Schema(description = "크루명", example = "거진홍길동")
             String crewName,
 
+            @Schema(description = "크루 구호", example = "헤르메스 신발의 주인공")
+            String slogan,
+
             @Schema(description = "챌린지 시작일", example = "2025-01-14")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "챌린지 마감일", example = "2025-01-16")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 기간", example = "3")
             int challengePeriod,
@@ -356,10 +366,10 @@ public class ChallengeResponse {
             Long challengeId,
 
             @Schema(description = "챌린지 시작일", example = "2025-01-14")
-            LocalDate startDate,
+            String startDate,
 
             @Schema(description = "챌린지 마감일", example = "2025-01-16")
-            LocalDate endDate,
+            String endDate,
 
             @Schema(description = "챌린지 기간", example = "3")
             int challengePeriod,
@@ -403,5 +413,41 @@ public class ChallengeResponse {
 
     ) {}
 
+    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 순위 결과 조회 응답 DTO")
+    public record CrewChallengeContributionRes (
+
+            @Schema(description = "챌린지 기간", example = "3")
+            int challengePeriod,
+
+            @Schema(description = "챌린지 보상 개수", example = "1")
+            int reward,
+
+            @Schema(description = "크루명", example = "거진홍길동")
+            String crewName,
+
+            @Schema(description = "크루원 별 달린 거리 및 순위")
+            List<CrewMemberRankingInfo> CrewMemberDistance,
+
+            @Schema(description = "mvp 유저 ID", example = "1")
+            Long mvpId,
+
+            @Schema(description = "내 크루가 이겼는지", example = "true")
+            boolean win
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
+    public record CrewMemberRankingInfo(
+            @Schema(description = "사용자 ID", example = "1")
+            Long userId,
+
+            @Schema(description = "달성한 거리(km)", example = "5.2")
+            double runningDistance,
+
+            @Schema(description = "크루원 성향", example = "스프린터")
+            Tendency userTendency,
+
+            @Schema(description = "달린 거리 별 순위", example = "1")
+            int rank
+    ) {}
 
 }
