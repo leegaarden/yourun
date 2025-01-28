@@ -509,12 +509,7 @@ public class ChallengeService {
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        boolean win = true;
-        if (myCrewDistance >= matchedCrewDistance) {
-            win = true;
-        } else {
-            win = false;
-        }
+        boolean win = myCrewDistance >= matchedCrewDistance;
 
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
@@ -707,7 +702,7 @@ public class ChallengeService {
                 .mapToDouble(member -> calculateTotalDistance(matchedCrew.getId(), member.getUser().getId()))
                 .sum();
 
-        boolean win = myCrewTotalDistance > matchedCrewTotalDistance;
+        boolean win = myCrewTotalDistance >= matchedCrewTotalDistance;
 
         return new ChallengeResponse.CrewChallengeContributionRes(
                 crewChallenge.getChallengePeriod().getDays(),
