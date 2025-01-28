@@ -22,17 +22,15 @@ public class ChallengeRequest {
             @ValidSlogan(message = "공백 포함하여 한글로만 3-12자로 입력해주세요.")
             String slogan,
 
-            @Schema(description = "챌린지 종료일", example = "2025/01/31 02:28")
-            @JsonFormat(pattern = "yyyy/MM/dd HH:mm")
-            LocalDateTime endDate
+            @Schema(description = "챌린지 종료일", example = "2025-01-31")
+            LocalDate endDate
     ) {}
 
     @Schema(title = "CHALLENGE_REQ_02 : 개인 챌린지 생성 요청 DTO")
     public record CreateSoloChallengeReq(
 
-            @Schema(description = "챌린지 종료일", example = "2025/01/31 02:28")
-            @JsonFormat(pattern = "yyyy/MM/dd HH:mm")
-            LocalDateTime endDate,
+            @Schema(description = "챌린지 종료일", example = "2025-01-31")
+            LocalDate endDate,
 
             @Schema(description = "챌린지 거리", example = "ONE_KM",
             title = "ONE_KM = 1, THREE_KM = 3, FIVE_KM = 5")
