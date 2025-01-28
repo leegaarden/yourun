@@ -425,14 +425,29 @@ public class ChallengeResponse {
             @Schema(description = "크루명", example = "거진홍길동")
             String crewName,
 
-            @Schema(description = "크루원 별 달린 거리")
-            List<CrewMemberInfo> CrewMemberDistance,
+            @Schema(description = "크루원 별 달린 거리 및 순위")
+            List<CrewMemberRankingInfo> CrewMemberDistance,
 
             @Schema(description = "mvp 유저 ID", example = "1")
             Long mvpId,
 
             @Schema(description = "내 크루가 이겼는지", example = "true")
             boolean win
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
+    public record CrewMemberRankingInfo(
+            @Schema(description = "사용자 ID", example = "1")
+            Long userId,
+
+            @Schema(description = "달성한 거리(km)", example = "5.2")
+            double runningDistance,
+
+            @Schema(description = "크루원 성향", example = "스프린터")
+            Tendency userTendency,
+
+            @Schema(description = "달린 거리 별 순위", example = "1")
+            int rank
     ) {}
 
 }

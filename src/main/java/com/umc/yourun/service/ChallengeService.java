@@ -638,25 +638,54 @@ public class ChallengeService {
     // 크루 챌린지 기여도 결과 화면
     @Transactional(readOnly = true)
     public ChallengeResponse.CrewChallengeContributionRes getCrewChallengeContribution(String accessToken) {
-
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 1. 유저의 현재 크루 챌린지 조회
         UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
-
         CrewChallenge crewChallenge = userCrewChallenge.getCrewChallenge();
 
-        // 2. 크루원들의 정보와 달린 거리 조회 (유저가 맨 앞)
-        List<ChallengeResponse.CrewMemberInfo> crewMemberDistances = sortCrewMembersWithUser(user.getId(), crewChallenge.getId());
+        // 2. 크루원들과 거리 정보 조회
+        List<UserCrewChallenge> crewMembers = userCrewChallengeRepository.findByCrewChallengeIdOrderByCreatedAt(crewChallenge.getId());
 
-        // 3. MVP 선정 (거리가 가장 많은 사람)
-        Long mvpId = crewMemberDistances.stream()
-                .max(Comparator.comparingDouble(ChallengeResponse.CrewMemberInfo::runningDistance))
-                .map(ChallengeResponse.CrewMemberInfo::userId)
+        // 3. 거리 정보와 순위를 포함한 크루원 정보 리스트 생성
+        List<ChallengeResponse.CrewMemberRankingInfo> crewMemberRankings = new ArrayList<>();
+
+        // 먼저 모든 거리 정보 수집 및 정렬
+        List<Double> sortedDistances = crewMembers.stream()
+                .map(member -> calculateTotalDistance(crewChallenge.getId(), member.getUser().getId()))
+                .sorted(Comparator.reverseOrder())
+                .distinct()
+                .toList();
+
+        // 유저를 먼저 처리하고, 나머지는 참여 순서대로
+        for (UserCrewChallenge member : crewMembers) {
+            double distance = calculateTotalDistance(crewChallenge.getId(), member.getUser().getId());
+            int rank = sortedDistances.indexOf(distance) + 1;
+
+            ChallengeResponse.CrewMemberRankingInfo rankingInfo = new ChallengeResponse.CrewMemberRankingInfo(
+                    member.getUser().getId(),
+                    distance,
+                    member.getUser().getTendency(),
+                    rank
+            );
+
+            // 현재 유저의 정보는 리스트의 맨 앞으로
+            if (member.getUser().getId().equals(user.getId())) {
+                crewMemberRankings.add(0, rankingInfo);
+            } else {
+                crewMemberRankings.add(rankingInfo);
+            }
+        }
+
+        // 4. MVP 선정 (1등)
+        Long mvpId = crewMemberRankings.stream()
+                .filter(member -> member.rank() == 1)
+                .findFirst()
+                .map(ChallengeResponse.CrewMemberRankingInfo::userId)
                 .orElse(null);
 
-        // 4. 보상 계산
+        // 5. 보상 계산
         int reward = switch (crewChallenge.getChallengePeriod().getDays()) {
             case 3 -> 1;
             case 4 -> 2;
@@ -664,9 +693,9 @@ public class ChallengeService {
             default -> 0;
         };
 
-        // 5. 승패 여부 계산
-        double myCrewTotalDistance = crewMemberDistances.stream()
-                .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
+        // 6. 승패 여부 계산
+        double myCrewTotalDistance = crewMemberRankings.stream()
+                .mapToDouble(ChallengeResponse.CrewMemberRankingInfo::runningDistance)
                 .sum();
 
         CrewChallenge matchedCrew = crewChallengeRepository.findById(crewChallenge.getMatchedCrewChallengeId())
@@ -684,7 +713,7 @@ public class ChallengeService {
                 crewChallenge.getChallengePeriod().getDays(),
                 reward,
                 crewChallenge.getCrewName(),
-                crewMemberDistances,
+                crewMemberRankings,
                 mvpId,
                 win
         );
