@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -105,13 +106,13 @@ public class ChallengeMatchService {
     // 마감시간이 된 챌린지들 상태 COMPLETED 로 변경
     @Scheduled(fixedRate = 60000) // 1분 마다 실행
     public void completeExpiredChallenges() {
-        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
 
         // 1. 솔로 챌린지 종료 처리
         List<SoloChallenge> expiredSoloChallenges = soloChallengeRepository
                 .findByChallengeStatusAndEndDateBefore(
                         ChallengeStatus.IN_PROGRESS,
-                        today
+                        now
                 );
 
         for (SoloChallenge challenge : expiredSoloChallenges) {
@@ -123,7 +124,7 @@ public class ChallengeMatchService {
         List<CrewChallenge> expiredCrewChallenges = crewChallengeRepository
                 .findByChallengeStatusAndEndDateBefore(
                         ChallengeStatus.IN_PROGRESS,
-                        today
+                        now
                 );
 
         for (CrewChallenge challenge : expiredCrewChallenges) {

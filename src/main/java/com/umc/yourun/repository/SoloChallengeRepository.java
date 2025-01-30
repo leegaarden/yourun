@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -28,7 +29,7 @@ public interface SoloChallengeRepository extends JpaRepository<SoloChallenge, Lo
     // 마감 시간 지난 챌린지 조회
     List<SoloChallenge> findByChallengeStatusAndEndDateBefore(
             ChallengeStatus status,
-            LocalDate date
+            LocalDateTime date
     );
 
 }
