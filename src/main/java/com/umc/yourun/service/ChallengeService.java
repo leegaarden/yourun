@@ -509,11 +509,9 @@ public class ChallengeService {
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        boolean win = myCrewDistance >= matchedCrewDistance;
-
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
-                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()), win);
+                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()));
 
     }
 

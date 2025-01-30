@@ -255,10 +255,7 @@ public class ChallengeResponse {
             double matchedCrewDistance,
 
             @Schema(description = "현재시간", example = "2024/01/23 14:30")
-            String now,
-
-            @Schema(description = "유저 크루가 이기고 있는지", example = "true")
-            boolean win
+            String now
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
