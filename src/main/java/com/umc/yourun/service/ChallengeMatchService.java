@@ -22,6 +22,7 @@ import java.util.Random;
 @Transactional
 public class ChallengeMatchService {
 
+
     private final SoloChallengeRepository soloChallengeRepository;
     private final CrewChallengeRepository crewChallengeRepository;
     private final UserSoloChallengeRepository userSoloChallengeRepository;
