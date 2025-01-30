@@ -37,7 +37,7 @@ jobs:
       - name: Upload build artifact  # 빌드된 아티팩트 업로드
         uses: actions/upload-artifact@v4
         with:
-          name: umc7thServer
+          name: yourunServer
           path: build/libs/*.jar
 
   deploy:
@@ -64,6 +64,6 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15 
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/umc7thServer.jar > app.log 2>&1 &  
+            nohup java -jar /home/$EC2_USERNAME/yourunServer.jar > app.log 2>&1 &  
           "
           rm -f private_key.pem
