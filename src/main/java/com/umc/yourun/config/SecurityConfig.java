@@ -40,7 +40,7 @@ public class SecurityConfig {
 //                .securityMatcher("/users/**")
 //                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("api/v1/users/login", "api/v1/users", "/swagger-ui/**", "/api-docs/**").permitAll()
+                        .requestMatchers("api/v1/users/login", "api/v1/users", "api/v1/users/duplicate", "/swagger-ui/**", "/api-docs/**").permitAll()
 //                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
