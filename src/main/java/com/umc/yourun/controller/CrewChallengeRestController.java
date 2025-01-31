@@ -1,6 +1,7 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
+import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorResponse;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
@@ -29,6 +30,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 생성 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @PostMapping("")
     public ApiResponse<ChallengeResponse.CrewChallengeCreate> createCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
@@ -44,6 +46,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/pending")
     public ApiResponse<ChallengeResponse.CrewChallenge> getPendingCrewChallenges(
             @RequestHeader(value = "Authorization") String accessToken
@@ -58,6 +61,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @PostMapping("/{challengeId}/join")
     public ApiResponse<ChallengeResponse.CrewChallengeMateRes> joinCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
@@ -74,6 +78,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/matching")
     public ApiResponse<ChallengeResponse.CrewChallengeMatchingRes> getCrewMatch(
             @RequestHeader(value = "Authorization") String accessToken) {
@@ -89,6 +94,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/detail-progress")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
             @RequestHeader(value = "Authorization") String accessToken) {
@@ -104,6 +110,7 @@ public class CrewChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "참여중인 크루 챌린지가 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/pending/{challengeId}")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewChallengeDetail(
             @RequestHeader(value = "Authorization") String accessToken,

@@ -54,4 +54,13 @@ public class UserController {
         ChallengeResponse.HomeChallengeRes response = challengeService.getUserChallenges(accessToken);
         return ApiResponse.success("홈 화면 : 사용자와 관련된 챌린지 정보입니다.", response);
     }
+
+    @PostMapping("/duplicate")
+    public ApiResponse<Boolean> duplicate(@RequestParam String email){
+        if(userService.duplicateUserCheck(email)) {
+            return ApiResponse.success("중복되지 않은 이메일입니다", true);
+        }else{
+            return ApiResponse.success("이미 존재하는 이메일입니다.", false);
+        }
+    }
 }
