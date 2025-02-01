@@ -38,7 +38,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
 //                .securityMatcher("/users/**")
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("api/v1/users/login", "api/v1/users", "api/v1/users/duplicate", "/swagger-ui/**", "/api-docs/**").permitAll()
 //                        .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -49,17 +49,19 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
-//        configuration.addAllowedMethod("*");       // 모든 HTTP 메서드 허용
-//        configuration.addAllowedHeader("*");       // 모든 Header 허용
-//        configuration.setAllowCredentials(true);   // 인증 정보 허용
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("*"); // 모든 Origin 허용
+        configuration.addAllowedMethod("*");       // 모든 HTTP 메서드 허용
+        configuration.addAllowedHeader("*");       // 모든 Header 허용
+        configuration.setAllowCredentials(false);   // 인증 정보 허용
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
 
     @Bean
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {

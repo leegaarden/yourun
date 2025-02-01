@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<Map<String,String>> getAccessToken(@RequestBody UserRequestDTO.LoginDto loginDto){
+    public ApiResponse<Map<String,String>> getAccessToken(@Valid @RequestBody UserRequestDTO.LoginDto loginDto){
         Map<String,String> token;
         try {
             token = userService.login(loginDto);
