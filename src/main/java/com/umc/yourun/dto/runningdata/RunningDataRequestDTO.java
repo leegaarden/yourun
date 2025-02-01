@@ -15,10 +15,6 @@ public class RunningDataRequestDTO {
 
 	@Schema(title = "RUNNING_REQ_01 : 러닝 결과 정보 생성 요청")
 	public record CreateRunningDataReq(
-		//TODO: 토큰에서 가져오기
-		@Schema(description = "user ID", example = "1")
-		@NotNull(message = "user ID는 필수 입력 값입니다.")
-		Long userId,
 		@Schema(description = "목표 시간")
 		@Min(value = 0, message = "목표 시간은 0 이상의 값이어야 합니다.")
 		@Max(value = 60, message = "목표 시간은 60 이하의 값이어야 합니다.")
