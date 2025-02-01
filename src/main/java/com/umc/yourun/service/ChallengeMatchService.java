@@ -1,5 +1,7 @@
 package com.umc.yourun.service;
 
+import com.umc.yourun.config.exception.ErrorCode;
+import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.enums.ChallengeStatus;
@@ -9,6 +11,7 @@ import com.umc.yourun.repository.UserCrewChallengeRepository;
 import com.umc.yourun.repository.UserSoloChallengeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -121,8 +124,7 @@ public class ChallengeMatchService {
             soloChallengeRepository.save(challenge);
         }
 
-        // 2. 크루 챌린지 종료 처리
-        // FIXME : 크루 챌린지의 경우 매칭된 크루도 마감시간이 되어야지 COMPLETED 처리
+        // 2. 크루 챌린지 종료 처리 (수정된 로직 : 두 크루 챌린지 모두 마감시간이 되어야 COMPLETED 상태가 되도록)
         List<CrewChallenge> expiredCrewChallenges = crewChallengeRepository
                 .findByChallengeStatusAndEndDateBefore(
                         ChallengeStatus.IN_PROGRESS,
@@ -130,8 +132,23 @@ public class ChallengeMatchService {
                 );
 
         for (CrewChallenge challenge : expiredCrewChallenges) {
-            challenge.updateStatus(ChallengeStatus.COMPLETED);
-            crewChallengeRepository.save(challenge);
+            // 매칭된 크루 챌린지 조회
+            CrewChallenge matchedChallenge = crewChallengeRepository
+                    .findById(challenge.getMatchedCrewChallengeId())
+                    .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+            // 둘 중 더 늦은 종료 시간 확인
+            LocalDateTime laterEndDate = challenge.getEndDate().isAfter(matchedChallenge.getEndDate())
+                    ? challenge.getEndDate()
+                    : matchedChallenge.getEndDate();
+
+            // 현재 시간이 더 늦은 종료 시간을 지났을 경우에만 두 챌린지 모두 COMPLETED로 변경
+            if (now.isAfter(laterEndDate)) {
+                challenge.updateStatus(ChallengeStatus.COMPLETED);
+                matchedChallenge.updateStatus(ChallengeStatus.COMPLETED);
+                crewChallengeRepository.save(challenge);
+                crewChallengeRepository.save(matchedChallenge);
+            }
         }
     }
 
