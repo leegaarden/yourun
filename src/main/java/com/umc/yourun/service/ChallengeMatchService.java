@@ -122,6 +122,7 @@ public class ChallengeMatchService {
         }
 
         // 2. 크루 챌린지 종료 처리
+        // FIXME : 크루 챌린지의 경우 매칭된 크루도 마감시간이 되어야지 COMPLETED 처리
         List<CrewChallenge> expiredCrewChallenges = crewChallengeRepository
                 .findByChallengeStatusAndEndDateBefore(
                         ChallengeStatus.IN_PROGRESS,
