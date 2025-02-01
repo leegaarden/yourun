@@ -15,9 +15,9 @@ public class RunningDataRequestDTO {
 
 	@Schema(title = "RUNNING_REQ_01 : 러닝 결과 정보 생성 요청")
 	public record CreateRunningDataReq(
-		@Schema(description = "목표 시간")
-		@Min(value = 0, message = "목표 시간은 0 이상의 값이어야 합니다.")
-		@Max(value = 60, message = "목표 시간은 60 이하의 값이어야 합니다.")
+		@Schema(description = "목표 시간(sec)", example = "1800")
+		@Min(value = 0, message = "목표 시간은 0분 이상의 값이어야 합니다.")
+		@Max(value = 60, message = "목표 시간은 60분 이하의 값이어야 합니다.")
 		@NotNull(message = "목표 시간은 필수 입력 값입니다.")
 		Integer targetTime,
 		@Schema(description = "시작 시간", example = "2025-01-17T15:00:00")
