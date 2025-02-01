@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.umc.yourun.config.exception.ErrorCode.INVALID_INPUT_VALUE;
@@ -26,32 +27,34 @@ public class UserMateController {
     @PostMapping("/mates/{mateId}")
     @ResponseBody
     public ApiResponse<Boolean> addMate(@RequestHeader("Authorization") String accessToken, @PathVariable Long mateId){
-        System.out.println(accessToken);
-        if(userMateService.addmate(accessToken, mateId)) {
-            return ApiResponse.success("메이트 추가에 성공했습니다.", true);
-        }else{
-            return ApiResponse.error(INVALID_INPUT_VALUE);
+        try{
+            userMateService.addmate(accessToken, mateId);
+        }catch(Exception e){
+            return ApiResponse.error(e.getMessage(), INVALID_INPUT_VALUE,false);
         }
+        return ApiResponse.success("메이트 추가에 성공했습니다.", true);
     }
 
     @GetMapping("/mates")
     @ResponseBody
     public ApiResponse<List<UserResponseDTO.userMateInfo>> getMates(@RequestHeader("Authorization") String accessToken){
-        List<UserResponseDTO.userMateInfo> userMateList = userMateService.getUserMates(accessToken);
-        if(userMateList.isEmpty()) {
-            return ApiResponse.error(INVALID_INPUT_VALUE);
-        }else{
-            return ApiResponse.success("메이트 목록 조회에 성공했습니다.", userMateList);
+        List<UserResponseDTO.userMateInfo> userMateList = new ArrayList<>();
+        try {
+            userMateList = userMateService.getUserMates(accessToken);
+        }catch (Exception e){
+            return ApiResponse.error(e.getMessage(), INVALID_INPUT_VALUE,null);
         }
+        return ApiResponse.success("메이트 목록 조회에 성공했습니다.",userMateList);
     }
 
     @DeleteMapping("/mates/{mateId}")
     @ResponseBody
     public ApiResponse<Boolean> deleteMate(@RequestHeader("Authorization") String accessToken, @PathVariable Long mateId){
-        if(userMateService.deleteMate(accessToken, mateId)) {
-            return ApiResponse.success("메이트 삭제에 성공했습니다.", true);
-        }else{
-            return ApiResponse.error(INVALID_INPUT_VALUE);
+        try {
+            userMateService.deleteMate(accessToken, mateId);
+        }catch (Exception e) {
+            return ApiResponse.error(e.getMessage(), INVALID_INPUT_VALUE,false);
         }
+        return ApiResponse.success("메이트 삭제에 성공했습니다.", true);
     }
 }
