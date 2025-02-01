@@ -11,7 +11,6 @@ public class RunningDataConverter {
 	public static RunningData toRunningData(RunningDataRequestDTO.CreateRunningDataReq request, Integer totalTime,
 		User user) {
 		return RunningData.builder()
-			//TODO: 유저 기능 완료 후 수정 필요
 			.user(user)
 			.targetTime(request.targetTime())
 			.totalDistance(request.totalDistance())
@@ -28,6 +27,7 @@ public class RunningDataConverter {
 			.endTime(runningData.getEndTime())
 			.totalDistance(runningData.getTotalDistance())
 			.totalTime(runningData.getTotalTime())
+			.userName(runningData.getUser().getNickname())
 			.build();
 	}
 

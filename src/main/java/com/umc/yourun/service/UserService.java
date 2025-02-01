@@ -45,10 +45,10 @@ public class UserService {
     }
 
     public boolean joinMember(UserRequestDTO.JoinDto request) {
-        if(!request.password().equals(request.passwordcheck())){
+        if (!request.password().equals(request.passwordcheck())) {
             return false;
         }
-        if(request.tag1().equals(request.tag2())){
+        if (request.tag1().equals(request.tag2())) {
             return false;
         }
 
@@ -63,7 +63,7 @@ public class UserService {
         return true;
     }
 
-    public Map<String,String> login(UserRequestDTO.LoginDto loginDto) throws UserException {
+    public Map<String, String> login(UserRequestDTO.LoginDto loginDto) throws UserException {
         // 인증
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password())
@@ -83,5 +83,15 @@ public class UserService {
         user.setStatus(UserStatus.valueOf("INACTIVE"));
         user.setInactive_date(LocalDateTime.now());
         return true;
+    }
+
+    public Boolean duplicateUserCheck(String email) {
+        System.out.println(email);
+        if(userRepository.findByEmail(email).isEmpty()){
+            System.out.println(userRepository.findByEmail(email));
+            return true;
+        }else{
+            return false;
+        }
     }
 }
