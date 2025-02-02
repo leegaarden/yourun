@@ -6,10 +6,12 @@ import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.converter.ChallengeConverter;
 import com.umc.yourun.domain.CrewChallenge;
+import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
 import com.umc.yourun.domain.enums.ChallengeStatus;
+import com.umc.yourun.domain.enums.RunningDataStatus;
 import com.umc.yourun.domain.enums.Tendency;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
@@ -486,7 +488,7 @@ public class ChallengeService {
         String crewName = myCrew.getCrewName();
 
         // 2. 유저가 속한 크루의 크루원들 정보
-        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = sortCrewMembersWithUser(user.getId(), challengeId);
+        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = getCrewMemberInfo(user.getId(), challengeId);
 
         // 3. 매칭된 크루 정보 조회
         CrewChallenge matchedCrew = crewChallengeRepository.findById(myCrew.getMatchedCrewChallengeId())
@@ -509,11 +511,9 @@ public class ChallengeService {
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        boolean win = myCrewDistance >= matchedCrewDistance;
-
         return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
-                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()), win);
+                matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()));
 
     }
 
@@ -630,7 +630,7 @@ public class ChallengeService {
 
     }
 
-    // 크루 챌린지 기여도 결과 화면
+    // 크루 챌린지 순위 결과 화면
     @Transactional(readOnly = true)
     public ChallengeResponse.CrewChallengeContributionRes getCrewChallengeContribution(String accessToken) {
         // 유저 조회
@@ -714,6 +714,58 @@ public class ChallengeService {
         );
     }
 
+    // 러닝 후 크루 챌린지 결과 확인
+    @Transactional(readOnly = true)
+    public ChallengeResponse.CrewChallengeRunningResult getCrewChallengeRunningResult (String accessToken) {
+
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 1. 유저의 현재 크루 챌린지 조회
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
+        CrewChallenge myCrewChallenge = userCrewChallenge.getCrewChallenge();
+
+        // 2. 유저가 속한 크루의 거리
+        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = getCrewMemberInfo(user.getId(), myCrewChallenge.getId());
+
+        // 유저가 방금 뛴 거리
+        Optional<RunningData> latestRunning = runningDataRepository.findTopByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), RunningDataStatus.ACTIVE);
+        double userDistance = latestRunning.get().getTotalDistance() / 1000.0;
+        double afterDistance = myCrewMembers.stream()
+                .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
+                .sum();
+        double beforeDistance = afterDistance - userDistance;
+
+        // 3. 매칭된 크루 정보 조회
+        CrewChallenge matchedCrewChallenge = crewChallengeRepository.findById(myCrewChallenge.getMatchedCrewChallengeId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        String matchedCrewName = matchedCrewChallenge.getCrewName();
+        Tendency matchedCrewCreator = userCrewChallengeRepository.findByCrewChallengeIdAndIsCreator(matchedCrewChallenge.getId(), true)
+                .get().getUser().getTendency();
+
+        // 상태 검증 (두 크루 챌린지가 모두 종료가 안 됐을 경우)
+        if (myCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED
+                || matchedCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED) {
+            throw new ChallengeException(ErrorCode.CREW_CHALLENGE_COMPLETED);
+        }
+
+        // 4. 유저 크루와 매칭된 크루의 거리
+        List<Long> matchedCrewMemberIds = userCrewChallengeRepository
+                .findByCrewChallengeIdOrderByCreatedAt(matchedCrewChallenge.getId())
+                .stream()
+                .map(uc -> uc.getUser().getId())
+                .toList();
+
+        double matchedCrewDistance = matchedCrewMemberIds.stream()
+                .mapToDouble(memberId -> calculateTotalDistance(myCrewChallenge.getMatchedCrewChallengeId(), memberId))
+                .sum();
+
+        return new ChallengeResponse.CrewChallengeRunningResult(myCrewChallenge.getChallengePeriod().getDays(),
+                myCrewChallenge.getCrewName(), beforeDistance, userDistance, afterDistance, matchedCrewName,
+                matchedCrewCreator, matchedCrewDistance);
+    }
+
     // 활용 메소드들
     // 기간 검사
     private ChallengePeriod validateDates(LocalDate endDate) {
@@ -739,7 +791,7 @@ public class ChallengeService {
         return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
     }
 
-    // 달린 거리 계산
+    // 크루 챌린지 중 특정 유저의 달린 거리 계산
     private double calculateTotalDistance(Long challengeId, Long userId) {
         CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
@@ -767,8 +819,8 @@ public class ChallengeService {
                 .collect(Collectors.toList());
     }
 
-    // 유저가 맨 앞으로, 이후로는 참여한 순서대로 (크루 챌린지 상세 진행도 및 결과 화면)
-    private List<ChallengeResponse.CrewMemberInfo> sortCrewMembersWithUser(Long userId, Long challengeId) {
+    // 참여자 정보 및 거리 조회
+    private List<ChallengeResponse.CrewMemberInfo> getCrewMemberInfo (Long userId, Long challengeId) {
         return userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(challengeId)
                 .stream()
@@ -777,11 +829,6 @@ public class ChallengeService {
                         calculateTotalDistance(challengeId, member.getUser().getId()),
                         member.getUser().getTendency()
                 ))
-                .sorted((m1, m2) -> {
-                    if (m1.userId().equals(userId)) return -1;
-                    if (m2.userId().equals(userId)) return 1;
-                    return 0;
-                })
                 .toList();
     }
 

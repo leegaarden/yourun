@@ -61,7 +61,7 @@ public interface CrewChallengeRepository extends JpaRepository<CrewChallenge, Lo
     // 마감 시간 지난 챌린지 조회
     List<CrewChallenge> findByChallengeStatusAndEndDateBefore(
             ChallengeStatus status,
-            LocalDate date
+            LocalDateTime date
     );
 
 }

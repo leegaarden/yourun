@@ -255,10 +255,7 @@ public class ChallengeResponse {
             double matchedCrewDistance,
 
             @Schema(description = "현재시간", example = "2024/01/23 14:30")
-            String now,
-
-            @Schema(description = "유저 크루가 이기고 있는지", example = "true")
-            boolean win
+            String now
     ) {}
 
     @Schema(description = "CHALLENGE_RES_07 - 1 : 크루원 정보")
@@ -413,7 +410,7 @@ public class ChallengeResponse {
 
     ) {}
 
-    @Schema(title = "CHALLENGE_RES_13 : 러닝 후 크루 챌린지 순위 결과 조회 응답 DTO")
+    @Schema(title = "CHALLENGE_RES_13 : 크루 챌린지 순위 결과 조회 응답 DTO")
     public record CrewChallengeContributionRes (
 
             @Schema(description = "챌린지 기간", example = "3")
@@ -448,6 +445,35 @@ public class ChallengeResponse {
 
             @Schema(description = "달린 거리 별 순위", example = "1")
             int rank
+    ) {}
+
+    @Schema(description = "CHALLENGE_RES_08 : 러닝 후 크루 챌린지 결과 응답 DTO")
+    public record CrewChallengeRunningResult(
+
+            @Schema(description = "설정된 기간", example = "3")
+            int challengePeriod,
+
+            @Schema(description = "내 크루명", example = "거진홍길동")
+            String myCrewName,
+
+            @Schema(description = "유저가 뛰기 전 크루 총 거리", example = "12.8")
+            double beforeDistance,
+
+            @Schema(description = "유저가 방금 뛴 거리", example = "5.2")
+            double userDistance,
+
+            @Schema(description = "유저가 뛰어서 추가된 크루 총 거리", example = "18")
+            double afterDistance,
+
+            @Schema(description = "매칭된 크루 명", example = "거진이봉주")
+            String matchedCrewName,
+
+            @Schema(description = "매칭된 크루 생성자 성향", example = "스프린터")
+            Tendency matchedCrewCreator,
+
+            @Schema(description = "매칭된 크루 총 거리", example = "10")
+            double matchedCrewDistance
+
     ) {}
 
 }

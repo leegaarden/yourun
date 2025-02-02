@@ -41,4 +41,7 @@ public interface RunningDataRepository extends JpaRepository<RunningData, Long> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+	// 특정 사용자의 가장 최근 러닝 데이터 (러닝 후 결과 조회 확인용)
+	Optional<RunningData> findTopByUserIdAndStatusOrderByCreatedAtDesc(Long userId, RunningDataStatus status);
 }
