@@ -1,4 +1,4 @@
-package com.umc.yourun.service;
+package com.umc.yourun.service.challenge;
 
 import com.umc.yourun.config.exception.ErrorCode;
 import com.umc.yourun.config.exception.custom.ChallengeException;
