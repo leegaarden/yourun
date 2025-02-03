@@ -196,7 +196,7 @@ public class ChallengeResponse {
             @Schema(description = "솔로 챌린지 진행 일차", example = "3")
             int soloDayCount,
 
-            @Schema(description = "솔로 챌린지 시작일", example = "2025-01-22")
+            @Schema(description = "솔로 챌린지 시작일", example = "2025-01-22 15:00")
             String soloStartDate
     ) {}
 
@@ -221,7 +221,7 @@ public class ChallengeResponse {
             @Schema(description = "크루 챌린지 진행 일차", example = "2")
             int crewDayCount,
 
-            @Schema(description = "크루 챌린지 시작일", example = "2025-01-22")
+            @Schema(description = "크루 챌린지 시작일", example = "2025-01-22 15:00")
             String crewStartDate
     ) {}
 
@@ -276,10 +276,10 @@ public class ChallengeResponse {
             @Schema(description = "크루명", example = "거진홍길동")
             String crewName,
 
-            @Schema(description = "시작일", example = "2025-01-15")
+            @Schema(description = "시작일", example = "2025-01-15 15:00")
             String startDate,
 
-            @Schema(description = "마감일", example = "2025-01-20")
+            @Schema(description = "마감일", example = "2025-01-20 15:00")
             String endDate,
 
             @Schema(description = "챌린지 기간", example = "4")
@@ -301,10 +301,10 @@ public class ChallengeResponse {
     @Schema(title = "CHALLENGE_RES_09 : 솔로 챌린지 상세 페이지 응답 DTO")
     public record SoloChallengeDetailRes(
 
-            @Schema(description = "시작일", example = "2025-01-15")
+            @Schema(description = "시작일", example = "2025-01-15 15:00")
             String startDate,
 
-            @Schema(description = "마감일", example = "2025-01-20")
+            @Schema(description = "마감일", example = "2025-01-20 15:00")
             String endDate,
 
             @Schema(description = "챌린지 거리", example = "1")
@@ -342,10 +342,10 @@ public class ChallengeResponse {
             @Schema(description = "크루 구호", example = "헤르메스 신발의 주인공")
             String slogan,
 
-            @Schema(description = "챌린지 시작일", example = "2025-01-14")
+            @Schema(description = "챌린지 시작일", example = "2025-01-14 15:00")
             String startDate,
 
-            @Schema(description = "챌린지 마감일", example = "2025-01-16")
+            @Schema(description = "챌린지 마감일", example = "2025-01-16 15:00")
             String endDate,
 
             @Schema(description = "챌린지 기간", example = "3")
@@ -362,10 +362,10 @@ public class ChallengeResponse {
             @Schema(description = "생성된 솔로 챌린지 ID", example = "1")
             Long challengeId,
 
-            @Schema(description = "챌린지 시작일", example = "2025-01-14")
+            @Schema(description = "챌린지 시작일", example = "2025-01-14 15:00")
             String startDate,
 
-            @Schema(description = "챌린지 마감일", example = "2025-01-16")
+            @Schema(description = "챌린지 마감일", example = "2025-01-16 15:00")
             String endDate,
 
             @Schema(description = "챌린지 기간", example = "3")

@@ -86,7 +86,7 @@ public class ChallengeService {
 
         return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
                 savedCrewChallenge.getCrewName(), savedCrewChallenge.getSlogan(),
-                formatDate(startDateTime), formatDate(endDateTime),
+                formatDateTime(startDateTime), formatDateTime(endDateTime),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -133,7 +133,7 @@ public class ChallengeService {
         userSoloChallengeRepository.save(userSoloChallenge);
 
         return new ChallengeResponse.SoloChallengeCreate(savedSoloChallenge.getId(),
-                formatDate(startDateTime), formatDate(endDateTime),
+                formatDateTime(startDateTime), formatDateTime(endDateTime),
                 savedSoloChallenge.getChallengePeriod().getDays(), user.getTendency());
     }
 
@@ -452,7 +452,7 @@ public class ChallengeService {
 
             }
 
-            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, user, mateId, mateNickname, tendency, soloCountDay, formatDate(soloStartDate));
+            soloInfo = ChallengeConverter.toUserSoloChallengeInfo(challenge, user, mateId, mateNickname, tendency, soloCountDay, formatDateTime(soloStartDate));
         }
 
         ChallengeResponse.UserCrewChallengeInfo crewInfo = null;
@@ -466,7 +466,7 @@ public class ChallengeService {
             if (memberCount == 4) {  // 4명이 모인 크루만 응답
                 List<ChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(challenge.getId());
 
-                crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, participantInfos, crewCountDay, formatDate(crewStartDate));
+                crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, participantInfos, crewCountDay, formatDateTime(crewStartDate));
             }
         }
 
@@ -542,7 +542,7 @@ public class ChallengeService {
         };
 
         return new ChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(),
-                formatDate(crewChallenge.get().getStartDate()), formatDate(crewChallenge.get().getEndDate()),
+                formatDateTime(crewChallenge.get().getStartDate()), formatDateTime(crewChallenge.get().getEndDate()),
                 crewChallenge.get().getChallengePeriod().getDays(), participants.size(), reward, participantInfos, crewChallenge.get().getSlogan());
 
     }
@@ -583,8 +583,8 @@ public class ChallengeService {
 
         int countDay = calculateCountDay(user.getCreatedAt().toLocalDate());
 
-        return new ChallengeResponse.SoloChallengeDetailRes(formatDate(soloChallenge.get().getStartDate()),
-                formatDate(soloChallenge.get().getEndDate()), soloChallenge.get().getChallengeDistance().getDistance(),
+        return new ChallengeResponse.SoloChallengeDetailRes(formatDateTime(soloChallenge.get().getStartDate()),
+                formatDateTime(soloChallenge.get().getEndDate()), soloChallenge.get().getChallengeDistance().getDistance(),
                 soloChallenge.get().getChallengePeriod().getDays(), nickname, hashtags, creatorUser.getTendency(),
                 reward, countDay);
     }
