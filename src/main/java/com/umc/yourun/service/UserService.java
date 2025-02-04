@@ -9,6 +9,7 @@ import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.repository.UserRepository;
 import com.umc.yourun.repository.UserTagRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
