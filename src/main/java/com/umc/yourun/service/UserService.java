@@ -1,8 +1,6 @@
 package com.umc.yourun.service;
 
 import com.umc.yourun.config.JwtTokenProvider;
-import com.umc.yourun.config.exception.GeneralExceptionHandler;
-import com.umc.yourun.config.exception.custom.RunningException;
 import com.umc.yourun.converter.UserConverter;
 import com.umc.yourun.converter.UserTagConverter;
 import com.umc.yourun.domain.User;
@@ -10,15 +8,7 @@ import com.umc.yourun.domain.enums.UserStatus;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.repository.UserRepository;
 import com.umc.yourun.repository.UserTagRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,12 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.umc.yourun.config.exception.custom.UserException;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.*;
 

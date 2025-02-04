@@ -6,6 +6,7 @@ import com.umc.yourun.domain.BaseEntity;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengePeriod;
+import com.umc.yourun.domain.enums.ChallengeResult;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import jakarta.persistence.*;

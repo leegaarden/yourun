@@ -1,11 +1,11 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
-import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorResponse;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
-import com.umc.yourun.service.ChallengeService;
+import com.umc.yourun.service.challenge.CrewChallengeService;
+import com.umc.yourun.service.challenge.SoloChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,15 +15,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/challenges/crew")
 @Tag(name = "CrewChallenge", description = "크루 챌린지 API")
 public class CrewChallengeRestController {
 
-    private final ChallengeService challengeService;
+    private final CrewChallengeService crewChallengeService;
 
     @Operation(summary = "CREW_CHALLENGE_API_01 : 크루 챌린지 생성", description = "새로운 크루 챌린지를 생성합니다.")
     @ApiResponses(value = {
@@ -32,11 +30,11 @@ public class CrewChallengeRestController {
     })
 
     @PostMapping("")
-    public ApiResponse<ChallengeResponse.CrewChallengeCreate> createCrewChallenge(
+    public ApiResponse<ChallengeResponse.CrewChallengeCreateRes> createCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
 
-        ChallengeResponse.CrewChallengeCreate response = challengeService.createCrewChallenge(request, accessToken);
+        ChallengeResponse.CrewChallengeCreateRes response = crewChallengeService.createCrewChallenge(request, accessToken);
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", response);
     }
 
@@ -51,7 +49,7 @@ public class CrewChallengeRestController {
     public ApiResponse<ChallengeResponse.CrewChallenge> getPendingCrewChallenges(
             @RequestHeader(value = "Authorization") String accessToken
     ) {
-        ChallengeResponse.CrewChallenge response = challengeService.getPendingCrewChallenges(accessToken);
+        ChallengeResponse.CrewChallenge response = crewChallengeService.getPendingCrewChallenges(accessToken);
         return ApiResponse.success("결성 대기 중인 크루 챌린지 목록입니다.", response);
     }
 
@@ -66,7 +64,7 @@ public class CrewChallengeRestController {
     public ApiResponse<ChallengeResponse.CrewChallengeMateRes> joinCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.CrewChallengeMateRes response = challengeService.joinCrewChallenge(challengeId, accessToken);
+        ChallengeResponse.CrewChallengeMateRes response = crewChallengeService.joinCrewChallenge(challengeId, accessToken);
         return ApiResponse.success("크루 챌린지 참여가 완료되었습니다.", response);
     }
 
@@ -82,7 +80,7 @@ public class CrewChallengeRestController {
     @GetMapping("/matching")
     public ApiResponse<ChallengeResponse.CrewChallengeMatchingRes> getCrewMatch(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.CrewChallengeMatchingRes response = challengeService.getCrewMatch(accessToken);
+        ChallengeResponse.CrewChallengeMatchingRes response = crewChallengeService.getCrewMatch(accessToken);
         return ApiResponse.success("크루 챌린지 매칭 정보입니다.", response);
     }
 
@@ -98,7 +96,7 @@ public class CrewChallengeRestController {
     @GetMapping("/detail-progress")
     public ApiResponse<ChallengeResponse.CrewChallengeDetailProgressRes> getCrewMatchDetailProgress(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.CrewChallengeDetailProgressRes response = challengeService.getCrewChallengeDetailProgress(accessToken);
+        ChallengeResponse.CrewChallengeDetailProgressRes response = crewChallengeService.getCrewChallengeDetailProgress(accessToken);
         return ApiResponse.success("크루 챌린지 상세 진행도 정보입니다.", response);
     }
 
@@ -115,7 +113,7 @@ public class CrewChallengeRestController {
     public ApiResponse<ChallengeResponse.CrewChallengeDetailRes> getCrewChallengeDetail(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.CrewChallengeDetailRes response = challengeService.getCrewChallengeDetail(challengeId, accessToken);
+        ChallengeResponse.CrewChallengeDetailRes response = crewChallengeService.getCrewChallengeDetail(challengeId, accessToken);
         return ApiResponse.success("크루 챌린지 상세 정보입니다.", response);
     }
 
@@ -130,7 +128,7 @@ public class CrewChallengeRestController {
     @GetMapping("/ranking-result")
     public ApiResponse<ChallengeResponse.CrewChallengeContributionRes> getCrewChallengeContribution(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.CrewChallengeContributionRes response = challengeService.getCrewChallengeContribution(accessToken);
+        ChallengeResponse.CrewChallengeContributionRes response = crewChallengeService.getCrewChallengeContribution(accessToken);
         return ApiResponse.success("크루 챌린지 순위 결과입니다.", response);
     }
 
@@ -143,9 +141,9 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/running-result")
-    public ApiResponse<ChallengeResponse.CrewChallengeRunningResult> getCrewChallengeRunningResult(
+    public ApiResponse<ChallengeResponse.CrewChallengeRunningResultRes> getCrewChallengeRunningResult(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.CrewChallengeRunningResult response = challengeService.getCrewChallengeRunningResult(accessToken);
+        ChallengeResponse.CrewChallengeRunningResultRes response = crewChallengeService.getCrewChallengeRunningResult(accessToken);
         return ApiResponse.success("러닝 후 크루 챌린지 결과입니다.", response);
     }
 }

@@ -6,7 +6,7 @@ import com.umc.yourun.config.exception.ErrorResponse;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.service.UserService;
-import com.umc.yourun.service.ChallengeService;
+import com.umc.yourun.service.challenge.SoloChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +25,8 @@ import static com.umc.yourun.config.exception.ErrorCode.INVALID_INPUT_VALUE;
 @RequestMapping("api/v1/users")
 public class UserController {
     private final UserService userService;
-    private final ChallengeService challengeService;
+    private final SoloChallengeService soloChallengeService;
+
     @PostMapping("")
     public ApiResponse join(@Valid @RequestBody UserRequestDTO.JoinDto user){
         try {
@@ -62,7 +63,7 @@ public class UserController {
     @GetMapping("/home/challenges")
     public ApiResponse<ChallengeResponse.HomeChallengeRes> getUserChallenges(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.HomeChallengeRes response = challengeService.getUserChallenges(accessToken);
+        ChallengeResponse.HomeChallengeRes response = soloChallengeService.getUserChallenges(accessToken);
         return ApiResponse.success("홈 화면 : 사용자와 관련된 챌린지 정보입니다.", response);
     }
 
