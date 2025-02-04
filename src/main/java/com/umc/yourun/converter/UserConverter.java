@@ -6,6 +6,8 @@ import com.umc.yourun.domain.enums.Tag;
 import com.umc.yourun.domain.enums.UserStatus;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.dto.user.UserResponseDTO;
+import com.umc.yourun.repository.RunningDataRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,6 +15,13 @@ import java.util.List;
 
 @Component
 public class UserConverter {
+    private RunningDataRepository runningDataRepository;
+
+    @Autowired
+    public UserConverter(RunningDataRepository runningDataRepository) {
+        this.runningDataRepository = runningDataRepository;
+    }
+
     public static User toMember(UserRequestDTO.JoinDto request) {
 
         return User.builder()
@@ -27,7 +36,7 @@ public class UserConverter {
                 .build();
     }
 
-    public static UserResponseDTO.userMateInfo toUserMateInfo(User mate) {
+    public static UserResponseDTO.userMateInfo toUserMateInfo(User mate, int distance, int countDay) {
         List<Tag> tags = new ArrayList<>();
         for(UserTag userTag: mate.getUserTags()){
             tags.add(userTag.getTag());
@@ -38,6 +47,8 @@ public class UserConverter {
                 .nickname(mate.getNickname())
                 .tendency(mate.getTendency())
                 .tags(tags)
+                .totalDistance(distance)
+                .countDay(countDay)
                 .build();
     }
 }

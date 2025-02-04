@@ -5,14 +5,16 @@ import com.umc.yourun.converter.UserMateConverter;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.UserMate;
 import com.umc.yourun.dto.user.UserResponseDTO;
+import com.umc.yourun.repository.RunningDataRepository;
 import com.umc.yourun.repository.UserMateRepository;
 import com.umc.yourun.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,12 +24,14 @@ import java.util.Optional;
 public class UserMateService {
     private UserMateRepository userMateRepository;
     private UserRepository userRepository;
+    private RunningDataRepository runningDataRepository;
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserMateService(UserMateRepository userMateRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+    public UserMateService(UserMateRepository userMateRepository, UserRepository userRepository, RunningDataRepository runningDataRepository, JwtTokenProvider jwtTokenProvider) {
         this.userMateRepository = userMateRepository;
         this.userRepository = userRepository;
+        this.runningDataRepository = runningDataRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -62,7 +66,8 @@ public class UserMateService {
 
         List<UserResponseDTO.userMateInfo> userMateInfos = new ArrayList<>();
         for(UserMate userMate : userMates){
-            userMateInfos.add(UserConverter.toUserMateInfo(userMate.getMate()));
+            User mate = userMate.getMate();
+            userMateInfos.add(UserConverter.toUserMateInfo(mate, runningDataRepository.sumDistanceByUserId(mate.getId()), calculateCountDay(mate.getCreatedAt().toLocalDate())));
         }
 
         return userMateInfos;
@@ -95,9 +100,13 @@ public class UserMateService {
 
         List<UserResponseDTO.userMateInfo> userMateInfos = new ArrayList<>();
         for(User temp : users){
-            userMateInfos.add(UserConverter.toUserMateInfo(temp));
+            userMateInfos.add(UserConverter.toUserMateInfo(temp, runningDataRepository.sumDistanceByUserId(temp.getId()), calculateCountDay(temp.getCreatedAt().toLocalDate())));
         }
 
         return userMateInfos;
+    }
+
+    private int calculateCountDay(LocalDate startDate) {
+        return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
     }
 }
