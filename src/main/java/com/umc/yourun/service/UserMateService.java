@@ -10,6 +10,7 @@ import com.umc.yourun.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class UserMateService {
     }
 
     public Boolean addmate(String token, Long mateId) throws ValidationException{
-        if(userMateRepository.findById(mateId).isEmpty()){
+        if(userRepository.findById(mateId).isEmpty()){
             throw new ValidationException("존재하지 않는 유저를 메이트로 추가할 수 없습니다.");
         }
         User user = jwtTokenProvider.getUserByToken(token);
@@ -60,7 +61,7 @@ public class UserMateService {
     }
 
     public Boolean deleteMate(String token, Long mateId) throws ValidationException{
-        if(userMateRepository.findById(mateId).isEmpty()){
+        if(userRepository.findById(mateId).isEmpty()){
             throw new ValidationException("존재하지 않는 메이트를 삭제할 수 없습니다.");
         }
         User user = jwtTokenProvider.getUserByToken(token);
@@ -68,5 +69,27 @@ public class UserMateService {
         UserMate userMate = userMateRepository.findByUserAndMate(user,mate.get());
         userMateRepository.delete(userMate);
         return true;
+    }
+
+    public List<UserResponseDTO.userMateInfo> recommendFiveMates(String token){
+        User user = jwtTokenProvider.getUserByToken(token);
+
+        List<Long> excludeIdList = new ArrayList<>();
+        excludeIdList.add(user.getId());
+        for(UserMate userMate :user.getUserMates()){
+            excludeIdList.add(userMate.getMate().getId());
+        }
+
+        List<User> users = userRepository.findRandomFive(excludeIdList);
+        if(users.isEmpty()){
+            throw new ValidationException("랜덤으로 추천할 수 있는 유저가 0명으로 추천에 실패했습니다.");
+        }
+
+        List<UserResponseDTO.userMateInfo> userMateInfos = new ArrayList<>();
+        for(User temp : users){
+            userMateInfos.add(UserConverter.toUserMateInfo(temp));
+        }
+
+        return userMateInfos;
     }
 }

@@ -57,4 +57,16 @@ public class UserMateController {
         }
         return ApiResponse.success("메이트 삭제에 성공했습니다.", true);
     }
+
+    @GetMapping("/mates/recommend")
+    @ResponseBody
+    public ApiResponse<List<UserResponseDTO.userMateInfo>> recommendMates(@RequestHeader("Authorization") String accessToken){
+        List<UserResponseDTO.userMateInfo> mateInfos = new ArrayList<>();
+        try {
+            mateInfos = userMateService.recommendFiveMates(accessToken);
+        }catch (Exception e){
+            ApiResponse.error(e.getMessage(),INVALID_INPUT_VALUE, null);
+        }
+        return ApiResponse.success("랜덤 메이트 추천에 성공했습니다.", mateInfos);
+    }
 }

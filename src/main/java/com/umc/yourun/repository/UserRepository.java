@@ -1,12 +1,14 @@
 package com.umc.yourun.repository;
 
 import com.umc.yourun.domain.User;
+import com.umc.yourun.domain.UserMate;
 import com.umc.yourun.domain.enums.Tendency;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,4 +26,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 사용자 아이디로 성향 찾기
     @Query("SELECT u.tendency FROM User u WHERE u.id = :userId")
     Optional<Tendency> findTendencyById(@Param("userId") Long userId);
+
+    @Query(value = "SELECT * FROM user WHERE id not in (:excludeIdList) ORDER BY RAND() LIMIT 5", nativeQuery = true)
+    List<User> findRandomFive(@Param("excludeIdList") List<Long> excludeIdList);
 }
