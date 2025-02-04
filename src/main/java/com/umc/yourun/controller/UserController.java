@@ -75,4 +75,13 @@ public class UserController {
             return ApiResponse.error("이미 존재하는 이메일입니다.", INVALID_INPUT_VALUE,false);
         }
     }
+
+    @PostMapping("/check-nickname")
+    public ApiResponse<Boolean> checkNickname(@RequestParam String nickname){
+        if(userService.checkUserNickname(nickname)) {
+            return ApiResponse.success("사용 가능한 닉네임입니다", true);
+        }else{
+            return ApiResponse.error("이미 존재하는 닉네임입니다.", INVALID_INPUT_VALUE,false);
+        }
+    }
 }

@@ -33,3 +33,9 @@ springdoc:
             scope: read write
             token-uri: http://${SERVER_HOST}:8080/oauth/token
             client-authentication-method: post
+SERVER_HOST: localhost
+DB_HOST: localhost
+DB_PORT: 3306
+DB_NAME: yourun
+DB_USER: root
+DB_PASSWORD: chltjr123@

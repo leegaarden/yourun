@@ -20,6 +20,8 @@ public class UserResponseDTO {
             String nickname,
             @Schema(example = "페이스메이커")
             Tendency tendency,
-            List<Tag> tags
+            List<Tag> tags,
+            int totalDistance,
+            int countDay
     ){}
 }
