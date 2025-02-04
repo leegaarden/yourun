@@ -8,6 +8,7 @@ import com.umc.yourun.dto.user.UserResponseDTO;
 import com.umc.yourun.repository.UserMateRepository;
 import com.umc.yourun.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,10 @@ public class UserMateService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public Boolean addmate(String token,Long mateId){
+    public Boolean addmate(String token, Long mateId) throws ValidationException{
+        if(userMateRepository.findById(mateId).isEmpty()){
+            throw new ValidationException("존재하지 않는 유저를 메이트로 추가할 수 없습니다.");
+        }
         User user = jwtTokenProvider.getUserByToken(token);
         Optional<User> mate = userRepository.findById(mateId);
         if(mate.isEmpty()){
@@ -39,9 +43,13 @@ public class UserMateService {
         return true;
     }
     
-    public List<UserResponseDTO.userMateInfo> getUserMates(String token){
+    public List<UserResponseDTO.userMateInfo> getUserMates(String token) throws ValidationException{
         User user = jwtTokenProvider.getUserByToken(token);
         List<UserMate> userMates = user.getUserMates();
+
+        if(userMates.isEmpty()){
+            throw new ValidationException("추가한 메이트가 0명입니다.");
+        }
 
         List<UserResponseDTO.userMateInfo> userMateInfos = new ArrayList<>();
         for(UserMate userMate : userMates){
@@ -51,7 +59,10 @@ public class UserMateService {
         return userMateInfos;
     }
 
-    public Boolean deleteMate(String token, Long mateId){
+    public Boolean deleteMate(String token, Long mateId) throws ValidationException{
+        if(userMateRepository.findById(mateId).isEmpty()){
+            throw new ValidationException("존재하지 않는 메이트를 삭제할 수 없습니다.");
+        }
         User user = jwtTokenProvider.getUserByToken(token);
         Optional<User> mate = userRepository.findById(mateId);
         UserMate userMate = userMateRepository.findByUserAndMate(user,mate.get());

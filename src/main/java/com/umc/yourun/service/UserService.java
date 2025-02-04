@@ -38,12 +38,18 @@ public class UserService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public boolean joinMember(UserRequestDTO.JoinDto request) {
+    public boolean joinMember(UserRequestDTO.JoinDto request) throws ValidationException{
+        if(!userRepository.findByEmail(request.email()).isEmpty()) {
+            throw new ValidationException("이미 사용중인 이메일입니다.");
+        }
         if (!request.password().equals(request.passwordcheck())) {
-            return false;
+            throw new ValidationException("비밀번호가 일치하지 않습니다");
+        }
+        if(!userRepository.findByNickname(request.nickname()).isEmpty()){
+            throw new ValidationException("이미 사용중인 닉네임입니다.");
         }
         if (request.tag1().equals(request.tag2())) {
-            return false;
+            throw new ValidationException("같은 테그를 선택할 수 없습니다.");
         }
 
         User newUser = UserConverter.toMember(request);
@@ -57,7 +63,13 @@ public class UserService {
         return true;
     }
 
-    public Map<String, String> login(UserRequestDTO.LoginDto loginDto) throws UserException {
+    public Map<String, String> login(UserRequestDTO.LoginDto loginDto) throws ValidationException {
+        if(userRepository.findByEmail(loginDto.email()).isEmpty()) {
+            throw new ValidationException("존재하지 않은 이메일입니다.");
+        }
+        if(!passwordEncoder.matches(loginDto.password(),userRepository.findByEmail(loginDto.email()).get().getPassword())) {
+            throw new ValidationException("비밀번호가 틀렸습니다.");
+        }
         // 인증
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password())
@@ -80,9 +92,7 @@ public class UserService {
     }
 
     public Boolean duplicateUserCheck(String email) {
-        System.out.println(email);
         if(userRepository.findByEmail(email).isEmpty()){
-            System.out.println(userRepository.findByEmail(email));
             return true;
         }else{
             return false;

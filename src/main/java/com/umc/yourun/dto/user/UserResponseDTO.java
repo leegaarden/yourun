@@ -14,8 +14,8 @@ public class UserResponseDTO {
 
     @Builder
     public record userMateInfo(
+            @Schema(example = "1")
             Long id,
-            @Pattern(regexp = "^[가-힣]{2,4}$", message = "닉네임은 띄어쓰기 없이 한글 2~4자만 가능합니다.")
             @Schema(example = "최석운")
             String nickname,
             @Schema(example = "페이스메이커")
