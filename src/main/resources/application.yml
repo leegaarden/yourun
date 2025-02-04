@@ -9,8 +9,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-      jdbc:
-        time_zone: Asia/Seoul
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
   application:
     name: yourun
 springdoc:

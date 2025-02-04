@@ -15,6 +15,7 @@ import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
 import com.umc.yourun.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -32,7 +35,6 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class SoloChallengeService {
 
-    private final CrewChallengeRepository crewChallengeRepository;
     private final SoloChallengeRepository soloChallengeRepository;
     private final UserSoloChallengeRepository userSoloChallengeRepository;
     private final UserCrewChallengeRepository userCrewChallengeRepository;
@@ -41,6 +43,8 @@ public class SoloChallengeService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RunningDataRepository runningDataRepository;
 
+    ZoneId seoulZone = ZoneId.of("Asia/Seoul");
+    ZoneOffset seoulOffset = ZoneOffset.of("+09:00");
 
     // 1. 솔로 챌린지 생성
     @Transactional
@@ -279,8 +283,10 @@ public class SoloChallengeService {
         Map<Integer, Double> dailyDistances = new HashMap<>();
         // 각 일자별 시작시간과 종료시간을 계산하여 데이터 조회
         for (int day = 1; day <= currentDay; day++) {
-            LocalDateTime dayStart = startDate.plusDays(day - 1);
-            LocalDateTime dayEnd = startDate.plusDays(day);
+            LocalDateTime dayStart = challenge.getStartDate().plusDays(currentDay - 1);
+            LocalDateTime dayEnd = currentDay == calculateDayFromStart(challenge.getStartDate(), now)
+                    ? now
+                    : challenge.getStartDate().plusDays(currentDay);
 
             // 마지막 날인 경우 현재 시간까지만 계산
             if (day == currentDay) {
@@ -289,19 +295,17 @@ public class SoloChallengeService {
 
             // 특정 기간 동안의 유저의 러닝 데이터 조회 (하루치)
             List<RunningData> dayRunningData = runningDataRepository
-                    .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                    .findAllByUserIdAndStartTimeBetweenAndStatus(
                             userId,
                             dayStart,
                             dayEnd,
-                            RunningDataStatus.ACTIVE
+                            RunningDataStatus.ACTIVE.name()
                     );
 
             double totalDistance = dayRunningData.stream()
                     .mapToDouble(data -> data.getTotalDistance() / 1000.0) // m를 km로 변환
                     .sum();
-
             dailyDistances.put(day, totalDistance);
-
         }
 
         return dailyDistances.entrySet().stream()
@@ -329,11 +333,11 @@ public class SoloChallengeService {
                 LocalDateTime dayEnd = challenge.getStartDate().plusDays(day);
 
                 double dayDistance = runningDataRepository
-                        .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                        .findAllByUserIdAndStartTimeBetweenAndStatus(
                                 mate.getId(),
                                 dayStart,
                                 dayEnd,
-                                RunningDataStatus.ACTIVE
+                                RunningDataStatus.ACTIVE.name()
                         )
                         .stream()
                         .mapToDouble(data -> data.getTotalDistance() / 1000.0)
@@ -365,11 +369,11 @@ public class SoloChallengeService {
 
         // 현재 일차의 러닝 거리 계산
         double currentDayDistance = runningDataRepository
-                .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                .findAllByUserIdAndStartTimeBetweenAndStatus(
                         mate.getId(),
                         dayStart,
                         dayEnd,
-                        RunningDataStatus.ACTIVE
+                        RunningDataStatus.ACTIVE.name()
                 )
                 .stream()
                 .mapToDouble(data -> data.getTotalDistance() / 1000.0)
@@ -568,11 +572,11 @@ public class SoloChallengeService {
         LocalDateTime dayStart = challenge.getStartDate().plusDays(currentDay - 1);
 
         return runningDataRepository
-                .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                .findAllByUserIdAndStartTimeBetweenAndStatus(
                         userId,
                         dayStart,
                         now,
-                        RunningDataStatus.ACTIVE
+                        RunningDataStatus.ACTIVE.name()
                 )
                 .stream()
                 .mapToDouble(RunningData::getTotalDistance)
@@ -600,11 +604,11 @@ public class SoloChallengeService {
             LocalDateTime dayEnd = challenge.getStartDate().plusDays(day);
 
             double dayDistance = runningDataRepository
-                    .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                    .findAllByUserIdAndStartTimeBetweenAndStatus(
                             userId,
                             dayStart,
                             dayEnd,
-                            RunningDataStatus.ACTIVE
+                            RunningDataStatus.ACTIVE.name()
                     )
                     .stream()
                     .mapToDouble(data -> data.getTotalDistance() / 1000.0)
@@ -623,11 +627,11 @@ public class SoloChallengeService {
         LocalDateTime dayEnd = challenge.getStartDate().plusDays(lastDay);
 
         return runningDataRepository
-                .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                .findAllByUserIdAndStartTimeBetweenAndStatus(
                         userId,
                         dayStart,
                         dayEnd,
-                        RunningDataStatus.ACTIVE
+                        RunningDataStatus.ACTIVE.name()
                 )
                 .stream()
                 .mapToDouble(data -> data.getTotalDistance() / 1000.0)
@@ -654,11 +658,11 @@ public class SoloChallengeService {
                 LocalDateTime dayEnd = challenge.getStartDate().plusDays(day);
 
                 double dayDistance = runningDataRepository
-                        .findAllByUserIdAndCreatedAtBetweenAndStatus(
+                        .findAllByUserIdAndStartTimeBetweenAndStatus(
                                 userChallenge.getUser().getId(),
                                 dayStart,
                                 dayEnd,
-                                RunningDataStatus.ACTIVE
+                                RunningDataStatus.ACTIVE.name()
                         )
                         .stream()
                         .mapToDouble(data -> data.getTotalDistance() / 1000.0)
