@@ -32,15 +32,23 @@ public class UserMateService {
     }
 
     public Boolean addmate(String token, Long mateId) throws ValidationException{
-        if(userRepository.findById(mateId).isEmpty()){
-            throw new ValidationException("존재하지 않는 유저를 메이트로 추가할 수 없습니다.");
-        }
         User user = jwtTokenProvider.getUserByToken(token);
         Optional<User> mate = userRepository.findById(mateId);
+
         if(mate.isEmpty()){
-            return false;
+            throw new ValidationException("존재하지 않는 유저를 메이트로 추가할 수 없습니다.");
         }
+        if(mate.get().getId().equals(user.getId())){
+            throw new ValidationException("자기 자신을 메이트로 추가할 수 없습니다.");
+        }
+        for(UserMate userMate : user.getUserMates()){
+            if(userMate.getId().equals(mateId)){
+                throw new ValidationException("이미 추가한 메이트를 중복으로 추가할 수 없습니다.");
+            }
+        }
+
         userMateRepository.save(UserMateConverter.toUserMate(user, mate.get()));
+
         return true;
     }
     
@@ -61,17 +69,17 @@ public class UserMateService {
     }
 
     public Boolean deleteMate(String token, Long mateId) throws ValidationException{
-        if(userRepository.findById(mateId).isEmpty()){
-            throw new ValidationException("존재하지 않는 메이트를 삭제할 수 없습니다.");
-        }
         User user = jwtTokenProvider.getUserByToken(token);
         Optional<User> mate = userRepository.findById(mateId);
+        if(mate.isEmpty()){
+            throw new ValidationException("메이트 목록에 존재하지 않는 메이트를 삭제할 수 없습니다.");
+        }
         UserMate userMate = userMateRepository.findByUserAndMate(user,mate.get());
         userMateRepository.delete(userMate);
         return true;
     }
 
-    public List<UserResponseDTO.userMateInfo> recommendFiveMates(String token){
+    public List<UserResponseDTO.userMateInfo> recommendFiveMates(String token) throws ValidationException{
         User user = jwtTokenProvider.getUserByToken(token);
 
         List<Long> excludeIdList = new ArrayList<>();
@@ -82,7 +90,7 @@ public class UserMateService {
 
         List<User> users = userRepository.findRandomFive(excludeIdList);
         if(users.isEmpty()){
-            throw new ValidationException("랜덤으로 추천할 수 있는 유저가 0명으로 추천에 실패했습니다.");
+            throw new ValidationException("메이트로 추천할 수 있는 유저가 0명이므로 추천에 실패했습니다.");
         }
 
         List<UserResponseDTO.userMateInfo> userMateInfos = new ArrayList<>();

@@ -47,7 +47,8 @@ public enum ErrorCode {
 
     // User 관련 에러
     INVALID_PATH_PARAMETER(400, "P001", "잘못된 PathParameter입니다."),
-    USER_NOT_FOUND(400, "U001", "존재하지 않는 사용자입니다.");
+    USER_NOT_FOUND(400, "U001", "존재하지 않는 사용자입니다."),
+    FAILED_MATE_RECOMMEND(400, "M001", "메이트 랜덤 추천에 실패했습니다.");
 
     private final int status;
     private final String code;

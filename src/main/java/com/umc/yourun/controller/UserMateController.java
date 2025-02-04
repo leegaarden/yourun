@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.umc.yourun.config.exception.ErrorCode.INVALID_INPUT_VALUE;
+import static com.umc.yourun.config.exception.ErrorCode.*;
 
 @Controller
 @RequestMapping("api/v1/users")
@@ -65,8 +65,8 @@ public class UserMateController {
         try {
             mateInfos = userMateService.recommendFiveMates(accessToken);
         }catch (Exception e){
-            ApiResponse.error(e.getMessage(),INVALID_INPUT_VALUE, null);
+            ApiResponse.error(e.getMessage(), FAILED_MATE_RECOMMEND, null);
         }
-        return ApiResponse.success("랜덤 메이트 추천에 성공했습니다.", mateInfos);
+        return ApiResponse.success("메이트 랜덤 추천에 성공했습니다.", mateInfos);
     }
 }
