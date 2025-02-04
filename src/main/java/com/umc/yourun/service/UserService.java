@@ -114,4 +114,12 @@ public class UserService {
             return false;
         }
     }
+
+    public Boolean checkUserNickname(String nickName) {
+        if(userRepository.findByNickname(nickName).isEmpty()){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
