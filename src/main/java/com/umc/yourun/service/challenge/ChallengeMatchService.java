@@ -11,14 +11,11 @@ import com.umc.yourun.repository.UserCrewChallengeRepository;
 import com.umc.yourun.repository.UserSoloChallengeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 // 챌린지 매칭과 관련된 서비스 클래스
 @Service
@@ -107,7 +104,7 @@ public class ChallengeMatchService {
 
     }
 
-    // 마감시간이 된 챌린지들 상태 COMPLETED 로 변경
+    // 1분 마다 마감시간이 된 챌린지들 상태 COMPLETED 로 변경
     @Scheduled(fixedRate = 60000) // 1분 마다 실행
     public void completeExpiredChallenges() {
         LocalDateTime now = LocalDateTime.now();

@@ -34,6 +34,10 @@ public class UserSoloChallenge extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
+    @Getter
     private ChallengeResult challengeResult = ChallengeResult.IN_PROGRESS;
 
+    public void updateChallengeResult(ChallengeResult result) {
+        this.challengeResult = result;
+    }
 }

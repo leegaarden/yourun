@@ -1,5 +1,6 @@
 package com.umc.yourun.repository;
 
+import com.umc.yourun.domain.enums.ChallengeResult;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,5 +42,8 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
 
     // 챌린지 아이디와 생성자 여부로 찾기 (챌린지 메이트 찾기)
     Optional<UserSoloChallenge> findBySoloChallengeIdAndIsCreator(Long challengeId, boolean isCreator);
+
+    // 모든 유저의 진행 중인 솔로 챌린지 조회
+    List<UserSoloChallenge> findAllByChallengeResult(ChallengeResult challengeResult);
 
 }

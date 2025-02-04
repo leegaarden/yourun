@@ -39,7 +39,7 @@ public class CrewChallengeService {
 
     // 1. 크루 챌린지 생성 및 응답
     @Transactional
-    public ChallengeResponse.CrewChallengeCreate createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
+    public ChallengeResponse.CrewChallengeCreateRes createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -78,7 +78,7 @@ public class CrewChallengeService {
         UserCrewChallenge userCrewChallenge = ChallengeConverter.toUserCrewChallenge(user, savedCrewChallenge, true);
         userCrewChallengeRepository.save(userCrewChallenge);
 
-        return new ChallengeResponse.CrewChallengeCreate(savedCrewChallenge.getId(),
+        return new ChallengeResponse.CrewChallengeCreateRes(savedCrewChallenge.getId(),
                 savedCrewChallenge.getCrewName(), savedCrewChallenge.getSlogan(),
                 formatDateTime(startDateTime), formatDateTime(endDateTime),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
@@ -259,7 +259,7 @@ public class CrewChallengeService {
 
     // 6. 러닝 후 크루 챌린지 결과 확인
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallengeRunningResult getCrewChallengeRunningResult (String accessToken) {
+    public ChallengeResponse.CrewChallengeRunningResultRes getCrewChallengeRunningResult (String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -304,7 +304,7 @@ public class CrewChallengeService {
                 .mapToDouble(memberId -> calculateTotalDistance(myCrewChallenge.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        return new ChallengeResponse.CrewChallengeRunningResult(myCrewChallenge.getChallengePeriod().getDays(),
+        return new ChallengeResponse.CrewChallengeRunningResultRes(myCrewChallenge.getChallengePeriod().getDays(),
                 myCrewChallenge.getCrewName(), beforeDistance, userDistance, afterDistance, matchedCrewName,
                 matchedCrewCreator, matchedCrewDistance);
     }
@@ -475,11 +475,6 @@ public class CrewChallengeService {
         return ChallengePeriod.from(period);  // 기간 반환
     }
 
-    // 챌린지 며칠째 진행 중인지
-    private int calculateCountDay(LocalDate startDate) {
-        return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
-    }
-
     // 크루 챌린지 중 특정 유저의 달린 거리 계산
     private double calculateTotalDistance(Long challengeId, Long userId) {
         CrewChallenge challenge = crewChallengeRepository.findById(challengeId)
@@ -497,7 +492,7 @@ public class CrewChallengeService {
     }
 
     // 챌린지 참여자 정보와 성향 조회
-    private List<ChallengeResponse.MemberTendencyInfo> getMemberTendencyInfos(Long challengeId) {
+    public List<ChallengeResponse.MemberTendencyInfo> getMemberTendencyInfos(Long challengeId) {
         return userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(challengeId)
                 .stream()
@@ -530,7 +525,7 @@ public class CrewChallengeService {
     }
 
     // LocalDateTime -> String 변환
-    private String formatDateTime(LocalDateTime dateTime) {
+    public String formatDateTime(LocalDateTime dateTime) {
         return dateTime.format(DATE_TIME_FORMATTER);
     }
 

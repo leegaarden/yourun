@@ -30,11 +30,11 @@ public class CrewChallengeRestController {
     })
 
     @PostMapping("")
-    public ApiResponse<ChallengeResponse.CrewChallengeCreate> createCrewChallenge(
+    public ApiResponse<ChallengeResponse.CrewChallengeCreateRes> createCrewChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateCrewChallengeReq request) {
 
-        ChallengeResponse.CrewChallengeCreate response = crewChallengeService.createCrewChallenge(request, accessToken);
+        ChallengeResponse.CrewChallengeCreateRes response = crewChallengeService.createCrewChallenge(request, accessToken);
         return ApiResponse.success("크루 챌린지가 생성되었습니다.", response);
     }
 
@@ -141,9 +141,9 @@ public class CrewChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/running-result")
-    public ApiResponse<ChallengeResponse.CrewChallengeRunningResult> getCrewChallengeRunningResult(
+    public ApiResponse<ChallengeResponse.CrewChallengeRunningResultRes> getCrewChallengeRunningResult(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.CrewChallengeRunningResult response = crewChallengeService.getCrewChallengeRunningResult(accessToken);
+        ChallengeResponse.CrewChallengeRunningResultRes response = crewChallengeService.getCrewChallengeRunningResult(accessToken);
         return ApiResponse.success("러닝 후 크루 챌린지 결과입니다.", response);
     }
 }

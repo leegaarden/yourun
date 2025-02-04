@@ -44,4 +44,12 @@ public interface RunningDataRepository extends JpaRepository<RunningData, Long> 
 
 	// 특정 사용자의 가장 최근 러닝 데이터 (러닝 후 결과 조회 확인용)
 	Optional<RunningData> findTopByUserIdAndStatusOrderByCreatedAtDesc(Long userId, RunningDataStatus status);
+
+	// 특정 기간 동안의 유저의 러닝 데이터 조회 (일자별 솔로 챌린지 결과 확인용)
+	List<RunningData> findAllByUserIdAndCreatedAtBetweenAndStatus(
+			Long userId,
+			LocalDateTime start,
+			LocalDateTime end,
+			RunningDataStatus status
+	);
 }

@@ -29,10 +29,10 @@ public class SoloChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("")
-    public ApiResponse<ChallengeResponse.SoloChallengeCreate> createSoloChallenge(
+    public ApiResponse<ChallengeResponse.SoloChallengeCreateRes> createSoloChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
-        ChallengeResponse.SoloChallengeCreate response = soloChallengeService.createSoloChallenge(request, accessToken);
+        ChallengeResponse.SoloChallengeCreateRes response = soloChallengeService.createSoloChallenge(request, accessToken);
         return ApiResponse.success("솔로 챌린지가 생성되었습니다.", response);
     }
 
@@ -89,6 +89,19 @@ public class SoloChallengeRestController {
             @RequestHeader(value = "Authorization") String accessToken) {
         ChallengeResponse.SoloChallengeMatchingRes response = soloChallengeService.getSoloChallengeMatching(accessToken);
         return ApiResponse.success("솔로 챌린지 매칭 정보입니다.", response);
+    }
+
+    @Operation(summary = "SOLO_CHALLENGE_API_06 : 솔로 챌린지 일자별 진행도 조회", description = "솔로 챌린지의 일자별 조회 화면입니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/progress")
+    public ApiResponse<ChallengeResponse.SoloChallengeProgressRes> getSoloProgress (
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.SoloChallengeProgressRes response = soloChallengeService.getSoloChallengeProgress(accessToken);
+        return ApiResponse.success("솔로 챌린지 일자별 진행도 조회 정보입니다.", response);
     }
 
 }
