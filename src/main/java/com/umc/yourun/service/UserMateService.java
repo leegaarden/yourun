@@ -46,7 +46,7 @@ public class UserMateService {
             throw new ValidationException("자기 자신을 메이트로 추가할 수 없습니다.");
         }
         for(UserMate userMate : user.getUserMates()){
-            if(userMate.getId().equals(mateId)){
+            if(userMate.getMate().getId().equals(mateId)){
                 throw new ValidationException("이미 추가한 메이트를 중복으로 추가할 수 없습니다.");
             }
         }
@@ -76,11 +76,21 @@ public class UserMateService {
     public Boolean deleteMate(String token, Long mateId) throws ValidationException{
         User user = jwtTokenProvider.getUserByToken(token);
         Optional<User> mate = userRepository.findById(mateId);
-        if(mate.isEmpty()){
-            throw new ValidationException("메이트 목록에 존재하지 않는 메이트를 삭제할 수 없습니다.");
+
+        Boolean check = false;
+        for(UserMate userMate : user.getUserMates()){
+            if(userMate.getMate().getId().equals(mateId)){
+                check = true;
+            }
         }
-        UserMate userMate = userMateRepository.findByUserAndMate(user,mate.get());
-        userMateRepository.delete(userMate);
+
+        if(check) {
+            UserMate userMate = userMateRepository.findByUserAndMate(user, mate.get());
+            userMateRepository.delete(userMate);
+        }else {
+            throw new ValidationException("메이트 목록에 존재하지 않는 메이트는 삭제할 수 없습니다.");
+        }
+
         return true;
     }
 

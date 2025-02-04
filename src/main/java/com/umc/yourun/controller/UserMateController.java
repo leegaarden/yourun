@@ -65,7 +65,7 @@ public class UserMateController {
         try {
             mateInfos = userMateService.recommendFiveMates(accessToken);
         }catch (Exception e){
-            ApiResponse.error(e.getMessage(), FAILED_MATE_RECOMMEND, null);
+            return ApiResponse.error(e.getMessage(), FAILED_MATE_RECOMMEND, null);
         }
         return ApiResponse.success("메이트 랜덤 추천에 성공했습니다.", mateInfos);
     }
