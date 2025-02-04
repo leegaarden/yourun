@@ -35,17 +35,6 @@ public class RealtimeRankingService {
 
         User requestedUser = jwtTokenProvider.getUserByToken(accessToken);
 
-//        List<User> users = userRepository.findAll();
-//
-//        // 각 멤버의 총점 계산 (0점은 포함 안함)
-//        Map<User, Integer> scores = calculateUserScore(users);
-//
-//        // 점수를 기준으로 내림차순 정렬 후 리스트로 변환
-//        List<Map.Entry<User, Integer>> sortedRanking = scores.entrySet()
-//                .stream()
-//                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-//                .collect(Collectors.toList());
-
         List<RunningData> runningDataList = runningDataRepository.findAll();
 
         Map<User, Integer> rankingScore = runningDataList.stream()
@@ -95,7 +84,7 @@ public class RealtimeRankingService {
 
         // 페이지네이션 적용
         Map<User, Integer> paginatedScores = sortedRanking.entrySet().stream()
-                .skip((long) page * PAGE_SIZE)
+                .skip((long) safePage * PAGE_SIZE)
                 .limit(PAGE_SIZE)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -121,18 +110,4 @@ public class RealtimeRankingService {
         }
         return rank;
     }
-//
-//    private Map<User, Integer> calculateUserScore(List<User> users) {
-//        Map<User, Integer> scores = users.stream()
-//                .collect(Collectors.toMap(
-//                        user -> user,
-//                        user -> runningDataRepository.findByUser(user).stream()
-//                                .mapToInt(RunningData::getTotalDistance)
-//                                .sum()
-//                ))
-//                .entrySet().stream()
-//                .filter(entry -> entry.getValue() > 0)
-//                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-//        return scores;
-//    }
 }
