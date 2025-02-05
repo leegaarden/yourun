@@ -38,10 +38,7 @@ public class UserConverter {
 	}
 
 	public static UserResponseDTO.userMateInfo toUserMateInfo(User mate, int distance, int countDay) {
-		List<Tag> tags = new ArrayList<>();
-		for (UserTag userTag : mate.getUserTags()) {
-			tags.add(userTag.getTag());
-		}
+		List<Tag> tags = getTagsByUser(mate);
 
 		return UserResponseDTO.userMateInfo.builder()
 			.id(mate.getId())
@@ -54,10 +51,7 @@ public class UserConverter {
 	}
 
 	public static UserResponseDTO.userInfo toUserInfo(User user) {
-		List<Tag> tags = new ArrayList<>();
-		for (UserTag userTag : user.getUserTags()) {
-			tags.add(userTag.getTag());
-		}
+		List<Tag> tags = getTagsByUser(user);
 
 		return UserResponseDTO.userInfo.builder()
 			.id(user.getId())
@@ -68,5 +62,12 @@ public class UserConverter {
 			.personalReward(user.getPersonalReward())
 			.mvp(user.getMvp())
 			.build();
+	}
+	private static List<Tag> getTagsByUser(User user) {
+		List<Tag> tags = new ArrayList<>();
+		for (UserTag userTag : user.getUserTags()) {
+			tags.add(userTag.getTag());
+		}
+		return tags;
 	}
 }
