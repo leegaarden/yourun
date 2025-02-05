@@ -24,15 +24,7 @@ public class RealtimeRankingService {
     private static final int PAGE_SIZE = 10;  // 페이지 크기 상수 설정
 
     private final RunningDataRepository runningDataRepository;
-    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-
-//    @Autowired
-//    public RealtimeRankingService(RunningDataRepository runningDataRepository, UserRepository userRepository, JwtTokenProvider provider) {
-//        this.runningDataRepository = runningDataRepository;
-//        this.userRepository = userRepository;
-//        this.jwtTokenProvider = provider;
-//    }
 
     public RankingResponse.rankingInfoUser getRanking(int page, String accessToken) {
 
