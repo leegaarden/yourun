@@ -9,6 +9,7 @@ import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.config.exception.custom.RunningException;
 
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,7 @@ public class GeneralExceptionHandler {
         return ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE);
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class, ValidationException.class})
     public ApiResponse<List<Map<String,String>>> handleValidationException(Exception e) {  // 파라미터 타입을 Exception으로 변경
         log.error("Invalid DTO Value: {}", e.getMessage());
         if (e instanceof MethodArgumentNotValidException) {
@@ -68,7 +69,7 @@ public class GeneralExceptionHandler {
             return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE, fieldErrors);
         }
         // ConstraintViolationException 처리
-        return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE, null);
+        return ApiResponse.error("Validation failed", ErrorCode.INVALID_INPUT_VALUE, List.of(Map.of("message", e.getMessage())));
     }
 
     @ExceptionHandler(RuntimeException.class)
