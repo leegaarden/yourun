@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ public class RealtimeRankingService {
 
         User requestedUser = jwtTokenProvider.getUserByToken(accessToken);
 
-        List<RunningData> runningDataList = runningDataRepository.findAll();
+        List<RunningData> runningDataList = runningDataRepository.findAllByEndTimeAfter(LocalDateTime.now().minusMonths(1));
 
         Map<User, Integer> rankingScore = runningDataList.stream()
                 .collect(Collectors.groupingBy(
