@@ -6,6 +6,7 @@ import com.umc.yourun.domain.BaseEntity;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengeDistance;
 import com.umc.yourun.domain.enums.ChallengePeriod;
+import com.umc.yourun.domain.enums.ChallengeResult;
 import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import jakarta.persistence.*;
@@ -26,11 +27,11 @@ public class SoloChallenge extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate startDate;
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
+    private LocalDateTime startDate;
 
-    @Column(nullable = false)
-    private LocalDate endDate;
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,8 +49,8 @@ public class SoloChallenge extends BaseEntity {
     private List<UserSoloChallenge> userSoloChallenges = new ArrayList<>();
 
     @Builder
-    public SoloChallenge(LocalDate endDate, ChallengeDistance challengeDistance, ChallengePeriod challengePeriod) {
-        this.startDate = LocalDate.now().plusDays(1);
+    public SoloChallenge(LocalDateTime startDate, LocalDateTime endDate, ChallengeDistance challengeDistance, ChallengePeriod challengePeriod) {
+        this.startDate = startDate;
         this.endDate = endDate;
         this.challengeDistance = challengeDistance;
         this.challengeStatus = ChallengeStatus.PENDING;

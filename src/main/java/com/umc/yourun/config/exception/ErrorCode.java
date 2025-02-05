@@ -33,6 +33,7 @@ public enum ErrorCode {
     CREW_CHALLENGE_FULL(400, "C015", "크루 인원이 모두 찼습니다."),
     DUPLICATE_CREW_NAME(400, "C016", "이미 사용 중인 크루명입니다."),
     NO_CREW_CHALLENGE_FOUND(400, "C017", "사용자는 크루에 참여하고 있지 않습니다."),
+    CREW_CHALLENGE_COMPLETED(500, "C018", "두 크루 챌린지가 모두 COMPLETED 상태여야 결과를 확인할 수 있습니다."),
 
     //Running 관련 에러
     INVALID_END_TIME(400, "R001", "종료 시간은 시작 시간 이후여야 합니다."),
@@ -46,7 +47,8 @@ public enum ErrorCode {
 
     // User 관련 에러
     INVALID_PATH_PARAMETER(400, "P001", "잘못된 PathParameter입니다."),
-    USER_NOT_FOUND(400, "U001", "존재하지 않는 사용자입니다.");
+    USER_NOT_FOUND(400, "U001", "존재하지 않는 사용자입니다."),
+    FAILED_MATE_RECOMMEND(400, "M001", "메이트 랜덤 추천에 실패했습니다.");
 
     private final int status;
     private final String code;

@@ -4,7 +4,7 @@ import com.umc.yourun.apiPayload.ApiResponse;
 import com.umc.yourun.config.exception.ErrorResponse;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.ChallengeResponse;
-import com.umc.yourun.service.ChallengeService;
+import com.umc.yourun.service.challenge.SoloChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,15 +14,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/challenges/solo")
 @Tag(name = "SoloChallenge", description = "솔로 챌린지 API")
 public class SoloChallengeRestController {
 
-    private final ChallengeService challengeService;
+    private final SoloChallengeService soloChallengeService;
 
     @Operation(summary = "SOLO_CHALLENGE_API_01 : 솔로 챌린지 생성", description = "새로운 솔로 챌린지를 생성합니다.")
     @ApiResponses(value = {
@@ -31,10 +29,10 @@ public class SoloChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("")
-    public ApiResponse<ChallengeResponse.SoloChallengeCreate> createSoloChallenge(
+    public ApiResponse<ChallengeResponse.SoloChallengeCreateRes> createSoloChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody @Valid ChallengeRequest.CreateSoloChallengeReq request) {
-        ChallengeResponse.SoloChallengeCreate response = challengeService.createSoloChallenge(request, accessToken);
+        ChallengeResponse.SoloChallengeCreateRes response = soloChallengeService.createSoloChallenge(request, accessToken);
         return ApiResponse.success("솔로 챌린지가 생성되었습니다.", response);
     }
 
@@ -48,7 +46,7 @@ public class SoloChallengeRestController {
     public ApiResponse<ChallengeResponse.SoloChallenge> getPendingSoloChallenges(
             @RequestHeader(value = "Authorization") String accessToken
     ) {
-        ChallengeResponse.SoloChallenge result = challengeService.getPendingSoloChallenges(accessToken);
+        ChallengeResponse.SoloChallenge result = soloChallengeService.getPendingSoloChallenges(accessToken);
         return ApiResponse.success("대기 중인 솔로 챌린지 목록입니다.", result);
     }
 
@@ -62,7 +60,7 @@ public class SoloChallengeRestController {
     public ApiResponse<ChallengeResponse.SoloChallengeMateRes> joinSoloChallenge(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.SoloChallengeMateRes response = challengeService.joinSoloChallenge(challengeId, accessToken);
+        ChallengeResponse.SoloChallengeMateRes response = soloChallengeService.joinSoloChallenge(challengeId, accessToken);
         return ApiResponse.success("솔로 챌린지 참여가 완료되었습니다.", response);
     }
 
@@ -72,11 +70,11 @@ public class SoloChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/pending/{challengeId}")
+    @GetMapping("/pending/{challengeId}")
     public ApiResponse<ChallengeResponse.SoloChallengeDetailRes> getSoloChallengeDetail(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable Long challengeId) {
-        ChallengeResponse.SoloChallengeDetailRes response = challengeService.getSoloChallengeDetail(challengeId, accessToken);
+        ChallengeResponse.SoloChallengeDetailRes response = soloChallengeService.getSoloChallengeDetail(challengeId, accessToken);
         return ApiResponse.success("솔로 챌린지 상세 조회 정보입니다.", response);
     }
 
@@ -86,11 +84,24 @@ public class SoloChallengeRestController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/matching")
+    @GetMapping("/matching")
     public ApiResponse<ChallengeResponse.SoloChallengeMatchingRes> getSoloMatch (
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.SoloChallengeMatchingRes response = challengeService.getSoloChallengeMatching(accessToken);
+        ChallengeResponse.SoloChallengeMatchingRes response = soloChallengeService.getSoloChallengeMatching(accessToken);
         return ApiResponse.success("솔로 챌린지 매칭 정보입니다.", response);
+    }
+
+    @Operation(summary = "SOLO_CHALLENGE_API_06 : 솔로 챌린지 일자별 진행도 조회", description = "솔로 챌린지의 일자별 조회 화면입니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/progress")
+    public ApiResponse<ChallengeResponse.SoloChallengeProgressRes> getSoloProgress (
+            @RequestHeader(value = "Authorization") String accessToken) {
+        ChallengeResponse.SoloChallengeProgressRes response = soloChallengeService.getSoloChallengeProgress(accessToken);
+        return ApiResponse.success("솔로 챌린지 일자별 진행도 조회 정보입니다.", response);
     }
 
 }

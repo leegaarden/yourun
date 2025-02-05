@@ -14,6 +14,7 @@ import lombok.Builder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,19 +23,25 @@ public class ChallengeConverter {
     //  1. DTO -> Entity
 
     // 1-1. 크루 챌린지 생성
-    public static CrewChallenge toCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, ChallengePeriod challengePeriod) {
+    public static CrewChallenge toCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request,
+                                                LocalDateTime startTime, LocalDateTime endTime,
+                                                ChallengePeriod challengePeriod) {
         return CrewChallenge.builder()
                 .crewName(request.crewName())
-                .endDate(request.endDate())
+                .startDate(startTime)
+                .endDate(endTime)
                 .slogan(request.slogan())
                 .challengePeriod(challengePeriod)
                 .build();
     }
 
     // 1-2. 솔로 챌린지 생성
-    public static SoloChallenge toSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, ChallengePeriod challengePeriod) {
+    public static SoloChallenge toSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request,
+                                                LocalDateTime startTime, LocalDateTime endTime,
+                                                ChallengePeriod challengePeriod) {
         return SoloChallenge.builder()
-                .endDate(request.endDate())
+                .endDate(endTime)
+                .startDate(startTime)
                 .challengeDistance(request.challengeDistance())
                 .challengePeriod(challengePeriod)
                 .build();
@@ -67,7 +74,8 @@ public class ChallengeConverter {
             Long challengeMateId,
             String challengeMateNickName,
             Tendency challengeMateTendency,
-            int soloCountDay) {
+            int soloCountDay,
+            String startDate) {
         return ChallengeResponse.UserSoloChallengeInfo.builder()
                 .challengeDistance(challenge.getChallengeDistance().getDistance())
                 .challengeId(challenge.getId())
@@ -80,6 +88,7 @@ public class ChallengeConverter {
                 .userNickName(user.getNickname())
                 .userTendency(user.getTendency())
                 .soloDayCount(soloCountDay)
+                .soloStartDate(startDate)
                 .build();
 
     }
@@ -88,7 +97,8 @@ public class ChallengeConverter {
     public static ChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
             CrewChallenge challenge,
             List<ChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo,
-            int crewCountDay) {
+            int crewCountDay,
+            String startDate) {
         return ChallengeResponse.UserCrewChallengeInfo.builder()
                 .challengeId(challenge.getId())
                 .crewName(challenge.getCrewName())
@@ -96,7 +106,7 @@ public class ChallengeConverter {
                 .challengePeriod(challenge.getChallengePeriod().getDays())
                 .myParticipantIdsInfo(myParticipantIdsInfo)
                 .crewDayCount(crewCountDay)
-                .crewStartDate(challenge.getStartDate())
+                .crewStartDate(startDate)
                 .build();
     }
 

@@ -38,7 +38,7 @@ public class RunningRestController {
 
 	private final RunningService runningService;
 
-	@Operation(summary = "RUNNING_DATA_API_01 : 크루 챌린지 생성", description = "새로운 러닝 데이터를 생성합니다.")
+	@Operation(summary = "RUNNING_DATA_API_01 : 러닝 데이터 생성", description = "새로운 러닝 데이터를 생성합니다.")
 	@ApiResponses(value = {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "러닝데이터 생성 성공"),
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))

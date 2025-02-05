@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -24,5 +25,11 @@ public interface SoloChallengeRepository extends JpaRepository<SoloChallenge, Lo
     @Query(value = "SELECT * FROM solo_challenge WHERE challenge_status = 'PENDING' ORDER BY RAND() LIMIT :size",
             nativeQuery = true)
     List<SoloChallenge> findRandomPendingChallenges(@Param("size") int size);
+
+    // 마감 시간 지난 챌린지 조회
+    List<SoloChallenge> findByChallengeStatusAndEndDateBefore(
+            ChallengeStatus status,
+            LocalDateTime date
+    );
 
 }
