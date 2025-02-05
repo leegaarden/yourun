@@ -7,6 +7,7 @@ import com.umc.yourun.domain.User;
 import com.umc.yourun.dto.Ranking.RankingResponse;
 import com.umc.yourun.repository.RunningDataRepository;
 import com.umc.yourun.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class RealtimeRankingService {
 
     private static final int PAGE_SIZE = 10;  // 페이지 크기 상수 설정
@@ -25,12 +27,12 @@ public class RealtimeRankingService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    public RealtimeRankingService(RunningDataRepository runningDataRepository, UserRepository userRepository, JwtTokenProvider provider) {
-        this.runningDataRepository = runningDataRepository;
-        this.userRepository = userRepository;
-        this.jwtTokenProvider = provider;
-    }
+//    @Autowired
+//    public RealtimeRankingService(RunningDataRepository runningDataRepository, UserRepository userRepository, JwtTokenProvider provider) {
+//        this.runningDataRepository = runningDataRepository;
+//        this.userRepository = userRepository;
+//        this.jwtTokenProvider = provider;
+//    }
 
     public RankingResponse.rankingInfoUser getRanking(int page, String accessToken) {
 
