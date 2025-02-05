@@ -65,6 +65,7 @@ public class RealtimeRankingService {
                 .builder()
                 .rank(rank)
                 .username(requestedUser.getNickname())
+                .tendency(requestedUser.getTendency())
                 .list(list)
                 .build();
     }

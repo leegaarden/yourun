@@ -23,6 +23,7 @@ public class RankingConverter {
                 .nickname(maps.getKey().getNickname())
                 .score(maps.getValue())
                 .tags(collect)
+                .tendency(maps.getKey().getTendency())
                 .build();
     }
 }
