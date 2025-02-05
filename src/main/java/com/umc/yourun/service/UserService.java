@@ -46,7 +46,7 @@ public class UserService {
         if (!request.password().equals(request.passwordcheck())) {
             throw new ValidationException("비밀번호가 일치하지 않습니다");
         }
-        if(!userRepository.findByNickname(request.nickname()).isEmpty()){
+        if(!checkUserNickname(request.nickname())){
             throw new ValidationException("이미 사용중인 닉네임입니다.");
         }
         if (request.tag1().equals(request.tag2())) {
@@ -85,6 +85,29 @@ public class UserService {
         return token;
     }
 
+    public User getUserInfo(String accessToken) {
+        return jwtTokenProvider.getUserByToken(accessToken);
+    }
+
+    public User updateUserInfo(String accessToken, UserRequestDTO.UpdateDto request) {
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+        if(!checkUserNickname(request.nickname())&& !user.getNickname().equals(request.nickname())){
+            throw new ValidationException("이미 사용중인 닉네임입니다.");
+        }
+        if (request.tag1().equals(request.tag2())) {
+            throw new ValidationException("같은 테그를 선택할 수 없습니다.");
+        }
+        //만약 이전 내용과 동일하다면 업데이트 하지 않음
+        if(user.getNickname().equals(request.nickname()) && user.getUserTags().get(0).getTag().equals(request.tag1()) && user.getUserTags().get(1).getTag().equals(request.tag2())){
+            return user;
+        }
+        user.updateNickname(request.nickname());
+        userTagRepository.deleteAllByUser(user);
+        userTagRepository.save(UserTagConverter.toUserTag(user, request.tag1()));
+        userTagRepository.save(UserTagConverter.toUserTag(user, request.tag2()));
+        return user;
+    }
+
     public Boolean deleteUser(String accessToken) {
         User user = jwtTokenProvider.getUserByToken(accessToken);
         user.setStatus(UserStatus.valueOf("INACTIVE"));
@@ -93,18 +116,11 @@ public class UserService {
     }
 
     public Boolean duplicateUserCheck(String email) {
-        if(userRepository.findByEmail(email).isEmpty()){
-            return true;
-        }else{
-            return false;
-        }
+		return userRepository.findByEmail(email).isEmpty();
     }
 
     public Boolean checkUserNickname(String nickName) {
-        if(userRepository.findByNickname(nickName).isEmpty()){
-            return true;
-        }else{
-            return false;
-        }
+        return userRepository.findByNickname(nickName).isEmpty();
+
     }
 }
