@@ -530,16 +530,15 @@ public class SoloChallengeService {
         }
 
         SoloChallengeResponse.UserCrewChallengeInfo crewInfo = null;
-        LocalDateTime crewStartDate = userCrewChallenge.getCrewChallenge().getStartDate();
         if (userCrewChallenge != null) {
             CrewChallenge challenge = userCrewChallenge.getCrewChallenge();
+            LocalDateTime crewStartDate = challenge.getStartDate();
             int crewCountDay = calculateCountDay(challenge.getStartDate().toLocalDate());
 
             // 크루원 수 확인
             long memberCount = userCrewChallengeRepository.countByCrewChallengeId(challenge.getId());
             if (memberCount == 4) {  // 4명이 모인 크루만 응답
                 List<CrewChallengeResponse.MemberTendencyInfo> participantInfos = crewChallengeService.getMemberTendencyInfos(challenge.getId());
-
                 crewInfo = ChallengeConverter.toUserCrewChallengeInfo(challenge, participantInfos, crewCountDay, formatDateTime(crewStartDate));
             }
         }
