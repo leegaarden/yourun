@@ -277,25 +277,17 @@ public class SoloChallengeService {
     // 5-1. 일자별 달린 거리
     private List<SoloChallengeResponse.DayResult> getDayResults(Long userId, SoloChallenge challenge) {
         LocalDateTime startDate = challenge.getStartDate();
-        LocalDateTime now = parseDateTime(formatDateTime(LocalDateTime.now())); // 시간과 분만 비교할 수 있도록 포멧팅
+        LocalDateTime now = parseDateTime(formatDateTime(LocalDateTime.now()));
 
-        // 현재 진행 중인 챌린지 일자 계산
         int currentDay = calculateDayFromStart(startDate, now);
+        List<SoloChallengeResponse.DayResult> results = new ArrayList<>();
 
-        Map<Integer, Double> dailyDistances = new HashMap<>();
-        // 각 일자별 시작시간과 종료시간을 계산하여 데이터 조회
         for (int day = 1; day <= currentDay; day++) {
-            LocalDateTime dayStart = challenge.getStartDate().plusDays(currentDay - 1);
-            LocalDateTime dayEnd = currentDay == calculateDayFromStart(challenge.getStartDate(), now)
+            LocalDateTime dayStart = challenge.getStartDate().plusDays(day - 1);
+            LocalDateTime dayEnd = day == currentDay
                     ? now
-                    : challenge.getStartDate().plusDays(currentDay);
+                    : challenge.getStartDate().plusDays(day);
 
-            // 마지막 날인 경우 현재 시간까지만 계산
-            if (day == currentDay) {
-                dayEnd = now;
-            }
-
-            // 특정 기간 동안의 유저의 러닝 데이터 조회 (하루치)
             List<RunningData> dayRunningData = runningDataRepository
                     .findAllByUserIdAndStartTimeBetweenAndStatus(
                             userId,
@@ -305,13 +297,15 @@ public class SoloChallengeService {
                     );
 
             double totalDistance = dayRunningData.stream()
-                    .mapToDouble(data -> data.getTotalDistance() / 1000.0) // m를 km로 변환
+                    .mapToDouble(data -> data.getTotalDistance() / 1000.0)
                     .sum();
-            dailyDistances.put(day, totalDistance);
+
+            boolean isSuccess = totalDistance >= challenge.getChallengeDistance().getDistance();
+
+            results.add(new SoloChallengeResponse.DayResult(day, totalDistance, isSuccess));
         }
 
-        return dailyDistances.entrySet().stream()
-                .map(entry -> new SoloChallengeResponse.DayResult(entry.getKey(), entry.getValue()))
+        return results.stream()
                 .sorted(Comparator.comparing(SoloChallengeResponse.DayResult::day))
                 .collect(Collectors.toList());
     }
@@ -699,7 +693,7 @@ public class SoloChallengeService {
                 int currentDay = calculateDayFromStart(challenge.getStartDate(), now);
                 boolean failureFound = false;
 
-                // 이전 일차의 성공 여부 확인 (현재 일차 제외)
+                // 이전 일차의 성공 여부 확인 (현재 일차 제외 : 금일까지는 IN_PROGRESS)
                 for (int day = 1; day < currentDay; day++) {
                     LocalDateTime dayStart = challenge.getStartDate().plusDays(day - 1);
                     LocalDateTime dayEnd = challenge.getStartDate().plusDays(day);

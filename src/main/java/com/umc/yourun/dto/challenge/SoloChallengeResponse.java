@@ -175,7 +175,10 @@ public class SoloChallengeResponse {
             int day,
 
             @Schema(description = "일자의 달린 거리", example = "5.2")
-            double distance
+            double distance,
+
+            @Schema(description = "핻당 일자의 성공 여부", example = "true")
+            boolean isSuccess
     ) {}
 
     @Schema(description = "SOLO_CHALLENGE_RES_05 -2 : 챌린지 메이트 달린 거리 및 정보")
