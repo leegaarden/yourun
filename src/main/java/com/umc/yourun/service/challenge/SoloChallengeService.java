@@ -518,7 +518,7 @@ public class SoloChallengeService {
 
                 Optional<User> challengeMate = userRepository.findById(mateId);
 
-                mateNickname = userRepository.findNicknameById(user.getId())
+                mateNickname = userRepository.findNicknameById(challengeMate.get().getId())
                         .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
                 tendency = userRepository.findTendencyById(user.getId())
