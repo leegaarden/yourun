@@ -14,7 +14,7 @@ import com.umc.yourun.domain.enums.RunningDataStatus;
 import com.umc.yourun.domain.enums.Tendency;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
-import com.umc.yourun.dto.challenge.ChallengeResponse;
+import com.umc.yourun.dto.challenge.CrewChallengeResponse;
 import com.umc.yourun.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class CrewChallengeService {
 
     // 1. 크루 챌린지 생성 및 응답
     @Transactional
-    public ChallengeResponse.CrewChallengeCreateRes createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
+    public CrewChallengeResponse.CrewChallengeCreateRes createCrewChallenge(ChallengeRequest.CreateCrewChallengeReq request, String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -78,7 +78,7 @@ public class CrewChallengeService {
         UserCrewChallenge userCrewChallenge = ChallengeConverter.toUserCrewChallenge(user, savedCrewChallenge, true);
         userCrewChallengeRepository.save(userCrewChallenge);
 
-        return new ChallengeResponse.CrewChallengeCreateRes(savedCrewChallenge.getId(),
+        return new CrewChallengeResponse.CrewChallengeCreateRes(savedCrewChallenge.getId(),
                 savedCrewChallenge.getCrewName(), savedCrewChallenge.getSlogan(),
                 formatDateTime(startDateTime), formatDateTime(endDateTime),
                 savedCrewChallenge.getChallengePeriod().getDays(), user.getTendency());
@@ -86,28 +86,28 @@ public class CrewChallengeService {
 
     // 2. PENDING 상태인 크루 챌린지 조회 (화면)
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallenge getPendingCrewChallenges(String accessToken) {
+    public CrewChallengeResponse.CrewChallenge getPendingCrewChallenges(String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 4명 결성 대기 중인 크루 챌린지들
-        List<ChallengeResponse.CrewChallengeRes> pendingCrewChallenges = getPendingCrewChallenge();
+        List<CrewChallengeResponse.CrewChallengeRes> pendingCrewChallenges = getPendingCrewChallenge();
 
-        return new ChallengeResponse.CrewChallenge(user.getId(), user.getTendency(),
+        return new CrewChallengeResponse.CrewChallenge(user.getId(), user.getTendency(),
                 user.getCrewReward(), user.getPersonalReward(), pendingCrewChallenges);
 
     }
 
     // 2-1. PENDING 상태인 크루 챌린지
     @Transactional(readOnly = true)
-    public List<ChallengeResponse.CrewChallengeRes> getPendingCrewChallenge() {
+    public List<CrewChallengeResponse.CrewChallengeRes> getPendingCrewChallenge() {
 
         List<CrewChallenge> pendingChallenges = crewChallengeRepository.findRandomPendingChallenges(5);
 
         return pendingChallenges.stream()
                 .map(challenge -> {
                     // 현재 참여자들의 ID와 성향 정보 조회
-                    List<ChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(challenge.getId());
+                    List<CrewChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(challenge.getId());
                     if (participantInfos.size() >= 4) {
                         return null;
                     }
@@ -121,7 +121,7 @@ public class CrewChallengeService {
                         default -> 0;
                     };
 
-                    return new ChallengeResponse.CrewChallengeRes(
+                    return new CrewChallengeResponse.CrewChallengeRes(
                             challenge.getId(),
                             challenge.getCrewName(),
                             challenge.getChallengePeriod().getDays(),
@@ -136,7 +136,7 @@ public class CrewChallengeService {
 
     // 3. 크루 챌린지 상세 조회
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail(Long challengeId, String accessToken) {
+    public CrewChallengeResponse.CrewChallengeDetailRes getCrewChallengeDetail(Long challengeId, String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
@@ -149,7 +149,7 @@ public class CrewChallengeService {
                 .map(uc -> uc.getUser().getId())
                 .toList();
 
-        List<ChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(challengeId);
+        List<CrewChallengeResponse.MemberTendencyInfo> participantInfos = getMemberTendencyInfos(challengeId);
         // 기간에 따른 보상 계산
         int reward = switch (crewChallenge.get().getChallengePeriod().getDays()) {
             case 3 -> 1;
@@ -158,7 +158,7 @@ public class CrewChallengeService {
             default -> 0;
         };
 
-        return new ChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(),
+        return new CrewChallengeResponse.CrewChallengeDetailRes(crewChallenge.get().getCrewName(),
                 formatDateTime(crewChallenge.get().getStartDate()), formatDateTime(crewChallenge.get().getEndDate()),
                 crewChallenge.get().getChallengePeriod().getDays(), participants.size(), reward, participantInfos, crewChallenge.get().getSlogan());
 
@@ -166,7 +166,7 @@ public class CrewChallengeService {
 
     // 4. 크루 챌린지 매칭 화면
     @Transactional
-    public ChallengeResponse.CrewChallengeMatchingRes getCrewMatch(String accessToken) {
+    public CrewChallengeResponse.CrewChallengeMatchingRes getCrewMatch(String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -184,12 +184,12 @@ public class CrewChallengeService {
         // 2. 내 크루원 ID 목록 조회 (참여 순서대로)
         CrewChallenge myCrew = userCrewChallenge.getCrewChallenge();
 
-        List<ChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo = getMemberTendencyInfos(userCrewChallenge.getCrewChallenge().getId());
+        List<CrewChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo = getMemberTendencyInfos(userCrewChallenge.getCrewChallenge().getId());
 
         // 3. 매칭된 크루 정보 조회
         String matchedCrewName = null;
         String matchedCrewSlogan = null;
-        List<ChallengeResponse.MemberTendencyInfo> matchedParticipantIdsInfo = new ArrayList<>();
+        List<CrewChallengeResponse.MemberTendencyInfo> matchedParticipantIdsInfo = new ArrayList<>();
 
         if (myCrew.getMatchedCrewChallengeId() != null) {
             CrewChallenge matchedCrew = crewChallengeRepository
@@ -202,7 +202,7 @@ public class CrewChallengeService {
 
         }
 
-        return new ChallengeResponse.CrewChallengeMatchingRes(
+        return new CrewChallengeResponse.CrewChallengeMatchingRes(
                 myCrew.getChallengePeriod().getDays(),
                 myCrew.getCrewName(),
                 myCrew.getSlogan(),
@@ -214,7 +214,7 @@ public class CrewChallengeService {
     }
 
     // 5. 크루 챌린지의 상세 진행도 (홈 화면 - 크루 챌린지 클릭)
-    public ChallengeResponse.CrewChallengeDetailProgressRes getCrewChallengeDetailProgress(String accessToken) {
+    public CrewChallengeResponse.CrewChallengeDetailProgressRes getCrewChallengeDetailProgress(String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -228,7 +228,7 @@ public class CrewChallengeService {
         String crewName = myCrew.getCrewName();
 
         // 2. 유저가 속한 크루의 크루원들 정보
-        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = getCrewMemberInfo(user.getId(), challengeId);
+        List<CrewChallengeResponse.CrewMemberInfo> myCrewMembers = getCrewMemberInfo(user.getId(), challengeId);
 
         // 3. 매칭된 크루 정보 조회
         CrewChallenge matchedCrew = crewChallengeRepository.findById(myCrew.getMatchedCrewChallengeId())
@@ -245,13 +245,13 @@ public class CrewChallengeService {
                 .toList();
 
         double myCrewDistance = myCrewMembers.stream()
-                .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
+                .mapToDouble(CrewChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
         double matchedCrewDistance = matchedCrewMemberIds.stream()
                 .mapToDouble(memberId -> calculateTotalDistance(myCrew.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        return new ChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
+        return new CrewChallengeResponse.CrewChallengeDetailProgressRes(challengePeriod, crewName, myCrew.getSlogan(), myCrewMembers,
                 myCrewDistance, matchedCrewName, matchedCrew.getSlogan(),
                 matchedCrewCreator.get().getUser().getTendency(), matchedCrewDistance, formatDateTime(LocalDateTime.now()));
 
@@ -259,7 +259,7 @@ public class CrewChallengeService {
 
     // 6. 러닝 후 크루 챌린지 결과 확인
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallengeRunningResultRes getCrewChallengeRunningResult (String accessToken) {
+    public CrewChallengeResponse.CrewChallengeRunningResultRes getCrewChallengeRunningResult (String accessToken) {
 
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
@@ -269,13 +269,13 @@ public class CrewChallengeService {
         CrewChallenge myCrewChallenge = userCrewChallenge.getCrewChallenge();
 
         // 2. 유저가 속한 크루의 거리
-        List<ChallengeResponse.CrewMemberInfo> myCrewMembers = getCrewMemberInfo(user.getId(), myCrewChallenge.getId());
+        List<CrewChallengeResponse.CrewMemberInfo> myCrewMembers = getCrewMemberInfo(user.getId(), myCrewChallenge.getId());
 
         // 유저가 방금 뛴 거리
         Optional<RunningData> latestRunning = runningDataRepository.findTopByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), RunningDataStatus.ACTIVE);
         double userDistance = latestRunning.get().getTotalDistance() / 1000.0;
         double afterDistance = myCrewMembers.stream()
-                .mapToDouble(ChallengeResponse.CrewMemberInfo::runningDistance)
+                .mapToDouble(CrewChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
         double beforeDistance = afterDistance - userDistance;
 
@@ -304,14 +304,14 @@ public class CrewChallengeService {
                 .mapToDouble(memberId -> calculateTotalDistance(myCrewChallenge.getMatchedCrewChallengeId(), memberId))
                 .sum();
 
-        return new ChallengeResponse.CrewChallengeRunningResultRes(myCrewChallenge.getChallengePeriod().getDays(),
+        return new CrewChallengeResponse.CrewChallengeRunningResultRes(myCrewChallenge.getChallengePeriod().getDays(),
                 myCrewChallenge.getCrewName(), beforeDistance, userDistance, afterDistance, matchedCrewName,
                 matchedCrewCreator, matchedCrewDistance);
     }
 
     // 7. 크루 챌린지 순위 결과 화면
     @Transactional(readOnly = true)
-    public ChallengeResponse.CrewChallengeContributionRes getCrewChallengeContribution(String accessToken) {
+    public CrewChallengeResponse.CrewChallengeContributionRes getCrewChallengeContribution(String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
@@ -323,7 +323,7 @@ public class CrewChallengeService {
         List<UserCrewChallenge> crewMembers = userCrewChallengeRepository.findByCrewChallengeIdOrderByCreatedAt(crewChallenge.getId());
 
         // 3. 거리 정보와 순위를 포함한 크루원 정보 리스트 생성
-        List<ChallengeResponse.CrewMemberRankingInfo> crewMemberRankings = new ArrayList<>();
+        List<CrewChallengeResponse.CrewMemberRankingInfo> crewMemberRankings = new ArrayList<>();
 
         // 먼저 모든 거리 정보 수집 및 정렬
         List<Double> sortedDistances = crewMembers.stream()
@@ -337,7 +337,7 @@ public class CrewChallengeService {
             double distance = calculateTotalDistance(crewChallenge.getId(), member.getUser().getId());
             int rank = sortedDistances.indexOf(distance) + 1;
 
-            ChallengeResponse.CrewMemberRankingInfo rankingInfo = new ChallengeResponse.CrewMemberRankingInfo(
+            CrewChallengeResponse.CrewMemberRankingInfo rankingInfo = new CrewChallengeResponse.CrewMemberRankingInfo(
                     member.getUser().getId(),
                     distance,
                     member.getUser().getTendency(),
@@ -356,7 +356,7 @@ public class CrewChallengeService {
         Long mvpId = crewMemberRankings.stream()
                 .filter(member -> member.rank() == 1)
                 .findFirst()
-                .map(ChallengeResponse.CrewMemberRankingInfo::userId)
+                .map(CrewChallengeResponse.CrewMemberRankingInfo::userId)
                 .orElse(null);
 
         // 5. 보상 계산
@@ -369,7 +369,7 @@ public class CrewChallengeService {
 
         // 6. 승패 여부 계산
         double myCrewTotalDistance = crewMemberRankings.stream()
-                .mapToDouble(ChallengeResponse.CrewMemberRankingInfo::runningDistance)
+                .mapToDouble(CrewChallengeResponse.CrewMemberRankingInfo::runningDistance)
                 .sum();
 
         CrewChallenge matchedCrew = crewChallengeRepository.findById(crewChallenge.getMatchedCrewChallengeId())
@@ -383,7 +383,7 @@ public class CrewChallengeService {
 
         boolean win = myCrewTotalDistance >= matchedCrewTotalDistance;
 
-        return new ChallengeResponse.CrewChallengeContributionRes(
+        return new CrewChallengeResponse.CrewChallengeContributionRes(
                 crewChallenge.getChallengePeriod().getDays(),
                 reward,
                 crewChallenge.getCrewName(),
@@ -395,7 +395,7 @@ public class CrewChallengeService {
 
     // 8. 크루 챌린지에 참여하기
     @Transactional
-    public ChallengeResponse.CrewChallengeMateRes joinCrewChallenge(Long challengeId, String accessToken) {
+    public CrewChallengeResponse.CrewChallengeMateRes joinCrewChallenge(Long challengeId, String accessToken) {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
@@ -452,7 +452,7 @@ public class CrewChallengeService {
                 .map(challenge -> challenge.getUser().getId())
                 .collect(Collectors.toList());
 
-        return new ChallengeResponse.CrewChallengeMateRes(challengeId, participants);
+        return new CrewChallengeResponse.CrewChallengeMateRes(challengeId, participants);
     }
 
     // 활용 메소드들
@@ -492,11 +492,11 @@ public class CrewChallengeService {
     }
 
     // 챌린지 참여자 정보와 성향 조회
-    public List<ChallengeResponse.MemberTendencyInfo> getMemberTendencyInfos(Long challengeId) {
+    public List<CrewChallengeResponse.MemberTendencyInfo> getMemberTendencyInfos(Long challengeId) {
         return userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(challengeId)
                 .stream()
-                .map(uc -> new ChallengeResponse.MemberTendencyInfo(
+                .map(uc -> new CrewChallengeResponse.MemberTendencyInfo(
                         uc.getUser().getId(),
                         uc.getUser().getTendency()
                 ))
@@ -504,11 +504,11 @@ public class CrewChallengeService {
     }
 
     // 참여자 정보 및 거리 조회
-    private List<ChallengeResponse.CrewMemberInfo> getCrewMemberInfo (Long userId, Long challengeId) {
+    private List<CrewChallengeResponse.CrewMemberInfo> getCrewMemberInfo (Long userId, Long challengeId) {
         return userCrewChallengeRepository
                 .findByCrewChallengeIdOrderByCreatedAt(challengeId)
                 .stream()
-                .map(member -> new ChallengeResponse.CrewMemberInfo(
+                .map(member -> new CrewChallengeResponse.CrewMemberInfo(
                         member.getUser().getId(),
                         calculateTotalDistance(challengeId, member.getUser().getId()),
                         member.getUser().getTendency()
