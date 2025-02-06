@@ -6,6 +6,7 @@ import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,5 +46,11 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
 
     // 모든 유저의 진행 중인 솔로 챌린지 조회
     List<UserSoloChallenge> findAllByChallengeResult(ChallengeResult challengeResult);
+
+    // 현재 진행중이고, 시작된 챌린지만 조회
+    List<UserSoloChallenge> findAllByChallengeResultAndSoloChallenge_StartDateLessThanEqual(
+            ChallengeResult challengeResult,
+            LocalDateTime dateTime
+    );
 
 }

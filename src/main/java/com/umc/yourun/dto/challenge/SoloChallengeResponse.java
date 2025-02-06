@@ -160,11 +160,11 @@ public class SoloChallengeResponse {
             @Schema(description = "챌린지 메이트 정보")
             ChallengeMateInfo challengeMateInfo,
 
-            @Schema(description = "오늘 성공 여부")
-            boolean isSuccess,
+            @Schema(description = "유저의 금일 성공 여부")
+            boolean userIsSuccess,
 
             @Schema(description = "유저 성향", example = "스프린터")
-            Tendency tendency
+            Tendency userTendency
 
     ) {}
 
@@ -174,7 +174,7 @@ public class SoloChallengeResponse {
             @Schema(description = "일자", example = "1")
             int day,
 
-            @Schema(description = "읿자의 달린 거리", example = "5.2")
+            @Schema(description = "일자의 달린 거리", example = "5.2")
             double distance
     ) {}
 
@@ -191,10 +191,33 @@ public class SoloChallengeResponse {
             int successDay,
 
             @Schema(description = "성공 여부", example = "false")
-            boolean isSuccess,
+            boolean challengeMateIsSuccess,
 
             @Schema(description = "챌린지 메이트가 뛴 거리", example = "2.5")
             double distance
+    ) {}
+
+    @Schema(description = "SOLO_CHALLENGE_RES_06 : 러닝 후 솔로 챌린지 결과 조회 응답 DTO")
+    public record SoloChallengeRunningResultRes (
+
+            @Schema(description = "챌린지 기간", example = "3")
+            int challengePeriod,
+
+            @Schema(description = "챌린지 거리", example = "5")
+            int challengeDistance,
+
+            @Schema(description = "챌린지 진행 며칠 째인지", example = "2")
+            int dayCount,
+
+            @Schema(description = "챌린지 메이트 정보")
+            ChallengeMateInfo challengeMateInfo,
+
+            @Schema(description = "유저의 성공 여부")
+            boolean userIsSuccess,
+
+            @Schema(description = "유저 성향", example = "스프린터")
+            Tendency userTendency
+
     ) {}
 
     @Schema(title = "SOLO_CHALLENGE_RES_07 : 솔로 챌린지 참여 응답 DTO")

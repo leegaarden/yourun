@@ -85,10 +85,23 @@ public class SoloChallengeRestController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/progress")
-    public ApiResponse<SoloChallengeResponse.SoloChallengeProgressRes> getSoloProgress (
+    public ApiResponse<SoloChallengeResponse.SoloChallengeProgressRes> getSoloChallengeProgress (
             @RequestHeader(value = "Authorization") String accessToken) {
         SoloChallengeResponse.SoloChallengeProgressRes response = soloChallengeService.getSoloChallengeProgress(accessToken);
         return ApiResponse.success("솔로 챌린지 일자별 진행도 조회 정보입니다.", response);
+    }
+
+    @Operation(summary = "SOLO_CHALLENGE_API_06 : 러닝 후 솔로 챌린지 결과 조회", description = "러닝 후 솔로 챌린지 결과 조회 화면입니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "챌린지 참여 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/running-result")
+    public ApiResponse<SoloChallengeResponse.SoloChallengeRunningResultRes> getSoloChallengeRunningResult (
+            @RequestHeader(value = "Authorization") String accessToken) {
+        SoloChallengeResponse.SoloChallengeRunningResultRes response = soloChallengeService.getSoloChallengeRunningResult(accessToken);
+        return ApiResponse.success("러닝 후 솔로 챌린지 결과 조회 정보입니다.", response);
     }
 
     @Operation(summary = "SOLO_CHALLENGE_API_07 : 솔로 챌린지 참여", description = "대기 중인 솔로 챌린지에 참여합니다.")

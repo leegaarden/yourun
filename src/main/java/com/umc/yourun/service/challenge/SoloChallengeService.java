@@ -16,6 +16,7 @@ import com.umc.yourun.dto.challenge.ChallengeRequest;
 import com.umc.yourun.dto.challenge.CrewChallengeResponse;
 import com.umc.yourun.dto.challenge.SoloChallengeResponse;
 import com.umc.yourun.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SoloChallengeService {
@@ -257,8 +259,8 @@ public class SoloChallengeService {
         // 챌린지 메이트의 거리 및 정보 조회
         SoloChallengeResponse.ChallengeMateInfo mateInfo = getChallengeMateInfo(challengeMate.get(), soloChallenge);
 
-        // 금일 성공 여부
-        boolean isSuccess = checkTodaySuccess(user.getId(), soloChallenge);
+        // 유저의 금일 성공 여부
+        boolean userIsSuccess = checkTodaySuccess(user.getId(), soloChallenge);
 
         return new SoloChallengeResponse.SoloChallengeProgressRes(soloChallenge.getChallengePeriod().getDays(),
                 soloChallenge.getChallengeDistance().getDistance(),
@@ -266,7 +268,7 @@ public class SoloChallengeService {
                 formatDateTime(LocalDateTime.now()),
                 dayResults,
                 mateInfo,
-                isSuccess,
+                userIsSuccess,
                 user.getTendency()
         );
 
@@ -383,8 +385,8 @@ public class SoloChallengeService {
         int successDays = countSuccessDaysBeforeFailure(mate.getId(), challenge, currentDay - 1);
 
         // 현재 일차 성공 여부 확인
-        boolean isSuccess = currentDayDistance >= challenge.getChallengeDistance().getDistance();
-        if (isSuccess) {
+        boolean challengeMateIsSuccess = currentDayDistance >= challenge.getChallengeDistance().getDistance();
+        if (challengeMateIsSuccess) {
             successDays++;
         }
 
@@ -392,9 +394,43 @@ public class SoloChallengeService {
                 mate.getNickname(),
                 mate.getTendency(),
                 successDays,
-                isSuccess,
+                challengeMateIsSuccess,
                 currentDayDistance
         );
+    }
+
+    // 6. 러닝 후 솔로 챌린지 결과 조회
+    public SoloChallengeResponse.SoloChallengeRunningResultRes getSoloChallengeRunningResult (String accessToken) {
+
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 유저가 참여 중인 챌린지 조회
+        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(user.getId());
+        SoloChallenge soloChallenge = userSoloChallenge.getSoloChallenge();
+
+        // 챌린지 메이트 조회
+        Long mateId = userSoloChallengeRepository
+                .findBySoloChallengeIdAndUserIdNot(soloChallenge.getId(), user.getId())
+                .map(mate -> mate.getUser().getId())
+                .orElse(null);
+
+        Optional<User> challengeMate = userRepository.findById(mateId);
+
+        // 챌린지 메이트의 거리 및 정보 조회
+        SoloChallengeResponse.ChallengeMateInfo mateInfo = getChallengeMateInfo(challengeMate.get(), soloChallenge);
+
+        // 유저의 금일 성공 여부
+        boolean userIsSuccess = checkTodaySuccess(user.getId(), soloChallenge);
+
+        return new SoloChallengeResponse.SoloChallengeRunningResultRes(soloChallenge.getChallengePeriod().getDays(),
+                soloChallenge.getChallengeDistance().getDistance(),
+                calculateDayCount(soloChallenge.getStartDate()),
+                mateInfo,
+                userIsSuccess,
+                user.getTendency()
+        );
+
     }
 
     // 7. 솔로 챌린지에 참여하기
@@ -639,41 +675,62 @@ public class SoloChallengeService {
     }
 
     // 1분 마다 솔로 챌린지 성공 여부 확인
-    @Scheduled(fixedRate = 60000) // 1분마다 실행
-    @jakarta.transaction.Transactional
+    @Scheduled(fixedRate = 60000)
+    @Transactional
     public void checkSoloChallengeStatus() {
-        LocalDateTime now = parseDateTime(formatDateTime(LocalDateTime.now())); // 시간과 분만 비교할 수 있도록 포맷팅
+        LocalDateTime now = LocalDateTime.now();
 
-        // 진행중인 모든 유저의 솔로 챌린지 조회
+        // 현재 진행중이고, 시작된 챌린지만 조회하도록 조건 추가
         List<UserSoloChallenge> inProgressChallenges = userSoloChallengeRepository
-                .findAllByChallengeResult(ChallengeResult.IN_PROGRESS);
+                .findAllByChallengeResultAndSoloChallenge_StartDateLessThanEqual(
+                        ChallengeResult.IN_PROGRESS,
+                        now
+                );
 
         for (UserSoloChallenge userChallenge : inProgressChallenges) {
-            SoloChallenge challenge = userChallenge.getSoloChallenge();
-            int currentDay = calculateDayFromStart(challenge.getStartDate(), now);
+            try {
+                SoloChallenge challenge = userChallenge.getSoloChallenge();
 
-            // 이전 일차의 성공 여부 확인 (현재 일차 제외)
-            for (int day = 1; day < currentDay; day++) {
-                LocalDateTime dayStart = challenge.getStartDate().plusDays(day - 1);
-                LocalDateTime dayEnd = challenge.getStartDate().plusDays(day);
-
-                double dayDistance = runningDataRepository
-                        .findAllByUserIdAndStartTimeBetweenAndStatus(
-                                userChallenge.getUser().getId(),
-                                dayStart,
-                                dayEnd,
-                                RunningDataStatus.ACTIVE.name()
-                        )
-                        .stream()
-                        .mapToDouble(data -> data.getTotalDistance() / 1000.0)
-                        .sum();
-
-                // 지정된 거리를 달성하지 못했다면 FAILURE로 상태 변경
-                if (dayDistance < challenge.getChallengeDistance().getDistance()) {
-                    userChallenge.updateChallengeResult(ChallengeResult.FAILURE);
-                    userSoloChallengeRepository.save(userChallenge);
-                    break;
+                // 이미 종료된 챌린지는 처리하지 않음
+                if (challenge.getEndDate().isBefore(now)) {
+                    continue;
                 }
+
+                int currentDay = calculateDayFromStart(challenge.getStartDate(), now);
+                boolean failureFound = false;
+
+                // 이전 일차의 성공 여부 확인 (현재 일차 제외)
+                for (int day = 1; day < currentDay; day++) {
+                    LocalDateTime dayStart = challenge.getStartDate().plusDays(day - 1);
+                    LocalDateTime dayEnd = challenge.getStartDate().plusDays(day);
+
+                    double dayDistance = runningDataRepository
+                            .findAllByUserIdAndStartTimeBetweenAndStatus(
+                                    userChallenge.getUser().getId(),
+                                    dayStart,
+                                    dayEnd,
+                                    RunningDataStatus.ACTIVE.name()
+                            )
+                            .stream()
+                            .mapToDouble(data -> data.getTotalDistance() / 1000.0)
+                            .sum();
+
+                    if (dayDistance < challenge.getChallengeDistance().getDistance()) {
+                        userChallenge.updateChallengeResult(ChallengeResult.FAILURE);
+                        userSoloChallengeRepository.save(userChallenge);
+                        failureFound = true;
+                        break;
+                    }
+                }
+
+                if (!failureFound) {
+                    // 현재까지 실패가 없다면 IN_PROGRESS 유지
+                    userChallenge.updateChallengeResult(ChallengeResult.IN_PROGRESS);
+                    userSoloChallengeRepository.save(userChallenge);
+                }
+            } catch (Exception e) {
+                log.error("Error processing challenge for user {}: {}",
+                        userChallenge.getUser().getId(), e.getMessage());
             }
         }
     }
