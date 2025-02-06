@@ -4,19 +4,16 @@ import com.umc.yourun.domain.CrewChallenge;
 import com.umc.yourun.domain.SoloChallenge;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.enums.ChallengePeriod;
-import com.umc.yourun.domain.enums.ChallengeStatus;
 import com.umc.yourun.domain.enums.Tendency;
 import com.umc.yourun.domain.mapping.UserCrewChallenge;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import com.umc.yourun.dto.challenge.ChallengeRequest;
-import com.umc.yourun.dto.challenge.ChallengeResponse;
-import lombok.Builder;
+import com.umc.yourun.dto.challenge.CrewChallengeResponse;
+import com.umc.yourun.dto.challenge.SoloChallengeResponse;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class ChallengeConverter {
@@ -68,7 +65,7 @@ public class ChallengeConverter {
     // 2. Entity -> DTO
 
     // 2-1. 사용자 관련된 솔로 챌린지 정보 응답
-    public static ChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
+    public static SoloChallengeResponse.UserSoloChallengeInfo toUserSoloChallengeInfo(
             SoloChallenge challenge,
             User user,
             Long challengeMateId,
@@ -76,7 +73,7 @@ public class ChallengeConverter {
             Tendency challengeMateTendency,
             int soloCountDay,
             String startDate) {
-        return ChallengeResponse.UserSoloChallengeInfo.builder()
+        return SoloChallengeResponse.UserSoloChallengeInfo.builder()
                 .challengeDistance(challenge.getChallengeDistance().getDistance())
                 .challengeId(challenge.getId())
                 .status(challenge.getChallengeStatus())
@@ -94,12 +91,12 @@ public class ChallengeConverter {
     }
 
 //    // 2-2. 사용자 관련 크루 챌린지 정보 응답
-    public static ChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
+    public static SoloChallengeResponse.UserCrewChallengeInfo toUserCrewChallengeInfo(
             CrewChallenge challenge,
-            List<ChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo,
+            List<CrewChallengeResponse.MemberTendencyInfo> myParticipantIdsInfo,
             int crewCountDay,
             String startDate) {
-        return ChallengeResponse.UserCrewChallengeInfo.builder()
+        return SoloChallengeResponse.UserCrewChallengeInfo.builder()
                 .challengeId(challenge.getId())
                 .crewName(challenge.getCrewName())
                 .challengeStatus(challenge.getChallengeStatus())
