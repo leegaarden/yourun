@@ -3,6 +3,7 @@ package com.umc.yourun.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 import com.umc.yourun.domain.enums.ChallengeResult;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
@@ -25,6 +26,8 @@ import com.umc.yourun.repository.UserSoloChallengeRepository;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+
+import javax.swing.text.html.Option;
 
 @Service
 @Transactional(readOnly = true)
@@ -72,16 +75,12 @@ public class RunningService {
 	public Boolean isSoloChallengeInProgress(String accessToken) {
 		User user = jwtTokenProvider.getUserByToken(accessToken);
 
-		// 먼저 진행 중인 솔로 챌린지 존재 여부 확인
-		UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
-				.findByUserIdAndSoloChallenge_ChallengeStatusIn(
-						user.getId(),
-						List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
-				.orElse(null);
+		Optional<UserSoloChallenge> userSoloChallenge = userSoloChallengeRepository.findByUserIdAndSoloChallenge_ChallengeStatusIn(
+				user.getId(),
+				List.of(ChallengeStatus.IN_PROGRESS));
 
-		// 챌린지가 존재하고 상태가 IN_PROGRESS인 경우에만 true 반환
-		return userSoloChallenge != null &&
-				userSoloChallenge.getChallengeResult() == ChallengeResult.IN_PROGRESS;
+		return userSoloChallenge.isPresent() &&
+				userSoloChallenge.get().getChallengeResult() == ChallengeResult.IN_PROGRESS;
 	}
 
 	public Boolean isCrewChallengeInProgress(String accessToken) {

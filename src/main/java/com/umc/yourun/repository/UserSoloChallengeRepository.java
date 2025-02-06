@@ -53,4 +53,11 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
             LocalDateTime dateTime
     );
 
+    // 진행 중인 챌린지에서, 유저가 진행 중인지
+    Optional<UserSoloChallenge> findByUserIdAndChallengeResultAndSoloChallenge_ChallengeStatus(
+            Long userId,
+            ChallengeResult challengeResult,
+            ChallengeStatus challengeStatus
+    );
+
 }
