@@ -9,7 +9,7 @@ public class RunningDataResponseDTO{
 
 	@Schema(title = "RUNNING_RES_01 : 러닝 결과 정보 생성 응답 DTO")
 	@Builder
-	public record createRunningData(
+	public record RunningDataCreateRes(
 
 		@Schema(description = "러닝 결과 ID", example = "1")
 		Long id,
@@ -27,7 +27,16 @@ public class RunningDataResponseDTO{
 		Integer totalDistance,
 
 		@Schema(description = "총 시간 (s) ", example = "500000")
-		Integer totalTime
+		Integer totalTime,
+
+		@Schema(description="페이스 (1km 당 걸리는 시간)", example="500")
+		Integer pace,
+
+		@Schema(description = "진행중인 개인 챌린지가 있는지 여부", example = "true")
+		Boolean isSoloChallengeInProgress,
+
+		@Schema(description = "진행중인 크루 챌린지가 있는지 여부", example = "true")
+		Boolean isCrewChallengeInProgress
 
 	) {}
 
