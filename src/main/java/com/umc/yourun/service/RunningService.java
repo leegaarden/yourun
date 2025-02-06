@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import com.umc.yourun.domain.enums.ChallengeResult;
+import com.umc.yourun.domain.mapping.UserSoloChallenge;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,9 +71,19 @@ public class RunningService {
 
 	public Boolean isSoloChallengeInProgress(String accessToken) {
 		User user = jwtTokenProvider.getUserByToken(accessToken);
-		return userSoloChallengeRepository.existsByUserIdAndSoloChallenge_ChallengeStatusIn(user.getId(),
-			List.of(ChallengeStatus.IN_PROGRESS));
+
+		// 먼저 진행 중인 솔로 챌린지 존재 여부 확인
+		UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
+				.findByUserIdAndSoloChallenge_ChallengeStatusIn(
+						user.getId(),
+						List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
+				.orElse(null);
+
+		// 챌린지가 존재하고 상태가 IN_PROGRESS인 경우에만 true 반환
+		return userSoloChallenge != null &&
+				userSoloChallenge.getChallengeResult() == ChallengeResult.IN_PROGRESS;
 	}
+
 	public Boolean isCrewChallengeInProgress(String accessToken) {
 		User user = jwtTokenProvider.getUserByToken(accessToken);
 		return userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(user.getId(),
