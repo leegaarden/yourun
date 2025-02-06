@@ -20,14 +20,17 @@ public class RunningDataConverter {
 			.build();
 	}
 
-	public static RunningDataResponseDTO.createRunningData toCreateRunningDataRes(RunningData runningData) {
-		return RunningDataResponseDTO.createRunningData.builder()
+	public static RunningDataResponseDTO.RunningDataCreateRes toCreateRunningDataRes(RunningData runningData,Boolean isSoloChallengeInProgress,Boolean isCrewChallengeInProgress) {
+		return RunningDataResponseDTO.RunningDataCreateRes.builder()
 			.id(runningData.getId())
 			.startTime(runningData.getStartTime())
 			.endTime(runningData.getEndTime())
 			.totalDistance(runningData.getTotalDistance())
 			.totalTime(runningData.getTotalTime())
 			.userName(runningData.getUser().getNickname())
+			.pace(runningData.getPace())
+			.isSoloChallengeInProgress(isCrewChallengeInProgress)
+			.isCrewChallengeInProgress(isCrewChallengeInProgress)
 			.build();
 	}
 
