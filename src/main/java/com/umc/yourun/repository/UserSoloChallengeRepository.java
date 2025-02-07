@@ -60,4 +60,7 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
             ChallengeStatus challengeStatus
     );
 
+    // 유저가 현재 참여 중인 솔로 챌린지 조회
+    Optional<UserSoloChallenge> findFirstByUserIdOrderByCreatedAtDesc(Long userId);
+
 }

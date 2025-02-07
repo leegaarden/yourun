@@ -38,4 +38,12 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
     // 사용자의 크루 챌린지 참여 정보 조회
     UserCrewChallenge findByUserId(Long userId);
 
+    // 사용자가 현재 참여 중인 크루 챌린지 조회
+    Optional<UserCrewChallenge> findFirstByUserIdOrderByCreatedAtDesc(Long userId);
+
+    Optional<UserCrewChallenge> findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
+            Long userId,
+            List<ChallengeStatus> challengeStatuses
+    );
+
 }
