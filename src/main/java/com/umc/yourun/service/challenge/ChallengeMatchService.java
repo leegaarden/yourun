@@ -11,6 +11,7 @@ import com.umc.yourun.repository.UserCrewChallengeRepository;
 import com.umc.yourun.repository.UserSoloChallengeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,15 +30,13 @@ public class ChallengeMatchService {
     private final UserSoloChallengeRepository userSoloChallengeRepository;
     private final UserCrewChallengeRepository userCrewChallengeRepository;
 
-    // 1분마다 매칭되지 않은 솔로 챌린지 체크
-    @Scheduled(fixedRate = 60000)  // 60000ms = 1분
+    // 1분 마다 매칭되지 않은 솔로 첼린지 체크
+    @Scheduled(fixedRate = 60000)
     public void checkUnmatchedSoloChallenges() {
-        // PENDING 상태의 솔로 챌린지 조회
         List<SoloChallenge> pendingSoloChallenges = soloChallengeRepository
                 .findByChallengeStatus(ChallengeStatus.PENDING);
 
         for (SoloChallenge challenge : pendingSoloChallenges) {
-            // 24시간 초과 체크 후 삭제
             if (!challenge.isMatchable()) {
                 deleteSoloChallenge(challenge);
             }

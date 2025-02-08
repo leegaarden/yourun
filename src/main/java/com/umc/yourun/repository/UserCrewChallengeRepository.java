@@ -20,12 +20,6 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
             List<ChallengeStatus> statuses
     );
 
-    // 상태별 사용자의 크루 챌린지 조회
-    UserCrewChallenge findByUserIdAndCrewChallenge_ChallengeStatusIn(
-            Long userId,
-            List<ChallengeStatus> statuses
-    );
-
     // 크루 챌린지 아이디로 생성자 찾기
     Optional<UserCrewChallenge> findByCrewChallengeIdAndIsCreator(Long crewChallengeId, boolean isCreator);
 
@@ -34,9 +28,6 @@ public interface UserCrewChallengeRepository extends JpaRepository<UserCrewChall
 
     // 크루 챌린지 삭제
     void deleteAllByCrewChallengeId(Long challengeId);
-
-    // 사용자의 크루 챌린지 참여 정보 조회
-    UserCrewChallenge findByUserId(Long userId);
 
     // 사용자가 현재 참여 중인 크루 챌린지 조회
     Optional<UserCrewChallenge> findFirstByUserIdOrderByCreatedAtDesc(Long userId);

@@ -32,32 +32,16 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
     // 솔로 챌린지 삭제
     void deleteAllBySoloChallengeId(Long challengeId);
 
-    // 사용자가 어떤 챌린지에든 참여하고 있는지 확인
-    boolean existsByUserId(Long userId);
-
-    // 사용자 아이디로 찾은 UserSoloChallenge
-    UserSoloChallenge findByUserId (Long UserId);
-
     // 사용자의 챌린지 메이트 찾기
     Optional<UserSoloChallenge> findBySoloChallengeIdAndUserIdNot(Long challengeId, Long userId);
 
     // 챌린지 아이디와 생성자 여부로 찾기 (챌린지 메이트 찾기)
     Optional<UserSoloChallenge> findBySoloChallengeIdAndIsCreator(Long challengeId, boolean isCreator);
 
-    // 모든 유저의 진행 중인 솔로 챌린지 조회
-    List<UserSoloChallenge> findAllByChallengeResult(ChallengeResult challengeResult);
-
     // 현재 진행중이고, 시작된 챌린지만 조회
     List<UserSoloChallenge> findAllByChallengeResultAndSoloChallenge_StartDateLessThanEqual(
             ChallengeResult challengeResult,
             LocalDateTime dateTime
-    );
-
-    // 진행 중인 챌린지에서, 유저가 진행 중인지
-    Optional<UserSoloChallenge> findByUserIdAndChallengeResultAndSoloChallenge_ChallengeStatus(
-            Long userId,
-            ChallengeResult challengeResult,
-            ChallengeStatus challengeStatus
     );
 
     // 유저가 현재 참여 중인 솔로 챌린지 조회
