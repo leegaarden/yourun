@@ -492,7 +492,7 @@ public class SoloChallengeService {
 
         // 솔로 챌린지 조회
         UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
-                .findByUserIdAndSoloChallenge_ChallengeStatusIn(
+                .findFirstByUserIdAndSoloChallenge_ChallengeStatusInOrderByCreatedAtDesc(
                         user.getId(),
                         List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
                 .orElse(null);

@@ -75,12 +75,17 @@ public class RunningService {
 	public Boolean isSoloChallengeInProgress(String accessToken) {
 		User user = jwtTokenProvider.getUserByToken(accessToken);
 
-		Optional<UserSoloChallenge> userSoloChallenge = userSoloChallengeRepository.findByUserIdAndSoloChallenge_ChallengeStatusIn(
-				user.getId(),
-				List.of(ChallengeStatus.IN_PROGRESS));
+		// 가장 최근의 챌린지를 조회하고, 상태가 IN_PROGRESS인 것만 필터링
+		Optional<UserSoloChallenge> userSoloChallenge = userSoloChallengeRepository
+				.findFirstByUserIdAndSoloChallenge_ChallengeStatusInOrderByCreatedAtDesc(
+						user.getId(),
+						List.of(ChallengeStatus.IN_PROGRESS)
+				);
 
+		// 챌린지가 존재하고, 유저의 챌린지 결과가 IN_PROGRESS이며, 현재 시간이 시작일 이후인지 확인
 		return userSoloChallenge.isPresent() &&
-				userSoloChallenge.get().getChallengeResult() == ChallengeResult.IN_PROGRESS;
+				userSoloChallenge.get().getChallengeResult() == ChallengeResult.IN_PROGRESS &&
+				LocalDateTime.now().isAfter(userSoloChallenge.get().getSoloChallenge().getStartDate());
 	}
 
 	public Boolean isCrewChallengeInProgress(String accessToken) {

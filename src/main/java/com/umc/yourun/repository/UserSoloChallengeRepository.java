@@ -15,7 +15,7 @@ public interface UserSoloChallengeRepository extends JpaRepository<UserSoloChall
 
     // 유저 아이디와 상태로 찾기
     // Optional 반환
-    Optional<UserSoloChallenge> findByUserIdAndSoloChallenge_ChallengeStatusIn(
+    Optional<UserSoloChallenge> findFirstByUserIdAndSoloChallenge_ChallengeStatusInOrderByCreatedAtDesc(
             Long userId,
             List<ChallengeStatus> statuses
     );
