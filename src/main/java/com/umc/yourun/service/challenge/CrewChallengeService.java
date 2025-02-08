@@ -430,23 +430,21 @@ public class CrewChallengeService {
         }
 
         // 5. 이미 진행 중인 크루 챌린지가 있는지 확인 및 셀프 참여 방지
-        UserCrewChallenge existUserCrewChallenge = userCrewChallengeRepository
+        Optional<UserCrewChallenge> existUserCrewChallenge = userCrewChallengeRepository
                 .findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
                         user.getId(),
                         List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS)
-                ).orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
+                );
 
         UserCrewChallenge creator = userCrewChallengeRepository
                 .findByCrewChallengeIdAndIsCreator(challengeId, true)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        if (existUserCrewChallenge != null) {
+        if (existUserCrewChallenge.isPresent()) {
+            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
+        } else if (creator.getUser().getId().equals(user.getId())) {
+            throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
 
-            if (creator.getUser().getId().equals(user.getId())) {
-                throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
-            } else {
-                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
-            }
         }
 
         // 6. UserCrewChallenge 생성 및 저장
