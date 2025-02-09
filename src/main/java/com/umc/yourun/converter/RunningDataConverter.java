@@ -29,7 +29,7 @@ public class RunningDataConverter {
 			.totalTime(runningData.getTotalTime())
 			.userName(runningData.getUser().getNickname())
 			.pace(runningData.getPace())
-			.isSoloChallengeInProgress(isCrewChallengeInProgress)
+			.isSoloChallengeInProgress(isSoloChallengeInProgress)
 			.isCrewChallengeInProgress(isCrewChallengeInProgress)
 			.build();
 	}

@@ -58,7 +58,9 @@ public class CrewChallengeService {
                 user.getId(),
                 Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
 
-            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
+            UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
+                    .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                    .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
             // 사용자가 생성자였던 경우
             if (userCrewChallenge.isCreator()) {
@@ -173,9 +175,10 @@ public class CrewChallengeService {
 
         // 1. 사용자의 현재 크루 챌린지 참여 정보 조회
         UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
-                .findByUserIdAndCrewChallenge_ChallengeStatusIn(user.getId(),
-                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS));
-        // .orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
+                .findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
+                        user.getId(),
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS)
+                ).orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
 
         if (userCrewChallenge == null) {
             throw new GeneralException(ErrorCode.NO_CREW_CHALLENGE_FOUND);
@@ -220,7 +223,10 @@ public class CrewChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 1. 유저가 참여 중인 크루 챌린지
-        Long challengeId = userCrewChallengeRepository.findByUserId(user.getId()).getCrewChallenge().getId();
+        Long challengeId =userCrewChallengeRepository
+                .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND))
+                .getCrewChallenge().getId();
         CrewChallenge myCrew = crewChallengeRepository.findById(challengeId)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
@@ -265,7 +271,9 @@ public class CrewChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 1. 유저의 현재 크루 챌린지 조회
-        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
+                .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         CrewChallenge myCrewChallenge = userCrewChallenge.getCrewChallenge();
 
         // 2. 유저가 속한 크루의 거리
@@ -316,7 +324,9 @@ public class CrewChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 1. 유저의 현재 크루 챌린지 조회
-        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository.findByUserId(user.getId());
+        UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
+                .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         CrewChallenge crewChallenge = userCrewChallenge.getCrewChallenge();
 
         // 2. 크루원들과 거리 정보 조회
@@ -420,22 +430,21 @@ public class CrewChallengeService {
         }
 
         // 5. 이미 진행 중인 크루 챌린지가 있는지 확인 및 셀프 참여 방지
-        UserCrewChallenge existUserCrewChallenge = userCrewChallengeRepository
-                .findByUserIdAndCrewChallenge_ChallengeStatusIn(
+        Optional<UserCrewChallenge> existUserCrewChallenge = userCrewChallengeRepository
+                .findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
                         user.getId(),
-                        Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS));
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS)
+                );
 
         UserCrewChallenge creator = userCrewChallengeRepository
                 .findByCrewChallengeIdAndIsCreator(challengeId, true)
                 .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        if (existUserCrewChallenge != null) {
+        if (existUserCrewChallenge.isPresent()) {
+            throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
+        } else if (creator.getUser().getId().equals(user.getId())) {
+            throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
 
-            if (creator.getUser().getId().equals(user.getId())) {
-                throw new ChallengeException(ErrorCode.CANNOT_JOIN_OWN_CHALLENGE);
-            } else {
-                throw new ChallengeException(ErrorCode.INVALID_CHALLENGE_JOIN);
-            }
         }
 
         // 6. UserCrewChallenge 생성 및 저장

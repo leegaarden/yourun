@@ -45,9 +45,6 @@ public class SoloChallengeService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RunningDataRepository runningDataRepository;
 
-    ZoneId seoulZone = ZoneId.of("Asia/Seoul");
-    ZoneOffset seoulOffset = ZoneOffset.of("+09:00");
-
     // 1. 솔로 챌린지 생성
     @Transactional
     public SoloChallengeResponse.SoloChallengeCreateRes createSoloChallenge(ChallengeRequest.CreateSoloChallengeReq request, String accessToken) {
@@ -68,7 +65,9 @@ public class SoloChallengeService {
                 user.getId(),
                 Arrays.asList(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))) {
 
-            UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(user.getId());
+            UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
+                    .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                    .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
 
             // 사용자가 생성자였던 경우
             if (userSoloChallenge.isCreator()) {
@@ -202,7 +201,9 @@ public class SoloChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 유저가 참여 중인 챌린지 조회
-        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(user.getId());
+        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
+                .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         SoloChallenge soloChallenge = userSoloChallenge.getSoloChallenge();
 
         // 챌린지 메이트 조회
@@ -241,8 +242,10 @@ public class SoloChallengeService {
         // 유저 조회
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
-        // 유저가 참여 중인 챌린지 조회
-        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(user.getId());
+        // 유저가 현재 참여 중인 챌린지 조회
+        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
+                .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         SoloChallenge soloChallenge = userSoloChallenge.getSoloChallenge();
 
         // 챌린지 메이트 조회
@@ -400,7 +403,9 @@ public class SoloChallengeService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
         // 유저가 참여 중인 챌린지 조회
-        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository.findByUserId(user.getId());
+        UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
+                .findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         SoloChallenge soloChallenge = userSoloChallenge.getSoloChallenge();
 
         // 챌린지 메이트 조회
@@ -487,16 +492,17 @@ public class SoloChallengeService {
 
         // 솔로 챌린지 조회
         UserSoloChallenge userSoloChallenge = userSoloChallengeRepository
-                .findByUserIdAndSoloChallenge_ChallengeStatusIn(
+                .findFirstByUserIdAndSoloChallenge_ChallengeStatusInOrderByCreatedAtDesc(
                         user.getId(),
                         List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS))
                 .orElse(null);
 
         // 크루 챌린지 조회 (4명이 결성된 크루일 경우에만)
         UserCrewChallenge userCrewChallenge = userCrewChallengeRepository
-                .findByUserIdAndCrewChallenge_ChallengeStatusIn(
+                .findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
                         user.getId(),
-                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS));
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS)
+                ).orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
 
         // 응답 DTO 생성
         SoloChallengeResponse.UserSoloChallengeInfo soloInfo = null;
