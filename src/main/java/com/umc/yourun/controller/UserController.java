@@ -83,4 +83,17 @@ public class UserController {
             return ApiResponse.error("이미 존재하는 닉네임입니다.", INVALID_INPUT_VALUE,false);
         }
     }
+
+    @Operation(summary = "CHALLENGE_API_2 : 챌린지 매칭 확인", description = "유저의 솔로 및 크루 챌린지가 매칭되었는지 확인합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/challenges/check-matching")
+    public ApiResponse<SoloChallengeResponse.CheckChallengeMatchingRes> getCheckChallengeMatching(
+            @RequestHeader(value = "Authorization") String accessToken) {
+        SoloChallengeResponse.CheckChallengeMatchingRes response = soloChallengeService.getCheckChallengeMatching(accessToken);
+        return ApiResponse.success("유저의 솔로, 크루 챌린지가 매칭되었는지 확인합니다.", response);
+    }
 }

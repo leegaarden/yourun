@@ -305,4 +305,14 @@ public class SoloChallengeResponse {
             @Schema(description = "크루 챌린지 시작일", example = "2025-01-22 15:00")
             String crewStartDate
     ) {}
+
+    @Schema(description = "CHALLENGE_RES_02 : 챌린지 매칭 확인 응답 DTO")
+    public record CheckChallengeMatchingRes(
+
+            @Schema(description = "솔로 챌린지 매칭되었는지", example = "true")
+            boolean isSoloChallengeMatching,
+
+            @Schema(description = "크루 챌린지 매칭되었는지", example = "false")
+            boolean isCrewChallengeMatching
+    ) {}
 }
