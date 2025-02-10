@@ -552,6 +552,30 @@ public class SoloChallengeService {
         return new SoloChallengeResponse.HomeChallengeRes(soloInfo, crewInfo);
     }
 
+    // 챌린지 매칭 확인 응답
+    public SoloChallengeResponse.CheckChallengeMatchingRes getCheckChallengeMatching(String accessToken) {
+        // 유저 조회
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        // 솔로 챌린지 매칭 확인
+        boolean isSoloChallengeMatching = userSoloChallengeRepository
+                .findFirstByUserIdAndSoloChallenge_ChallengeStatusInOrderByCreatedAtDesc(
+                        user.getId(),
+                        List.of(ChallengeStatus.IN_PROGRESS)
+                ).isPresent();
+
+        // 크루 챌린지 매칭 확인
+        boolean isCrewChallengeMatching = userCrewChallengeRepository
+                .findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
+                        user.getId(),
+                        List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS)
+                ).isPresent();
+
+        return new SoloChallengeResponse.CheckChallengeMatchingRes(
+                isSoloChallengeMatching,
+                isCrewChallengeMatching
+        );
+    }
 
     // 활용 메소드들
     // 기간 검사
