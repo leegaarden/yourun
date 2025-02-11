@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ public class RedisRankingService {
      */
     @Transactional
     public void saveUserRunningRecordInRedis(Long userId) {
+        log.info("save user running record" + userId);
         ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
 
         LocalDateTime aMonthAgo = LocalDateTime.now().minusMonths(1);

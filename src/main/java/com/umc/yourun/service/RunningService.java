@@ -7,7 +7,10 @@ import java.util.Optional;
 
 import com.umc.yourun.domain.enums.ChallengeResult;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.umc.yourun.config.JwtTokenProvider;
@@ -39,6 +42,7 @@ public class RunningService {
 	private final UserSoloChallengeRepository userSoloChallengeRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final RedisRankingService redisRankingService;
+	private final EntityManager entityManager;
 
 	@Transactional
 	public RunningData createRunningData(String accessToken,RunningDataRequestDTO.@Valid CreateRunningDataReq request) {
@@ -49,9 +53,12 @@ public class RunningService {
 		}
 		RunningData runningData= RunningDataConverter.toRunningData(request,totalTime,user);
 
+		RunningData savedData = runningDataRepository.save(runningData);
+		entityManager.flush();
+
 		//redis 추가 부분
 		redisRankingService.saveUserRunningRecordInRedis(user.getId());
-		return runningDataRepository.save(runningData);
+		return savedData;
 	}
 
 	public List<RunningData> getRunningDataMonthly(String accessToken,int years, int months) {
@@ -70,9 +77,12 @@ public class RunningService {
 		RunningData runningData=runningDataRepository.findByIdAndStatus(id,RunningDataStatus.ACTIVE).orElseThrow(()->new RunningException(ErrorCode.RUNNING_DATA_NOT_FOUND));
 		runningData.setStatus(status);
 
+		RunningData savedData = runningDataRepository.save(runningData);
+		entityManager.flush();
+
 		//redis 추가 부분
 		redisRankingService.saveUserRunningRecordInRedis(runningData.getUser().getId());
-		return runningData;
+		return savedData;
 	}
 
 	private Integer calculateTotalTime(LocalDateTime startTime, LocalDateTime endTime) {
@@ -100,5 +110,6 @@ public class RunningService {
 		return userCrewChallengeRepository.existsByUserIdAndCrewChallenge_ChallengeStatusIn(user.getId(),
 			List.of(ChallengeStatus.IN_PROGRESS));
 	}
+
 
 }
