@@ -6,9 +6,7 @@ import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.dto.Ranking.RankingResponse;
 import com.umc.yourun.repository.RunningDataRepository;
-import com.umc.yourun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +28,7 @@ public class RealtimeRankingService {
 
         User requestedUser = jwtTokenProvider.getUserByToken(accessToken);
 
-        List<RunningData> runningDataList = runningDataRepository.findAllByEndTimeAfter(LocalDateTime.now().minusMonths(1));
+        List<RunningData> runningDataList = runningDataRepository.findAllByStartTimeAfter(LocalDateTime.now().minusMonths(1));
 
         Map<User, Integer> rankingScore = runningDataList.stream()
                 .collect(Collectors.groupingBy(
@@ -49,7 +47,7 @@ public class RealtimeRankingService {
                 ));
 
         // 요청한 유저의 등수 계산
-        int rank = calculateUserRank(requestedUser, sortedRanking);
+        Long rank = (long) calculateUserRank(requestedUser, sortedRanking);
 
         //페이지 처리
         Map<User, Integer> paginatedScores = pagenation(page, sortedRanking);

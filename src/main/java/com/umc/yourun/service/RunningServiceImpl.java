@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.config.exception.ErrorCode;
-import com.umc.yourun.config.exception.GeneralException;
 import com.umc.yourun.config.exception.custom.RunningException;
 import com.umc.yourun.converter.RunningDataConverter;
 import com.umc.yourun.domain.RunningData;
@@ -24,6 +24,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class RunningServiceImpl implements RunningService{
@@ -31,6 +32,7 @@ public class RunningServiceImpl implements RunningService{
 	private final UserRepository userRepository;
 	private final UserService UserService;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final RedisRankingService redisRankingService;
 
 	@Override
 	@Transactional
@@ -41,6 +43,9 @@ public class RunningServiceImpl implements RunningService{
 			throw new RunningException(ErrorCode.INVALID_END_TIME);
 		}
 		RunningData runningData= RunningDataConverter.toRunningData(request,totalTime,user);
+
+		//Redis에 랭킹 갱신
+		redisRankingService.saveUserRunningRecordInRedis(runningData.getUser().getId());
 		return runningDataRepository.save(runningData);
 	}
 
@@ -62,6 +67,9 @@ public class RunningServiceImpl implements RunningService{
 	public RunningData updateRunningData(Long id, RunningDataStatus status) {
 		RunningData runningData=runningDataRepository.findByIdAndStatus(id,RunningDataStatus.ACTIVE).orElseThrow(()->new RunningException(ErrorCode.RUNNING_DATA_NOT_FOUND));
 		runningData.setStatus(status);
+
+		//Redis에 랭킹 갱신
+		redisRankingService.saveUserRunningRecordInRedis(runningData.getUser().getId());
 		return runningData;
 	}
 

@@ -32,7 +32,7 @@ public class RankingResponse {
         String username,
 
         @Schema(description = "rank", example = "10")
-        int rank,
+        Long rank,
 
         @Schema(description = "tendency", example = "페이스메이커")
         Tendency tendency,
