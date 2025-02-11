@@ -64,6 +64,7 @@ public class CrewChallenge extends BaseEntity {
     // true 반환: 아직 매칭 가능한 상태 (24시간 이내)
     // false 반환: 매칭 불가능한 상태 (24시간 초과)
     public boolean isMatchable() {
-        return this.getCreatedAt().plusDays(1).isAfter(LocalDateTime.now());
+        // 현재 시간이 시작 시간으로부터 24시간 이내인지 확인
+        return LocalDateTime.now().isBefore(this.getStartDate());
     }
 }

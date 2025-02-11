@@ -1,9 +1,9 @@
 package com.umc.yourun.controller;
 
 import com.umc.yourun.apiPayload.ApiResponse;
-import com.umc.yourun.config.exception.ErrorCode;
 import com.umc.yourun.config.exception.ErrorResponse;
-import com.umc.yourun.dto.challenge.ChallengeResponse;
+import com.umc.yourun.dto.challenge.CrewChallengeResponse;
+import com.umc.yourun.dto.challenge.SoloChallengeResponse;
 import com.umc.yourun.dto.user.UserRequestDTO;
 import com.umc.yourun.service.UserService;
 import com.umc.yourun.service.challenge.SoloChallengeService;
@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,9 +60,9 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/home/challenges")
-    public ApiResponse<ChallengeResponse.HomeChallengeRes> getUserChallenges(
+    public ApiResponse<SoloChallengeResponse.HomeChallengeRes> getUserChallenges(
             @RequestHeader(value = "Authorization") String accessToken) {
-        ChallengeResponse.HomeChallengeRes response = soloChallengeService.getUserChallenges(accessToken);
+        SoloChallengeResponse.HomeChallengeRes response = soloChallengeService.getUserChallenges(accessToken);
         return ApiResponse.success("홈 화면 : 사용자와 관련된 챌린지 정보입니다.", response);
     }
 
@@ -83,5 +82,18 @@ public class UserController {
         }else{
             return ApiResponse.error("이미 존재하는 닉네임입니다.", INVALID_INPUT_VALUE,false);
         }
+    }
+
+    @Operation(summary = "CHALLENGE_API_2 : 챌린지 매칭 확인", description = "유저의 솔로 및 크루 챌린지가 매칭되었는지 확인합니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/challenges/check-matching")
+    public ApiResponse<SoloChallengeResponse.CheckChallengeMatchingRes> getCheckChallengeMatching(
+            @RequestHeader(value = "Authorization") String accessToken) {
+        SoloChallengeResponse.CheckChallengeMatchingRes response = soloChallengeService.getCheckChallengeMatching(accessToken);
+        return ApiResponse.success("유저의 솔로, 크루 챌린지가 매칭되었는지 확인합니다.", response);
     }
 }
