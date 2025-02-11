@@ -14,6 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -36,10 +40,10 @@ public class UserController {
         }
         return ApiResponse.success("회원가입에 성공했습니다.", true);
     }
-    @PatchMapping("")
-    public ApiResponse<Boolean> delete(@RequestHeader("Authorization") String acesstoken){
 
-        return ApiResponse.success("회원의 상태가 비활성화 상태가 되었습니다. 3일 안에 회원 탈퇴를 취소하지 않으면 계정을 복구할 수 없습니다.", userService.deleteUser(acesstoken));
+    @PatchMapping("")
+    public ApiResponse<Boolean> delete(@RequestHeader("Authorization") String accesstoken){
+        return ApiResponse.success("회원의 상태가 비활성화 상태가 되었습니다. 3일 안에 회원 탈퇴를 취소하지 않으면 계정을 복구할 수 없습니다.", userService.deleteUser(accesstoken));
     }
 
     @PostMapping("/login")
@@ -60,6 +64,7 @@ public class UserController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+
     @GetMapping("/home/challenges")
     public ApiResponse<ChallengeResponse.HomeChallengeRes> getUserChallenges(
             @RequestHeader(value = "Authorization") String accessToken) {
@@ -83,5 +88,24 @@ public class UserController {
         }else{
             return ApiResponse.error("이미 존재하는 닉네임입니다.", INVALID_INPUT_VALUE,false);
         }
+    }
+
+    @GetMapping("/kakao-login")
+    public ApiResponse<Map<String,String>> kakaoLogin(@AuthenticationPrincipal OAuth2User user) {
+        if (user == null) {
+            return ApiResponse.error("카카오 로그인에 실패했습니다.", INVALID_INPUT_VALUE, null);
+        }else {
+            return ApiResponse.success("카카오 로그인에 성공했습니다.", userService.kakaoLogin(user));
+        }
+    }
+
+    @PatchMapping("/initialize")
+    public ApiResponse<Boolean> setUserInfo(@RequestHeader("Authorization") String accesstoken, @Valid @RequestBody UserRequestDTO.SetKakaoUserDto kakaoUserInfo){
+        try {
+            userService.setKakaoUserInfo(accesstoken, kakaoUserInfo);
+        }catch (Exception e){
+            return ApiResponse.error(e.getMessage(), INVALID_INPUT_VALUE,false);
+        }
+        return ApiResponse.success("카카오 회원 초기 정보 설정에 성공했습니다.", true);
     }
 }
