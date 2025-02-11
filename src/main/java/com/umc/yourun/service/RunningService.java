@@ -38,6 +38,7 @@ public class RunningService {
 	private final UserCrewChallengeRepository userCrewChallengeRepository;
 	private final UserSoloChallengeRepository userSoloChallengeRepository;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final RedisRankingService redisRankingService;
 
 	@Transactional
 	public RunningData createRunningData(String accessToken,RunningDataRequestDTO.@Valid CreateRunningDataReq request) {
@@ -47,6 +48,9 @@ public class RunningService {
 			throw new RunningException(ErrorCode.INVALID_END_TIME);
 		}
 		RunningData runningData= RunningDataConverter.toRunningData(request,totalTime,user);
+
+		//redis 추가 부분
+		redisRankingService.saveUserRunningRecordInRedis(user.getId());
 		return runningDataRepository.save(runningData);
 	}
 
@@ -65,6 +69,9 @@ public class RunningService {
 	public RunningData updateRunningData(Long id, RunningDataStatus status) {
 		RunningData runningData=runningDataRepository.findByIdAndStatus(id,RunningDataStatus.ACTIVE).orElseThrow(()->new RunningException(ErrorCode.RUNNING_DATA_NOT_FOUND));
 		runningData.setStatus(status);
+
+		//redis 추가 부분
+		redisRankingService.saveUserRunningRecordInRedis(runningData.getUser().getId());
 		return runningData;
 	}
 
