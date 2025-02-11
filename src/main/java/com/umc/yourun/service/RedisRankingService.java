@@ -49,7 +49,7 @@ public class RedisRankingService {
 
         if (totalDistance > 0) {
             log.info("User {} 랭킹 데이터 Redis 저장. 총 거리: {}", userId, totalDistance);
-            zSetOperations.add(RUNNING_RANK_KEY, String.valueOf(userId), totalDistance);
+            zSetOperations.add(RUNNING_RANK_KEY, String.valueOf(userId), totalDistance);        //덮어쓰기
         } else {
             zSetOperations.remove(RUNNING_RANK_KEY, String.valueOf(userId));
         }
