@@ -106,9 +106,9 @@ public class UserMateService {
             excludeIdList.add(userMate.getMate().getId());
         }
 
-        List<Tag> userTags = new ArrayList<>();
+        List<String> userTags = new ArrayList<>();
         for(UserTag userTag : user.getUserTags()){
-            userTags.add(userTag.getTag());
+            userTags.add(userTag.getTag().toString());
         }
 
         List<User> users = userRepository.findRandomFive(excludeIdList, userTags);
