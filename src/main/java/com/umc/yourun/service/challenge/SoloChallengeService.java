@@ -502,7 +502,7 @@ public class SoloChallengeService {
                 .findFirstByUserIdAndCrewChallenge_ChallengeStatusInOrderByCreatedAtDesc(
                         user.getId(),
                         List.of(ChallengeStatus.PENDING, ChallengeStatus.IN_PROGRESS)
-                ).orElseThrow(() -> new ChallengeException(ErrorCode.NO_CREW_CHALLENGE_FOUND));
+                ).orElse(null);
 
         // 응답 DTO 생성
         SoloChallengeResponse.UserSoloChallengeInfo soloInfo = null;
