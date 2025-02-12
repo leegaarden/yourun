@@ -33,3 +33,20 @@ springdoc:
             scope: read write
             token-uri: http://${SERVER_HOST}:8080/oauth/token
             client-authentication-method: post
+# Actuator & Prometheus 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
