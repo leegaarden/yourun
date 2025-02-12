@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.4'
+    id 'org.springframework.boot' version '3.2.2'
     id 'io.spring.dependency-management' version '1.1.6'
 }
 
@@ -36,18 +36,18 @@ dependencies {
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
 
-    //Spring Security
+    // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
 
-    // Spring Security OAuth2 클라이언트 의존성 추가
+    // Spring Security OAuth2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.1.2'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.2.1'
     implementation 'org.springframework.security:spring-security-oauth2-jose'
 
-    //JWT
+    // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
@@ -56,4 +56,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-

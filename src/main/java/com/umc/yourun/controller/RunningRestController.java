@@ -44,10 +44,12 @@ public class RunningRestController {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	@PostMapping
-	public ApiResponse<RunningDataResponseDTO.createRunningData> createRunningData(@RequestHeader(value = "Authorization") String accessToken,
+	public ApiResponse<RunningDataResponseDTO.RunningDataCreateRes> createRunningData(@RequestHeader(value = "Authorization") String accessToken,
 																					@RequestBody @Valid RunningDataRequestDTO.CreateRunningDataReq request) {
 		RunningData runningData = runningService.createRunningData(accessToken,request);
-		return ApiResponse.success("러닝 결과 정보 생성 성공", RunningDataConverter.toCreateRunningDataRes(runningData));
+		Boolean isSoloChallengeInProgress = runningService.isSoloChallengeInProgress(accessToken);
+		Boolean isCrewChallengeInProgress = runningService.isCrewChallengeInProgress(accessToken);
+		return ApiResponse.success("러닝 결과 정보 생성 성공", RunningDataConverter.toCreateRunningDataRes(runningData,isSoloChallengeInProgress,isCrewChallengeInProgress));
 	}
 
 	@Operation(summary = "RUNNING_DATA_API_01 : 특정 년/월의 모든 러닝데이터 조회(캘린더에서 사용)", description = "특정한 년/월의 모든 러닝 데이터를 조회합니다.")
@@ -62,7 +64,7 @@ public class RunningRestController {
 																							@PathVariable @Valid @Min(value = 1,message = "1월부터 12월사이의 값만 조회가능합니다.") @Max(value = 12,message = "1월부터 12월사이의 값만 조회가능합니다.") int months) {
 
 		List<RunningData> runningDataList = runningService.getRunningDataMonthly(accessToken,years, months);
-		return ApiResponse.success("특정 월/일 러닝 데이터 조회 성공", RunningDataConverter.toRunningDataRes(runningDataList));
+		return ApiResponse.success("특정 월/일의 모든 러닝 데이터 조회 성공", RunningDataConverter.toRunningDataRes(runningDataList));
 	}
 
 	@Operation(summary = "RUNNING_DATA_API_03 : 러닝 데이터 조회", description = "특정 id의 러닝 데이터를 조회합니다.")
