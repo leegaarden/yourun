@@ -45,6 +45,22 @@ public class UserRequestDTO {
             String password
     ){}
 
+    public record SetKakaoUserDto(
+            @NotBlank(message = "닉네임은 필수 입력 항목입니다.")
+            @Pattern(regexp = "^[가-힣]{2,4}$", message = "닉네임은 띄어쓰기 없이 한글 2~4자만 가능합니다.")
+            @Schema(example = "최석운")
+            String nickname,
+            @NotNull(message = "성향은 필수 입력 항목입니다.")
+            @Schema(example = "페이스메이커")
+            Tendency tendency,
+            @NotNull(message = "태그는 2개를 필수로 선택해야 하는 항목입니다.")
+            @Schema(example = "느긋하게")
+            Tag tag1,
+            @NotNull(message = "태그는 2개를 필수로 선택해야 하는 항목입니다.")
+            @Schema(example = "음악과")
+            Tag tag2
+    ){}
+
     public record UpdateDto(
         @NotBlank(message = "닉네임은 필수 입력 항목입니다.")
         @Pattern(regexp = "^[가-힣]{2,4}$", message = "닉네임은 띄어쓰기 없이 한글 2~4자만 가능합니다.")
