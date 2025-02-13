@@ -53,10 +53,13 @@ springdoc:
 # Actuator & Prometheus 설정 추가
 management:
   endpoints:
+    enabled-by-default: true     # 모든 엔드포인트 기본 활성화
     web:
       exposure:
         include: prometheus,health,metrics,info
       base-path: /actuator
+      path-mapping:
+        prometheus: prometheus   # 명시적 경로 매핑
   endpoint:
     health:
       show-details: always
@@ -69,12 +72,5 @@ management:
       export:
         enabled: true
   metrics:
-    enable:
-      all: true
-    distribution:
-      percentiles-histogram:
-        all: true
-      sla:
-        all: true
     tags:
       application: ${spring.application.name}
