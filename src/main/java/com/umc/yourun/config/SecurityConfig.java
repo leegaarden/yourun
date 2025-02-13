@@ -60,7 +60,7 @@ public class SecurityConfig {
 //                .securityMatcher("/users/**")
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("api/v1/users/login", "api/v1/users", "api/v1/users/duplicate", "api/v1/users/check-nickname", "/swagger-ui/**", "/api-docs/**", "/api/v1/oauth2/**", "/login/oauth2/**", "/oauth2/**").permitAll()
+                        .requestMatchers("api/v1/users/login", "api/v1/users", "api/v1/users/duplicate", "api/v1/users/check-nickname", "/swagger-ui/**", "/api-docs/**", "/api/v1/oauth2/**", "/login/oauth2/**", "/oauth2/**", "/actuator/**").permitAll()
 //                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -95,7 +95,7 @@ public class SecurityConfig {
         http
                 .securityMatcher("/oauth/**") // /oauth/** 경로만 처리
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/oauth/token").permitAll() // /oauth/token은 공개
+                        .requestMatchers("/oauth/token", "/actuator/**").permitAll() // /oauth/token은 공개
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth/token")); // CSRF 비활성화
