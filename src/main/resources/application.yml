@@ -1,6 +1,5 @@
 server:
   port: 8080
-
 spring:
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false
@@ -56,19 +55,26 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"  # 모든 엔드포인트 노출
+        include: prometheus,health,metrics,info
       base-path: /actuator
   endpoint:
+    health:
+      show-details: always
     prometheus:
       enabled: true
     metrics:
       enabled: true
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
+  metrics:
+    enable:
+      all: true
+    distribution:
+      percentiles-histogram:
+        all: true
+      sla:
+        all: true
     tags:
       application: ${spring.application.name}
-logging:
-  level:
-    org.springframework.security: DEBUG
