@@ -3,6 +3,7 @@ package com.umc.yourun.domain;
 import com.umc.yourun.domain.enums.Tendency;
 import com.umc.yourun.domain.enums.UserStatus;
 import com.umc.yourun.domain.mapping.UserSoloChallenge;
+import com.umc.yourun.dto.user.UserRequestDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,7 +38,7 @@ public class User extends BaseEntity{
     @Column(length = 100, nullable = false)
     private String password;
 
-    @Column(length = 10, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
@@ -71,6 +72,20 @@ public class User extends BaseEntity{
 
     public void encodePassword(String password) {
         this.password = password;
+    }
+
+    public User setKakaoUser(UserRequestDTO.SetKakaoUserDto kakaoUserInfo) {
+        return User.builder()
+                .id(this.id) // 기존 ID 유지
+                .email(this.email) // 기존 Email 유지
+                .password(this.password)
+                .nickname(kakaoUserInfo.nickname()) // 변경할 값만 반영
+                .tendency(kakaoUserInfo.tendency())
+                .crewReward(this.crewReward)
+                .personalReward(this.personalReward)
+                .mvp(this.mvp)
+                .status(this.status)
+                .build();
     }
 
     public void updateNickname(String nickname) {

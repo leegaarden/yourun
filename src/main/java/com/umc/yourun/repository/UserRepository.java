@@ -2,6 +2,7 @@ package com.umc.yourun.repository;
 
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.UserMate;
+import com.umc.yourun.domain.enums.Tag;
 import com.umc.yourun.domain.enums.Tendency;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u.tendency FROM User u WHERE u.id = :userId")
     Optional<Tendency> findTendencyById(@Param("userId") Long userId);
 
-    @Query(value = "SELECT * FROM user WHERE id not in (:excludeIdList) ORDER BY RAND() LIMIT 5", nativeQuery = true)
-    List<User> findRandomFive(@Param("excludeIdList") List<Long> excludeIdList);
+    @Query(value = "SELECT DISTINCT u.* FROM user u, user_tag ut WHERE u.id = ut.user_id AND u.id not in (:excludeIdList) AND ut.tag in (:userTags) ORDER BY RAND() LIMIT 5", nativeQuery = true)
+    List<User> findRandomFive(@Param("excludeIdList") List<Long> excludeIdList, @Param("userTags") List<String> userTags);
 }

@@ -4,10 +4,13 @@ import com.umc.yourun.converter.UserConverter;
 import com.umc.yourun.converter.UserMateConverter;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.UserMate;
+import com.umc.yourun.domain.UserTag;
+import com.umc.yourun.domain.enums.Tag;
 import com.umc.yourun.dto.user.UserResponseDTO;
 import com.umc.yourun.repository.RunningDataRepository;
 import com.umc.yourun.repository.UserMateRepository;
 import com.umc.yourun.repository.UserRepository;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +106,12 @@ public class UserMateService {
             excludeIdList.add(userMate.getMate().getId());
         }
 
-        List<User> users = userRepository.findRandomFive(excludeIdList);
+        List<String> userTags = new ArrayList<>();
+        for(UserTag userTag : user.getUserTags()){
+            userTags.add(userTag.getTag().toString());
+        }
+
+        List<User> users = userRepository.findRandomFive(excludeIdList, userTags);
         if(users.isEmpty()){
             throw new ValidationException("메이트로 추천할 수 있는 유저가 0명이므로 추천에 실패했습니다.");
         }
