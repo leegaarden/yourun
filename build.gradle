@@ -53,14 +53,9 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // Monitoring
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.18'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-el:10.1.18'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.18'
-    implementation 'io.projectreactor:reactor-core:3.6.2'
-    implementation 'io.projectreactor.netty:reactor-netty-core:1.1.15'
-    implementation 'io.projectreactor.netty:reactor-netty-http:1.1.15'
 }
 
 tasks.named('test') {

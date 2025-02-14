@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(
                                 "/actuator/**",
+                                "/actuator/prometheus",
                                 "/swagger-ui/**",
                                 "/api-docs/**",
                                 "/api/v1/users/login",
@@ -43,7 +44,8 @@ public class SecurityConfig {
                                 "/api/v1/users/check-nickname",
                                 "/api/v1/oauth2/**",
                                 "/login/oauth2/**",
-                                "/oauth2/**"
+                                "/oauth2/**",
+                                "/oauth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -62,7 +64,7 @@ public class SecurityConfig {
         http
                 .securityMatcher("/oauth/**")
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/oauth/token", "/actuator/**").permitAll()
+                        .requestMatchers("/oauth/token", "/actuator/**", "/actuator/prometheus").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
