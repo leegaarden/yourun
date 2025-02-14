@@ -3,6 +3,7 @@ package com.umc.yourun.converter;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.UserTag;
 import com.umc.yourun.dto.Ranking.RankingResponse;
+import com.umc.yourun.dto.Ranking.RankingResult;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -28,7 +29,11 @@ public class RankingConverter {
                 .build();
     }
 
-    public static RankingResponse.rankingInfoUser toRankingInfoUser(User user, Long rank, Map<User, Integer> rankings) {
+    public static RankingResponse.rankingInfoUser toRankingInfoUser(RankingResult result) {
+
+        User user = result.getUser();
+        Long rank = (long) result.getUserRank();
+        Map<User, Integer> rankings = result.getRanking();
 
         log.info("ranking data converting" + rankings.size());
         List<RankingResponse.rankingMateInfo> list = rankings.entrySet()

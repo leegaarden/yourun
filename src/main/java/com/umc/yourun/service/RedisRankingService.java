@@ -5,6 +5,7 @@ import com.umc.yourun.converter.RankingConverter;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
 import com.umc.yourun.dto.Ranking.RankingResponse;
+import com.umc.yourun.dto.Ranking.RankingResult;
 import com.umc.yourun.repository.RunningDataRepository;
 import com.umc.yourun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -86,52 +87,70 @@ public class RedisRankingService {
 
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
-        Long userRank = getUserRank(user.getId());
 
-        Map<User, Integer> ranking = pagenation(page);
-        RankingResponse.rankingInfoUser rankingInfoUser = RankingConverter.toRankingInfoUser(user, userRank, ranking);
+        RankingResult ranking = pagenation(page, user.getId());
+        RankingResponse.rankingInfoUser rankingInfoUser = RankingConverter.toRankingInfoUser(ranking);
 
-        log.info("[Ranking Request] User: {}, ID: {}, Requested Page: {}, Rank: {}",
-                user.getNickname(), user.getId(), page, userRank);
+//        log.info("[Ranking Request] User: {}, ID: {}, Requested Page: {}, Rank: {}",
+//                user.getNickname(), user.getId(), page, userRank);
 
         return rankingInfoUser;
     }
 
-    private Map<User, Integer> pagenation(int page) {
+    private RankingResult pagenation(int page, Long userId) {
         ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+        User requestUser = userRepository.findById(userId).get();
 
-        Long size = zSetOperations.size(RUNNING_RANK_KEY);
-        log.info("Redis size: " + zSetOperations.size(RUNNING_RANK_KEY));
-
-        int totalPages = (int) Math.ceil((double) size / PAGE_SIZE);
-        int safePage = Math.min(Math.max(page, 0), totalPages - 1);
-        int start = safePage * PAGE_SIZE;
-        int end = start + PAGE_SIZE - 1;
-
-        // 페이지네이션 적용
-        Set<ZSetOperations.TypedTuple<String>> rankedUsers = zSetOperations.reverseRangeWithScores(RUNNING_RANK_KEY, start, end);
-        if (rankedUsers == null || rankedUsers.isEmpty()) {
-            log.info("ranking is empty");
-            return Collections.emptyMap();
+        //Redis에 저장된 자신의 친구 리스트 불러오기
+        Set<String> friends = redisTemplate.opsForSet().members("friends:" + userId);
+        if (friends == null || friends.isEmpty()) {
+            log.info("유저 {}의 친구가 없음", userId);
+            return new RankingResult(requestUser, null, -1);
         }
 
-        List<Long> userRanker = rankedUsers.stream().map(list -> Long.parseLong(list.getValue()))
+        //랭킹에서 친구들만 필터링
+        List<Long> friendIds = friends.stream().map(Long::parseLong).collect(Collectors.toList());
+        friendIds.add(userId);
+        Set<ZSetOperations.TypedTuple<String>> rankedUsers = zSetOperations.reverseRangeWithScores(RUNNING_RANK_KEY, 0, -1);
+
+        if (rankedUsers == null || rankedUsers.isEmpty()) {
+            log.info("랭킹 데이터 없음");
+            return new RankingResult(requestUser, null, -1);
+        }
+
+        //친구 ID에 해당하는 데이터만 필터링
+        List<Long> userRanker = rankedUsers.stream()
+                .filter(ob -> friendIds.contains(Long.parseLong(ob.getValue())))
+                .map(ob -> Long.parseLong(ob.getValue()))
                 .collect(Collectors.toList());
 
+        //유저 데이터 조회
         Map<Long, User> userMap = userRepository.findAllById(userRanker).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
         Map<User, Integer> result = new LinkedHashMap<>();
         for (ZSetOperations.TypedTuple<String> tuple : rankedUsers) {
-            Long userId = Long.parseLong(tuple.getValue());
-            User rankingUser = userMap.get(userId);
-            if (rankingUser != null) {
-                result.put(rankingUser, tuple.getScore().intValue());
-            }
-        }
-        log.info("int" + result.size());
+            Long rankedUserId = Long.parseLong(tuple.getValue());
+            User rankingUser = userMap.get(rankedUserId);
 
-        return result;
+            result.put(rankingUser, tuple.getScore().intValue());
+        }
+
+        int userRankInResult = getUserRankInResult(result, requestUser);
+        RankingResult rankingResult = new RankingResult(requestUser, result, userRankInResult);
+
+        return rankingResult;
+    }
+
+    private int getUserRankInResult(Map<User, Integer> result, User targetUser) {
+        int rank = 1;
+        for (User user : result.keySet()) {
+            if (user.equals(targetUser)) {
+                return rank;
+            }
+            rank++;
+        }
+        return -1; // 랭킹에 없을 경우
     }
 
     /**

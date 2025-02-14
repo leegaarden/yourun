@@ -10,7 +10,9 @@ import com.umc.yourun.repository.UserMateRepository;
 import com.umc.yourun.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,18 +23,21 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@Slf4j
 public class UserMateService {
     private UserMateRepository userMateRepository;
     private UserRepository userRepository;
     private RunningDataRepository runningDataRepository;
     private JwtTokenProvider jwtTokenProvider;
+    private final StringRedisTemplate redisTemplate;
 
     @Autowired
-    public UserMateService(UserMateRepository userMateRepository, UserRepository userRepository, RunningDataRepository runningDataRepository, JwtTokenProvider jwtTokenProvider) {
+    public UserMateService(UserMateRepository userMateRepository, UserRepository userRepository, RunningDataRepository runningDataRepository, JwtTokenProvider jwtTokenProvider, StringRedisTemplate stringRedisTemplate) {
         this.userMateRepository = userMateRepository;
         this.userRepository = userRepository;
         this.runningDataRepository = runningDataRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.redisTemplate = stringRedisTemplate;
     }
 
     public Boolean addmate(String token, Long mateId) throws ValidationException{
@@ -52,6 +57,7 @@ public class UserMateService {
         }
 
         userMateRepository.save(UserMateConverter.toUserMate(user, mate.get()));
+        addFriendToRedis(user.getId(), mate.get().getId());
 
         return true;
     }
@@ -91,6 +97,8 @@ public class UserMateService {
             throw new ValidationException("메이트 목록에 존재하지 않는 메이트는 삭제할 수 없습니다.");
         }
 
+        removeFriendToRedis(user.getId(), mate.get().getId());
+
         return true;
     }
 
@@ -118,5 +126,18 @@ public class UserMateService {
 
     private int calculateCountDay(LocalDate startDate) {
         return (int) ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1;
+    }
+
+    public void addFriendToRedis(Long userId, Long friendId) {
+        redisTemplate.opsForSet().add("friends:" + userId, friendId.toString());
+        redisTemplate.opsForSet().add("friends:" + friendId, userId.toString());
+        log.info("Redis: 유저 {}와 유저 {} 친구 추가 완료", userId, friendId);
+    }
+
+
+    public void removeFriendToRedis(Long userId, Long friendId) {
+        redisTemplate.opsForSet().remove("friends:" + userId, friendId.toString());
+        redisTemplate.opsForSet().remove("friends:" + friendId, userId.toString());
+        log.info("유저 {}와 유저 {}의 친구 관계 삭제 완료", userId, friendId);
     }
 }
