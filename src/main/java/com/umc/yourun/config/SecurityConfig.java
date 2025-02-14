@@ -33,7 +33,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(requests -> requests
-                        // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
+                        // Actuator 엔드포인트를 가장 먼저 허용
                         .requestMatchers(
                                 "/actuator/**",
                                 "/actuator/prometheus"
@@ -44,7 +44,9 @@ public class SecurityConfig {
                                 "/api/v1/users/login",
                                 "/api/v1/users",
                                 "/api/v1/users/duplicate",
-                                "/api/v1/users/check-nickname",
+                                "/api/v1/users/check-nickname"
+                        ).permitAll()
+                        .requestMatchers(
                                 "/api/v1/oauth2/**",
                                 "/login/oauth2/**",
                                 "/oauth2/**"
