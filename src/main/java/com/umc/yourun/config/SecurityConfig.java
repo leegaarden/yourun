@@ -81,11 +81,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("*");
-        configuration.addAllowedMethod("*");
+        configuration.addAllowedMethod("GET");  // Prometheus는 GET 요청만 사용
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/actuator/**", configuration);  // actuator 경로 명시적 추가
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
