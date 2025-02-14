@@ -55,17 +55,10 @@ dependencies {
     // Monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
-
-    // Spring Boot Actuator + Prometheus
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-
-    // Tomcat
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.18'
-
-    // Reactor
     implementation 'io.projectreactor:reactor-core:3.6.2'
-    implementation 'io.projectreactor:reactor-netty:1.1.15'
+    implementation 'io.projectreactor.netty:reactor-netty-core:1.1.15'
+    implementation 'io.projectreactor.netty:reactor-netty-http:1.1.15'
 }
 
 tasks.named('test') {
