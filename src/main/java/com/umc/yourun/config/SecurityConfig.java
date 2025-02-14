@@ -32,11 +32,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                // 중요: 인증 없이 접근 가능한 엔드포인트를 명시적으로 정의
                 .authorizeHttpRequests(requests -> requests
-                        // Actuator 엔드포인트를 가장 먼저 허용
+                        // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
                         .requestMatchers(
                                 "/actuator/**",
-                                "/actuator/prometheus"
+                                "/actuator/prometheus",
+                                "/prometheus"
                         ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -44,21 +47,19 @@ public class SecurityConfig {
                                 "/api/v1/users/login",
                                 "/api/v1/users",
                                 "/api/v1/users/duplicate",
-                                "/api/v1/users/check-nickname"
-                        ).permitAll()
-                        .requestMatchers(
+                                "/api/v1/users/check-nickname",
                                 "/api/v1/oauth2/**",
                                 "/login/oauth2/**",
-                                "/oauth2/**"
+                                "/oauth2/**",
+                                "/oauth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+                // OAuth2 로그인 설정 비활성화 또는 제한
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
+                        .disable() // OAuth2 로그인 완전 비활성화
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .csrf(csrf -> csrf.disable());
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
