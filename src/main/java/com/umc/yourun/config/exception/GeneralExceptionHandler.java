@@ -20,7 +20,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.umc.yourun")  // actuator 패키지 제외
 public class GeneralExceptionHandler {
 
     @ExceptionHandler(ChallengeException.class)
