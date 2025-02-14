@@ -55,19 +55,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"    # 모든 엔드포인트 노출
-      base-path: /actuator
+        include: "*"
   endpoint:
-    health:
-      show-details: always
     prometheus:
       enabled: true
-    metrics:
-      enabled: true
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-  metrics:
-    tags:
-      application: ${spring.application.name}
