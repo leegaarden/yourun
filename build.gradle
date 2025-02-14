@@ -52,10 +52,20 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    // Monitoring
+    // 스프링 부트 웹 스타터 (최신 버전 사용)
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Prometheus 메트릭
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // Tomcat 명시적 버전 제거
+    // implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.18' 제거
+
+    // Reactor Core 버전 정리
+    implementation 'io.projectreactor:reactor-core'
 }
 
 tasks.named('test') {

@@ -67,7 +67,7 @@ management:
       prometheus:
         enabled: true
 
-# 디버깅용 로깅 레벨
+# 상세 로깅
 logging:
   level:
     org.springframework.security: DEBUG

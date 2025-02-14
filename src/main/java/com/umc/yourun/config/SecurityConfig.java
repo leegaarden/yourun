@@ -56,8 +56,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // OAuth2 로그인 설정 비활성화 또는 제한
-                .oauth2Login(oauth2 -> oauth2
-                        .disable() // OAuth2 로그인 완전 비활성화
+                .oauth2Login(oauth2 -> oauth2.disable() // OAuth2 로그인 완전 비활성화
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
