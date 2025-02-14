@@ -54,16 +54,15 @@ springdoc:
 # Actuator & Prometheus 설정 추가
 management:
   endpoints:
-    enabled-by-default: true
+    enabled-by-default: true    # 모든 엔드포인트 기본 활성화
     web:
       exposure:
-        include: "*"
-      base-path: /actuator
+        include: "*"            # 모든 엔드포인트 노출
   endpoint:
+    prometheus:
+      enabled: true            # prometheus 엔드포인트 명시적 활성화
     health:
       show-details: always
-    prometheus:
-      enabled: true
 # 상세 로깅
 logging:
   level:
