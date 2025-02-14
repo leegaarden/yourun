@@ -37,9 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
                         .requestMatchers(
-                                "/actuator/**",
-                                "/actuator/prometheus",
-                                "/prometheus"
+                                "/actuator/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -68,10 +66,7 @@ public class SecurityConfig {
         http
                 .securityMatcher("/oauth/**")
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(
-                                "/actuator/**",
-                                "/actuator/prometheus"
-                        ).permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/oauth/token").permitAll()
                         .anyRequest().authenticated()
                 )
