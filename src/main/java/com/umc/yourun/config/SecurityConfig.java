@@ -36,9 +36,12 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                // 중요: 인증 없이 접근 가능한 엔드포인트를 명시적으로 정의
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()  // GET 메서드 명시적 허용
+                        // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
+                        .requestMatchers(
+                                "/actuator/**"
+                        ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/api-docs/**",
@@ -53,29 +56,10 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // OAuth2 로그인 설정을 별도의 SecurityFilterChain으로 분리
-                .securityMatcher(AntPathRequestMatcher.antMatcher("/oauth2/**"))
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .defaultSuccessUrl("/api/v1/users/kakao-login", true)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    // OAuth2 전용 SecurityFilterChain 추가
-    @Bean
-    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/oauth2/**", "/login/oauth2/**")
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
-                );
 
         return http.build();
     }
