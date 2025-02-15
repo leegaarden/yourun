@@ -53,8 +53,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // OAuth2 로그인 설정 비활성화 또는 제한
-                .oauth2Login(oauth2 -> oauth2.disable() // OAuth2 로그인 완전 비활성화
+                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
