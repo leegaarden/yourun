@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +16,7 @@ import org.springframework.security.oauth2.client.web.HttpSessionOAuth2Authoriza
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,12 +36,9 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                // 중요: 인증 없이 접근 가능한 엔드포인트를 명시적으로 정의
                 .authorizeHttpRequests(requests -> requests
-                        // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
-                        .requestMatchers(
-                                "/actuator/**"
-                        ).permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()  // GET 메서드 명시적 허용
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/api-docs/**",
@@ -54,17 +53,29 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // OAuth2 설정을 actuator 경로에 대해서는 적용하지 않도록 수정
+                // OAuth2 로그인 설정을 별도의 SecurityFilterChain으로 분리
+                .securityMatcher(AntPathRequestMatcher.antMatcher("/oauth2/**"))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .defaultSuccessUrl("/api/v1/users/kakao-login", true)
-                        // 추가: actuator 경로 제외
-                        .authorizationEndpoint(authorization ->
-                                authorization.baseUri("/oauth2/authorization")
-                                        .authorizationRequestRepository(new HttpSessionOAuth2AuthorizationRequestRepository())
-                        )
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    // OAuth2 전용 SecurityFilterChain 추가
+    @Bean
+    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/oauth2/**", "/login/oauth2/**")
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
+                );
 
         return http.build();
     }
