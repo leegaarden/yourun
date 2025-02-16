@@ -57,7 +57,7 @@ management:
     web:
       exposure:
         include: health,prometheus,metrics
-    enabled-by-default: false
+    enabled-by-default: true
   endpoint:
     health:
       enabled: true
@@ -69,9 +69,6 @@ management:
   metrics:
     enable:
       all: true
-    export:
-      prometheus:
-        enabled: true
 # 상세 로깅
 logging:
   level:
