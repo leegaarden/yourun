@@ -33,6 +33,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .securityMatcher("/**")  // 모든 요청에 대해 이 설정 적용
                 // 중요: 인증 없이 접근 가능한 엔드포인트를 명시적으로 정의
                 .authorizeHttpRequests(requests -> requests
                         // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
@@ -68,13 +69,10 @@ public class SecurityConfig {
         http
                 .securityMatcher("/oauth/**")
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/oauth/token").permitAll()
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/oauth/token", "/actuator/**")
-                );
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth/token"));
 
         return http.build();
     }
