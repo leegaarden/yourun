@@ -54,24 +54,28 @@ springdoc:
 # Actuator & Prometheus 설정 추가
 management:
   endpoints:
-    enabled-by-default: true
     web:
       exposure:
-        include: "*"
-      base-path: /actuator
+        include: health,prometheus,metrics
+    enabled-by-default: false
   endpoint:
+    health:
+      enabled: true
+      show-details: always
     prometheus:
       enabled: true
-    health:
-      show-details: always
     metrics:
       enabled: true
-  prometheus:
-    metrics:
-      export:
+  metrics:
+    enable:
+      all: true
+    export:
+      prometheus:
         enabled: true
 # 상세 로깅
 logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
+    org.springframework.actuator: DEBUG
+    io.micrometer: DEBUG

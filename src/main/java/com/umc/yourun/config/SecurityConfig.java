@@ -37,7 +37,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
                         .requestMatchers(
-                                "/actuator/**"
+                                "/actuator/**",
+                                "/actuator/prometheus/**",
+                                "/actuator/health/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
