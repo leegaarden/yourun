@@ -21,6 +21,8 @@ public class RankingUpdateScheduler {
     public void onStartup() {
         log.info("🔥 서버 시작: Redis 랭킹 데이터 정리 실행");
         redisRankingService.resetRedisRecords();
+        log.info("🔥 서버 시작: Redis Mate 데이터 정리 실행");
+        redisRankingService.resetRedisFriendsRecords();
     }
 
     /**

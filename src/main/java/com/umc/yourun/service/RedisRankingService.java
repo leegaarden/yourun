@@ -4,9 +4,11 @@ import com.umc.yourun.config.JwtTokenProvider;
 import com.umc.yourun.converter.RankingConverter;
 import com.umc.yourun.domain.RunningData;
 import com.umc.yourun.domain.User;
+import com.umc.yourun.domain.UserMate;
 import com.umc.yourun.dto.Ranking.RankingResponse;
 import com.umc.yourun.dto.Ranking.RankingResult;
 import com.umc.yourun.repository.RunningDataRepository;
+import com.umc.yourun.repository.UserMateRepository;
 import com.umc.yourun.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class RedisRankingService {
     private final RunningDataRepository runningDataRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final UserMateRepository userMateRepository;
 
 
     /**
@@ -201,6 +204,24 @@ public class RedisRankingService {
 
         for (String userId : allUsers) {
             saveUserRunningRecordInRedis(Long.parseLong(userId));
+        }
+    }
+
+    @Transactional
+    public void resetRedisFriendsRecords() {
+        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+
+        //기존 Redis의 모든 데이터 삭제
+        Set<String> keys = redisTemplate.keys("friends:*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+
+        List<UserMate> allUserMate = userMateRepository.findAll();
+        for (UserMate userMate : allUserMate) {
+            Long userId = userMate.getUser().getId();
+            Long mateId = userMate.getMate().getId();
+            redisTemplate.opsForSet().add("friends:" + userId, mateId.toString());
         }
     }
 }
