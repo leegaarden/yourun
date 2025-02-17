@@ -88,18 +88,15 @@ public class RedisRankingService {
         User user = jwtTokenProvider.getUserByToken(accessToken);
 
 
-        RankingResult ranking = pagenation(page, user.getId());
+        RankingResult ranking = pagenation(page, user);
         RankingResponse.rankingInfoUser rankingInfoUser = RankingConverter.toRankingInfoUser(ranking);
-
-//        log.info("[Ranking Request] User: {}, ID: {}, Requested Page: {}, Rank: {}",
-//                user.getNickname(), user.getId(), page, userRank);
 
         return rankingInfoUser;
     }
 
-    private RankingResult pagenation(int page, Long userId) {
+    private RankingResult pagenation(int page, User requestUser) {
         ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
-        User requestUser = userRepository.findById(userId).get();
+        Long userId = requestUser.getId();
 
         //Redis에 저장된 자신의 친구 리스트 불러오기
         Set<String> friends = redisTemplate.opsForSet().members("friends:" + userId);
@@ -108,7 +105,8 @@ public class RedisRankingService {
             return new RankingResult(requestUser, null, -1);
         }
 
-        //랭킹에서 친구들만 필터링
+        //랭킹에서 친구들만 필터링(자기 자신도 데이터에 포함)
+        //friends: 내 친구들이 저장된 list
         List<Long> friendIds = friends.stream().map(Long::parseLong).collect(Collectors.toList());
         friendIds.add(userId);
         Set<ZSetOperations.TypedTuple<String>> rankedUsers = zSetOperations.reverseRangeWithScores(RUNNING_RANK_KEY, 0, -1);
@@ -118,26 +116,41 @@ public class RedisRankingService {
             return new RankingResult(requestUser, null, -1);
         }
 
-        //친구 ID에 해당하는 데이터만 필터링
+        //친구 ID(friends)에 해당하는 데이터만 필터링
         List<Long> userRanker = rankedUsers.stream()
                 .filter(ob -> friendIds.contains(Long.parseLong(ob.getValue())))
                 .map(ob -> Long.parseLong(ob.getValue()))
                 .collect(Collectors.toList());
 
         //유저 데이터 조회
+        List<User> userFriends = userRepository.findAllById(userRanker).stream()
+                .collect(Collectors.toList());
+
         Map<Long, User> userMap = userRepository.findAllById(userRanker).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
         Map<User, Integer> result = new LinkedHashMap<>();
-        for (ZSetOperations.TypedTuple<String> tuple : rankedUsers) {
-            Long rankedUserId = Long.parseLong(tuple.getValue());
-            User rankingUser = userMap.get(rankedUserId);
-
-            result.put(rankingUser, tuple.getScore().intValue());
+        for (User userFriend : userFriends) {
+            Double score = zSetOperations.score(RUNNING_RANK_KEY, userFriend.getId().toString());
+            result.put(userFriend, Double.valueOf(score).intValue());
         }
 
-        int userRankInResult = getUserRankInResult(result, requestUser);
-        RankingResult rankingResult = new RankingResult(requestUser, result, userRankInResult);
+        // Integer 값 기준으로 내림차순 정렬
+        Map<User, Integer> sortedResult = result.entrySet().stream()
+                .sorted(Map.Entry.<User, Integer>comparingByValue().reversed()) // 값 기준 내림차순
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new // 순서 유지
+                ));
+
+        log.info("result size: " + result.size());
+        log.info("request user Id: " + requestUser.getId());
+
+        //개인 등수 조회
+        int userRankInResult = getUserRankInResult(sortedResult, requestUser);
+        RankingResult rankingResult = new RankingResult(requestUser, sortedResult, userRankInResult);
 
         return rankingResult;
     }
@@ -145,6 +158,8 @@ public class RedisRankingService {
     private int getUserRankInResult(Map<User, Integer> result, User targetUser) {
         int rank = 1;
         for (User user : result.keySet()) {
+            log.info("user" + user.getId());
+            log.info("target: " + targetUser.getId());
             if (user.equals(targetUser)) {
                 return rank;
             }

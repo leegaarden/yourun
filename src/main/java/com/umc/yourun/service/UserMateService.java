@@ -130,14 +130,14 @@ public class UserMateService {
 
     public void addFriendToRedis(Long userId, Long friendId) {
         redisTemplate.opsForSet().add("friends:" + userId, friendId.toString());
-        redisTemplate.opsForSet().add("friends:" + friendId, userId.toString());
+//        redisTemplate.opsForSet().add("friends:" + friendId, userId.toString());
         log.info("Redis: 유저 {}와 유저 {} 친구 추가 완료", userId, friendId);
     }
 
 
     public void removeFriendToRedis(Long userId, Long friendId) {
         redisTemplate.opsForSet().remove("friends:" + userId, friendId.toString());
-        redisTemplate.opsForSet().remove("friends:" + friendId, userId.toString());
+//        redisTemplate.opsForSet().remove("friends:" + friendId, userId.toString());
         log.info("유저 {}와 유저 {}의 친구 관계 삭제 완료", userId, friendId);
     }
 }

@@ -5,6 +5,7 @@ import com.umc.yourun.domain.User;
 import com.umc.yourun.domain.UserMate;
 import com.umc.yourun.dto.user.UserResponseDTO;
 import com.umc.yourun.service.UserMateService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
