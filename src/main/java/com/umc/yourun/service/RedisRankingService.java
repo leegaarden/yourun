@@ -166,7 +166,7 @@ public class RedisRankingService {
         for (String userId : allUsers) {
             saveUserRunningRecordInRedis(Long.parseLong(userId));
         }
-        log.info("1개월 이상 지난 데이터를 Redis에서 정리 완료" + zSetOperations.size(RUNNING_RANK_KEY));
+        log.info("1개월 이상 지난 데이터를 Redis에서 정리 완료");
     }
 
     @Transactional

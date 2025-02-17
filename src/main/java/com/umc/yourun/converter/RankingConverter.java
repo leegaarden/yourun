@@ -34,12 +34,18 @@ public class RankingConverter {
         User user = result.getUser();
         Long rank = (long) result.getUserRank();
         Map<User, Integer> rankings = result.getRanking();
+        List<RankingResponse.rankingMateInfo> list;
 
-        log.info("ranking data converting" + rankings.size());
-        List<RankingResponse.rankingMateInfo> list = rankings.entrySet()
-                .stream()
-                .map(RankingConverter::toRankingRealtimeInfo)
-                .collect(Collectors.toList());
+//        log.info("ranking data converting" + rankings.size());
+        if (rankings == null) {
+            list = null;
+        } else {
+            list = rankings.entrySet()
+                    .stream()
+                    .map(RankingConverter::toRankingRealtimeInfo)
+                    .collect(Collectors.toList());
+        }
+
 
         return RankingResponse.rankingInfoUser.builder()
                 .rank(rank)
