@@ -8,6 +8,7 @@ import com.umc.yourun.apiPayload.ApiResponse;
 import com.umc.yourun.config.exception.custom.ChallengeException;
 import com.umc.yourun.config.exception.custom.RunningException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.umc.yourun")  // actuator 패키지 제외
 public class GeneralExceptionHandler {
 
     @ExceptionHandler(ChallengeException.class)
@@ -87,7 +88,12 @@ public class GeneralExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ApiResponse<Object> handleException(Exception e) {
+    public ApiResponse<Object> handleException(Exception e, HttpServletRequest request) throws Exception {
+        // actuator 요청인 경우 Spring의 기본 예외 처리로 위임
+        if (request.getRequestURI().startsWith("/actuator")) {
+            throw e;
+        }
+
         log.error("Internal Server Error: {}", e.getMessage());
         return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
     }

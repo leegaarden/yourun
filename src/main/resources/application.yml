@@ -8,7 +8,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         jdbc:
@@ -19,6 +19,25 @@ spring:
     redis:
       host: localhost
       port: 6379
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-authentication-method: client_secret_post
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: http://${SERVER_HOST}:8080/login/oauth2/code/kakao
+            authorization-grant-type: authorization_code
+            scope: account_email
+            client-name: Kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -31,9 +50,32 @@ springdoc:
       client:
         registration:
           custom-client:
-#            client-id: your-client-id
-#            client-secret: your-client-secret
             authorization-grant-type: password
             scope: read write
             token-uri: http://${SERVER_HOST}:8080/oauth/token
             client-authentication-method: post
+# Actuator & Prometheus 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+    enabled-by-default: true
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    prometheus:
+      enabled: true
+    metrics:
+      enabled: true
+  metrics:
+    enable:
+      all: true
+# 상세 로깅
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.actuator: DEBUG
+    io.micrometer: DEBUG

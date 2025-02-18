@@ -16,8 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import com.umc.yourun.config.exception.custom.UserException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -85,6 +85,29 @@ public class UserService {
         return token;
     }
 
+    public Map<String, String> kakaoLogin(OAuth2User user) {
+        Map<String, String> token = new HashMap<>();
+        token.put("access_token", jwtTokenProvider.createToken(user.getAttribute("email"), Collections.singletonList("USER")));
+        return token;
+    }
+
+    public Boolean setKakaoUserInfo(String accessToken, UserRequestDTO.SetKakaoUserDto kakaoUserInfo) {
+        if (!userRepository.findByNickname(kakaoUserInfo.nickname()).isEmpty()) {
+            throw new ValidationException("이미 사용중인 닉네임입니다.");
+        }
+        if (kakaoUserInfo.tag1().equals(kakaoUserInfo.tag2())) {
+            throw new ValidationException("같은 테그를 선택할 수 없습니다.");
+        }
+
+        User user = jwtTokenProvider.getUserByToken(accessToken);
+
+        userRepository.save(user.setKakaoUser(kakaoUserInfo));
+        userTagRepository.save(UserTagConverter.toUserTag(user, kakaoUserInfo.tag1()));
+        userTagRepository.save(UserTagConverter.toUserTag(user, kakaoUserInfo.tag2()));
+
+        return true;
+    }
+
     public User getUserInfo(String accessToken) {
         return jwtTokenProvider.getUserByToken(accessToken);
     }
@@ -121,6 +144,5 @@ public class UserService {
 
     public Boolean checkUserNickname(String nickName) {
         return userRepository.findByNickname(nickName).isEmpty();
-
     }
 }
