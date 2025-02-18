@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
 
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +30,13 @@ jobs:
           cd ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
+
+      - name: Check Redis connection  # Redis 서비스가 정상 실행되는지 확인
+        run: |
+          sleep 5  # Redis 서비스가 시작될 시간을 줌
+          redis-cli ping || (echo "Redis is not running!" && exit 1)
+        shell: bash
+
 
       - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
         run: chmod +x gradlew
