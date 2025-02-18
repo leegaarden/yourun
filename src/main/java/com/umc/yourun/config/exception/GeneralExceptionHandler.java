@@ -21,7 +21,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
-@RestControllerAdvice(basePackages = "com.umc.yourun")  // actuator 패키지 제외
+@RestControllerAdvice
 public class GeneralExceptionHandler {
 
     @ExceptionHandler(ChallengeException.class)
@@ -88,12 +88,7 @@ public class GeneralExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ApiResponse<Object> handleException(Exception e, HttpServletRequest request) throws Exception {
-        // actuator 요청인 경우 Spring의 기본 예외 처리로 위임
-        if (request.getRequestURI().startsWith("/actuator")) {
-            throw e;
-        }
-
+    public ApiResponse<Object> handleException(Exception e) {
         log.error("Internal Server Error: {}", e.getMessage());
         return ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
