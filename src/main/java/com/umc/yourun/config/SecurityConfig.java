@@ -31,35 +31,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .securityMatcher("/**")  // 모든 요청에 대해 이 설정 적용
-                // 중요: 인증 없이 접근 가능한 엔드포인트를 명시적으로 정의
-                .authorizeHttpRequests(requests -> requests
-                        // Actuator 엔드포인트를 가장 먼저, 가장 광범위하게 permitAll()으로 설정
-                        .requestMatchers(
-                                "/actuator/**",
-                                "/actuator/prometheus/**",
-                                "/actuator/health/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/api-docs/**",
-                                "/api/v1/users/login",
-                                "/api/v1/users",
-                                "/api/v1/users/duplicate",
-                                "/api/v1/users/check-nickname",
-                                "/api/v1/oauth2/**",
-                                "/login/oauth2/**",
-                                "/oauth2/**",
-                                "/oauth/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
+                .authorizeHttpRequests((requests) -> requests
+                                .requestMatchers("/api/v1/users/login", "/api/v1/users", "/api/v1/users/duplicate", "/api/v1/users/check-nickname",
+                                        "/swagger-ui/**", "/api-docs/**", "/api/v1/oauth2/**", "/login/oauth2/**", "/oauth2/**").permitAll()
+                                .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .defaultSuccessUrl("/api/v1/users/kakao-login", true)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
