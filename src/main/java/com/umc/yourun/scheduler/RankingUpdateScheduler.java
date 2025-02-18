@@ -32,6 +32,8 @@ public class RankingUpdateScheduler {
     public void cleanupOldRecords() {
         log.info("자정 스케줄 실행: Redis 랭킹 데이터 정리 시작");
         redisRankingService.removeOldRecords();
+        log.info("자정 스케줄 실행: Redis Mate 데이터 정리 실행");
+        redisRankingService.resetRedisFriendsRecords();
         log.info("자정 스케줄 완료: Redis 랭킹 데이터 정리 완료");
     }
 }
