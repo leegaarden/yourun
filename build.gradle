@@ -54,16 +54,6 @@ dependencies {
 
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-    // Monitoring
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-
-    // Reactor Core와 관련 의존성 추가
-    implementation 'io.projectreactor:reactor-core:3.6.2'
-    implementation 'io.projectreactor.netty:reactor-netty-core:1.1.15'
-    implementation 'io.projectreactor.netty:reactor-netty-http:1.1.15'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.18'
 }
 
 tasks.named('test') {
