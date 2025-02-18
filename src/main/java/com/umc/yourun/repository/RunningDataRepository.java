@@ -60,5 +60,7 @@ public interface RunningDataRepository extends JpaRepository<RunningData, Long> 
 			@Param("status") String status
 	);
 
-	List<RunningData> findAllByEndTimeAfter(LocalDateTime endTime);
+	List<RunningData> findAllByStartTimeAfter(LocalDateTime endTime);
+
+	List<RunningData> findByUserIdAndStartTimeAfter(Long userId, LocalDateTime dateTime);
 }

@@ -1,5 +1,6 @@
 package com.umc.yourun.dto.Ranking;
 
+import com.umc.yourun.domain.enums.Tendency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -18,7 +19,10 @@ public class RankingResponse {
         int score,
 
         @Schema(description = "유저 태그", example = "에너자이저")
-        List<String> tags
+        List<String> tags,
+
+        @Schema(description = "tendency", example = "페이스메이커")
+        Tendency tendency
     ) {}
 
     @Builder
@@ -28,8 +32,12 @@ public class RankingResponse {
         String username,
 
         @Schema(description = "rank", example = "10")
-        int rank,
+        Long rank,
+
+        @Schema(description = "tendency", example = "페이스메이커")
+        Tendency tendency,
 
         List<rankingMateInfo> list
+
     ) {}
 }
