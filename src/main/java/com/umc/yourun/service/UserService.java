@@ -88,7 +88,13 @@ public class UserService {
     public Map<String, String> kakaoLogin(OAuth2User user) {
         Map<String, String> token = new HashMap<>();
         token.put("access_token", jwtTokenProvider.createToken(user.getAttribute("email"), Collections.singletonList("USER")));
-        return token;
+        if(jwtTokenProvider.getUserByToken(token.get("access_token")).getNickname().matches("^[가-힣]+$")){
+            token.put("status","old");
+            return token;
+        }else{
+            token.put("status","new");
+            return token;
+        }
     }
 
     public Boolean setKakaoUserInfo(String accessToken, UserRequestDTO.SetKakaoUserDto kakaoUserInfo) {
