@@ -296,10 +296,10 @@ public class CrewChallengeService {
                 .get().getUser().getTendency();
 
         // 상태 검증 (두 크루 챌린지가 모두 종료가 안 됐을 경우)
-        if (myCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED
-                || matchedCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED) {
-            throw new ChallengeException(ErrorCode.CREW_CHALLENGE_COMPLETED);
-        }
+//        if (myCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED
+//                || matchedCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED) {
+//            throw new ChallengeException(ErrorCode.CREW_CHALLENGE_COMPLETED);
+//        }
 
         // 4. 유저 크루와 매칭된 크루의 거리
         List<Long> matchedCrewMemberIds = userCrewChallengeRepository
