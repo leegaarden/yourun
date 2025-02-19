@@ -37,9 +37,9 @@ public class SecurityConfig {
                                         "/swagger-ui/**", "/api-docs/**", "/api/v1/oauth2/**", "/login/oauth2/**", "/oauth2/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
-                )
+//                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+//                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
+//                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable());
 
