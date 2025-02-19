@@ -282,10 +282,15 @@ public class CrewChallengeService {
         // 유저가 방금 뛴 거리
         Optional<RunningData> latestRunning = runningDataRepository.findTopByUserIdAndStatusOrderByCreatedAtDesc(user.getId(), RunningDataStatus.ACTIVE);
         double userDistance = latestRunning.get().getTotalDistance() / 1000.0;
-        double afterDistance = myCrewMembers.stream()
+
+        // 유저가 뛰기 전 크루의 총 거리 계산
+        double beforeDistance = myCrewMembers.stream()
+                .filter(member -> !member.userId().equals(user.getId()))  // 현재 유저 제외
                 .mapToDouble(CrewChallengeResponse.CrewMemberInfo::runningDistance)
                 .sum();
-        double beforeDistance = afterDistance - userDistance;
+
+        // 유저가 뛴 후 크루의 총 거리
+        double afterDistance = beforeDistance + userDistance;
 
         // 3. 매칭된 크루 정보 조회
         CrewChallenge matchedCrewChallenge = crewChallengeRepository.findById(myCrewChallenge.getMatchedCrewChallengeId())
@@ -295,11 +300,6 @@ public class CrewChallengeService {
         Tendency matchedCrewCreator = userCrewChallengeRepository.findByCrewChallengeIdAndIsCreator(matchedCrewChallenge.getId(), true)
                 .get().getUser().getTendency();
 
-        // 상태 검증 (두 크루 챌린지가 모두 종료가 안 됐을 경우)
-        if (myCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED
-                || matchedCrewChallenge.getChallengeStatus() != ChallengeStatus.COMPLETED) {
-            throw new ChallengeException(ErrorCode.CREW_CHALLENGE_COMPLETED);
-        }
 
         // 4. 유저 크루와 매칭된 크루의 거리
         List<Long> matchedCrewMemberIds = userCrewChallengeRepository
