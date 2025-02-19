@@ -10,6 +10,7 @@ spring:
       maximum-pool-size: 10         # 최대 커넥션 개수
   jpa:
     hibernate:
+      dialect: org.hibernate.dialect.MySQLDialect
       ddl-auto: none
     properties:
       hibernate:
@@ -29,7 +30,7 @@ spring:
             client-authentication-method: client_secret_post
             client-id: ${CLIENT_ID}
             client-secret: ${CLIENT_SECRET}
-            redirect-uri: http://${SERVER_HOST}:8080/login/oauth2/code/kakao
+            redirect-uri: http://${server_host}:8080/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             scope: account_email
             client-name: Kakao
@@ -53,7 +54,7 @@ springdoc:
           custom-client:
             authorization-grant-type: password
             scope: read write
-            token-uri: http://${SERVER_HOST}:8080/oauth/token
+            token-uri: http://${server_host}:8080/oauth/token
             client-authentication-method: post
 logging:
   level:
