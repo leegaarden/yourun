@@ -40,6 +40,7 @@ public class SecurityConfig {
 //                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
 //                        .defaultSuccessUrl("/api/v1/users/kakao-login", true)
 //                )
+                .oauth2Login(oauth2 -> oauth2.disable())  // OAuth2 로그인 비활성화
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable());
 
