@@ -7,13 +7,20 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        Server httpsServer = new Server()
+                .url("https://yourun.co.kr")  // 실제 도메인으로 변경
+                .description("HTTPS Server");
+
         return new OpenAPI()
+                .servers(List.of(httpsServer))  // HTTPS 서버 정보 추가
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()
