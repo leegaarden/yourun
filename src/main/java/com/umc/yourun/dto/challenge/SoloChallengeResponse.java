@@ -234,6 +234,20 @@ public class SoloChallengeResponse {
 
     @Schema(description = "CHALLENGE_RES_01 : 홈 화면 챌린지 조회 응답 DTO")
     public record HomeChallengeRes(
+
+            // TODO: 유저 성향, 며칠 째인지, 크루 및 솔로 챌린지 리워드 개수
+            @Schema(description = "유저 성향", example = "스프린터")
+            Tendency tendency,
+
+            @Schema(description = "유저 닉네임", example = "12")
+            String homeNickName,
+
+            @Schema(description = "솔로 챌린지 리워드 개수", example = "15")
+            Long soloReward,
+
+            @Schema(description = "크루 챌린지 리워드 개수", example = "6")
+            Long crewReward,
+
             @Schema(description = "솔로 챌린지 정보")
             UserSoloChallengeInfo soloChallenge,
 

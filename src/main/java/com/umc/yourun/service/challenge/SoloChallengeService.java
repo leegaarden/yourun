@@ -549,7 +549,7 @@ public class SoloChallengeService {
             }
         }
 
-        return new SoloChallengeResponse.HomeChallengeRes(soloInfo, crewInfo);
+        return new SoloChallengeResponse.HomeChallengeRes(user.getTendency(), user.getNickname(), user.getPersonalReward(), user.getCrewReward(), soloInfo, crewInfo);
     }
 
     // 챌린지 매칭 확인 응답
