@@ -9,9 +9,8 @@ import com.umc.yourun.repository.CrewChallengeRepository;
 import com.umc.yourun.repository.SoloChallengeRepository;
 import com.umc.yourun.repository.UserCrewChallengeRepository;
 import com.umc.yourun.repository.UserSoloChallengeRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ import java.util.List;
 // 챌린지 매칭과 관련된 서비스 클래스
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(timeout = 30)
 public class ChallengeMatchService {
 
 
