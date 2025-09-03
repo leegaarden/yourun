@@ -6,7 +6,7 @@
 ## 📋 Project Info
 
 **🔄 Fork Information**
-- **Original Repository**: [organization/original-repo](https://github.com/UMC-YouRun/YouRun_Server)
+- **Original Repository**: [UMC-YouRun/YouRun_Server](https://github.com/UMC-YouRun/YouRun_Server)
 - **Forked by**: [이정원](https://github.com/leegaarden)
 - **Fork Purpose**: 개인 포트폴리오 및 기능 개선
 - **Fork Date**: 2025.09.02
